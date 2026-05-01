@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookiePerser from "cookie-parser"
 import errorHandler from "./middlewares/error.middleware.js";
 import authRoute from "./modules/auth/auth.route.js"
 
@@ -9,6 +10,7 @@ const app = express();
 // Middlewares
 app.use(cors());
 app.use(express.json());
+app.use(cookiePerser());
 
 
 // Test route
