@@ -9,10 +9,10 @@ required.forEach((key) => {
     }
 });
 
-export const config = {
+export const config = Object.freeze({
     env: process.env.NODE_ENV || 'production',
     port: parseInt(process.env.PORT, 10) || 2000,
     mongoUri: process.env.MONGO_URI,
     bcryptRounds: Number(process.env.BCRYPT_SALT_ROUNDS) || 10,
     jwt: JWT_CONFIG,
-};
+});
