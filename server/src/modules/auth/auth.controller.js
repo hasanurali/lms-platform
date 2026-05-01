@@ -1,5 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createUser } from "./auth.service.js"
+import { createUser, loginUser } from "./auth.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { config } from "../../config/index.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
@@ -18,4 +18,20 @@ export const register = asyncHandler(async (req, res) => {
         .cookie("accessToken", accessToken, config.cookie.ACCESS)
         .cookie("refreshToken", refreshToken, config.cookie.REFRESH)
         .json(new ApiResponse(MESSAGES.AUTH.REGISTER_SUCCESS, newUser));
+});
+
+export const login = asyncHandler(async (req, res) => {
+
+    // Get data from request
+    const { email, password } = req.body;
+
+    // Authenticate user
+    const { user, accessToken, refreshToken } = await loginUser({ email, password });
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .cookie("accessToken", accessToken, config.cookie.ACCESS)
+        .cookie("refreshToken", refreshToken, config.cookie.REFRESH)
+        .json(new ApiResponse(MESSAGES.AUTH.LOGIN_SUCCESS, user));
 });

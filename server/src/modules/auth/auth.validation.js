@@ -33,3 +33,13 @@ export const registerValidation = [
         .isIn(['student', 'instructor'])
         .withMessage('role must be student or instructor'),
 ];
+
+export const loginValidation = [
+    // Email
+    body("email")
+        .isEmail().withMessage("Invalid email"),
+
+    // Password
+    body("password")
+        .notEmpty().withMessage("Password is required")
+];
