@@ -13,7 +13,7 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
     const token = req.cookies.accessToken || (authHeader && authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : null);
 
     if (!token) {
-        throw new ApiError(HTTP_STATUS.UNAUTHORIZED, MESSAGES.UNAUTHORIZED);
+        throw new ApiError(HTTP_STATUS.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
     }
 
     let decoded;
@@ -31,7 +31,7 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
 
     const user = await userModel.findById(decoded.id);
     if (!user) {
-        throw new ApiError(HTTP_STATUS.UNAUTHORIZED, MESSAGES.NOT_FOUND);
+        throw new ApiError(HTTP_STATUS.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
     }
 
     req.user = user;
