@@ -20,3 +20,5 @@ const MESSAGES = Object.freeze({
         VALIDATION_ERROR: 'Validation failed',
     }),
 });
+
+export default MESSAGES;

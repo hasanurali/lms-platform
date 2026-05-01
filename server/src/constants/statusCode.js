@@ -10,4 +10,4 @@ const HTTP_STATUS = Object.freeze({
     INTERNAL_SERVER_ERROR: 500,
 });
 
-export default statusCode;
+export default HTTP_STATUS;
