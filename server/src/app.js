@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import errorHandler from "./middlewares/error.middleware.js";
+import authRoute from "./modules/auth/auth.route.js"
 
 const app = express();
 
@@ -17,6 +18,10 @@ app.get("/", (req, res) => {
         message: "API running"
     });
 });
+
+// Main Routes
+app.use("/api/v1/auth", authRoute);
+
 
 // Not found route
 app.use((req, res) => {
