@@ -58,3 +58,11 @@ export const loginUser = async ({ email, password }) => {
         refreshToken
     };
 };
+
+export const logoutUser = async (userId) => {
+
+    // Find user and update refresh token to null
+    await userModel.findByIdAndUpdate(userId, {
+        refreshToken: null,
+    });
+};
