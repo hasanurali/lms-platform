@@ -1,6 +1,9 @@
 import userModel from "../user/user.model.js"
 import ApiError from "../../utils/apiError.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
+import jwt from "jsonwebtoken"
+import { config } from "../../config/index.js"
+
 
 export const createUser = async (data) => {
 
@@ -65,4 +68,52 @@ export const logoutUser = async (userId) => {
     await userModel.findByIdAndUpdate(userId, {
         refreshToken: null,
     });
+};
+
+export const refreshAccessToken = async (token) => {
+
+    // Check token is provided
+    if (!token) {
+        throw new ApiError(HTTP_STATUS.UNAUTHORIZED, MESSAGES.AUTH.TOKEN_EXPIRED);
+    };
+
+    // Decode token by using jwt
+    let decoded;
+    try {
+        decoded = jwt.verify(token, config.jwt.REFRESH.SECRET);
+    } catch (err) {
+
+        if (err.name === "TokenExpiredError") {
+            throw new ApiError(HTTP_STATUS.UNAUTHORIZED, MESSAGES.AUTH.TOKEN_EXPIRED);
+        };
+
+        throw new ApiError(HTTP_STATUS.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
+
+    };
+
+    // Check user exist
+    const user = await userModel.findById(decoded.id).select("+refreshToken");
+    if (!user || !user.refreshToken) {
+        throw new ApiError(HTTP_STATUS.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
+    };
+
+    // Verify token 
+    const isValid = await user.compareRefreshToken(token);
+    if (!isValid) {
+        throw new ApiError(HTTP_STATUS.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
+    };
+
+    // Generate token
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    // Set hashed refresh token in db
+    await user.setRefreshToken(refreshToken);
+    await user.save();
+
+    // Return data
+    return {
+        accessToken,
+        refreshToken
+    };
 };

@@ -1,5 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createUser, loginUser, logoutUser } from "./auth.service.js"
+import { createUser, loginUser, logoutUser, refreshAccessToken } from "./auth.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { config } from "../../config/index.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
@@ -50,4 +50,20 @@ export const logout = asyncHandler(async (req, res) => {
         .clearCookie("accessToken", config.cookie.ACCESS)
         .clearCookie("refreshToken", config.cookie.REFRESH)
         .json(new ApiResponse(MESSAGES.AUTH.LOGOUT_SUCCESS));
+});
+
+export const refresh = asyncHandler(async (req, res) => {
+
+    // Get token from cookie
+    const token = req?.cookies?.refreshToken;
+
+    // Refresh token
+    const { accessToken, refreshToken } = await refreshAccessToken(token);
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .cookie("accessToken", accessToken, config.cookie.ACCESS)
+        .cookie("refreshToken", refreshToken, config.cookie.REFRESH)
+        .json(new ApiResponse("Token refreshed successfully"));
 });
