@@ -1,7 +1,7 @@
 const JWT_CONFIG = {
     ACCESS: {
         SECRET: process.env.JWT_ACCESS_KEY,
-        EXPIRY: "1h"
+        EXPIRY: "10m"
     },
 
     REFRESH: {
