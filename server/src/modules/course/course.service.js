@@ -1,4 +1,7 @@
 import courseModel from "./course.model.js"
+import ApiError from "../../utils/apiError.js";
+import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
+import mongoose from "mongoose";
 
 
 // Common population for instructor
@@ -50,4 +53,26 @@ export const getCoursesService = async ({ page = 1, limit = 10 }) => {
             hasPrev: safePage > 1,
         }
     };
+};
+
+export const getCourseService = async (courseId) => {
+
+    // Check course id provided
+    if (!courseId) {
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.GENERAL.VALIDATION_ERROR);
+    };
+
+    // Check course id is valid id
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.GENERAL.VALIDATION_ERROR);
+    };
+
+    // Fetch course by id
+    const course = await courseModel.findById(courseId).populate(commonPopulate);
+    if (!course) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
+    };
+
+    // Return data
+    return course;
 };
