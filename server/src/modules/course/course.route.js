@@ -5,7 +5,7 @@ import roleMiddleware from "../../middlewares/role.middleware.js"
 import { ROLES } from "../../constants/index.js"
 import { createCourseValidation } from "./course.validation.js"
 import validate from "../../middlewares/validation.result.middleware.js"
-import { createCourse } from "./course.controller.js"
+import { createCourse, getCourses } from "./course.controller.js"
 
 courseRoute.post("/",
     authMiddleware,
@@ -13,6 +13,10 @@ courseRoute.post("/",
     createCourseValidation,
     validate,
     createCourse
+);
+
+courseRoute.get("/",
+    getCourses
 );
 
 
