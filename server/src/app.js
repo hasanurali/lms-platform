@@ -4,6 +4,7 @@ import cookiePerser from "cookie-parser"
 import errorHandler from "./middlewares/error.middleware.js";
 import authRoute from "./modules/auth/auth.route.js"
 import userRoute from "./modules/user/user.route.js";
+import courseRoute from "./modules/course/course.route.js";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 // Main Routes
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/users", userRoute);
+app.use("/api/v1/courses", courseRoute);
 
 
 // Not found route
