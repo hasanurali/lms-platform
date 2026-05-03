@@ -26,3 +26,35 @@ export const createCourseValidation = [
         .trim()
         .isURL().withMessage("Thumbnail must be a valid URL"),
 ];
+
+export const updateCourseValidation = [
+
+    // Title (optional)
+    body("title")
+        .optional({ checkFalsy: true })
+        .trim()
+        .isLength({ min: 3, max: 50 }).withMessage("Title must be 3-50 characters"),
+
+    // Description (optional)
+    body("description")
+        .optional({ checkFalsy: true })
+        .trim()
+        .isLength({ min: 10, max: 500 }).withMessage("Description must be 10-500 characters"),
+
+    // Price (optional)
+    body("price")
+        .optional()
+        .isInt({ min: 0, max: 100000 })
+        .withMessage("Price must be between 0 and 100000"),
+
+    // Thumbnail (optional)
+    body("thumbnail")
+        .optional({ checkFalsy: true })
+        .trim()
+        .isURL().withMessage("Thumbnail must be a valid URL"),
+
+    // Published (optional)
+    body("isPublished")
+        .optional()
+        .isBoolean().withMessage("Is published must be a boolean")
+];

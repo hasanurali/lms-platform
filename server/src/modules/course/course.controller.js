@@ -1,5 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createCourseService, getCoursesService, getCourseService } from "./course.service.js"
+import { createCourseService, getCoursesService, getCourseService, updateCourseService } from "./course.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 
@@ -46,4 +46,43 @@ export const getCourse = asyncHandler(async (req, res) => {
     return res
         .status(HTTP_STATUS.OK)
         .json(new ApiResponse(MESSAGES.COURSE.FETCHED, course));
+});
+
+export const updateCourse = asyncHandler(async (req, res) => {
+
+
+    // Get data from request
+    const { title, description, price, thumbnail, isPublished } = req.body;
+
+    // Get course id from request
+    const courseId = req.params.id;
+
+    // Get instructor id from request
+    const instructorId = req.user._id;
+
+    // Check is valid data
+    const data = {};
+    if (title !== undefined) data.title = title;
+    if (description !== undefined) data.description = description;
+    if (price !== undefined) data.price = price;
+    if (thumbnail !== undefined) data.thumbnail = thumbnail;
+    if (isPublished !== undefined) data.isPublished = isPublished;
+
+    // Update course
+    const course = await updateCourseService({ data, instructorId, courseId });
+
+    // Check is published 
+    if (course.isPublished) {
+
+        // Send response
+        return res
+            .status(HTTP_STATUS.OK)
+            .json(new ApiResponse(MESSAGES.COURSE.PUBLISHED, course));
+
+    };
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .json(new ApiResponse(MESSAGES.COURSE.UPDATED, course));
 });

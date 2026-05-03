@@ -3,9 +3,9 @@ const courseRoute = express.Router()
 import authMiddleware from "../../middlewares/auth.middleware.js"
 import roleMiddleware from "../../middlewares/role.middleware.js"
 import { ROLES } from "../../constants/index.js"
-import { createCourseValidation } from "./course.validation.js"
+import { createCourseValidation, updateCourseValidation } from "./course.validation.js"
 import validate from "../../middlewares/validation.result.middleware.js"
-import { createCourse, getCourses, getCourse } from "./course.controller.js"
+import { createCourse, getCourses, getCourse, updateCourse } from "./course.controller.js"
 
 courseRoute.post("/",
     authMiddleware,
@@ -21,6 +21,14 @@ courseRoute.get("/",
 
 courseRoute.get("/:id",
     getCourse
+);
+
+courseRoute.put("/:id",
+    authMiddleware,
+    roleMiddleware(ROLES.INSTRUCTOR, ROLES.ADMIN),
+    updateCourseValidation,
+    validate,
+    updateCourse
 );
 
 
