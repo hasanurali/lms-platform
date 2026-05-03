@@ -1,5 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createCourseService, getCoursesService, getCourseService, updateCourseService } from "./course.service.js"
+import { createCourseService, getCoursesService, getCourseService, updateCourseService, deleteCourseService } from "./course.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 
@@ -85,4 +85,21 @@ export const updateCourse = asyncHandler(async (req, res) => {
     return res
         .status(HTTP_STATUS.OK)
         .json(new ApiResponse(MESSAGES.COURSE.UPDATED, course));
+});
+
+export const deleteCourse = asyncHandler(async (req, res) => {
+
+    // Get course id from request
+    const courseId = req.params.id;
+
+    // Get instructor id from request
+    const instructorId = req.user._id;
+
+    // delete course
+    await deleteCourseService({ instructorId, courseId });
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .json(new ApiResponse(MESSAGES.COURSE.DELETED));
 });

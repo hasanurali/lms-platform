@@ -5,7 +5,7 @@ import roleMiddleware from "../../middlewares/role.middleware.js"
 import { ROLES } from "../../constants/index.js"
 import { createCourseValidation, updateCourseValidation } from "./course.validation.js"
 import validate from "../../middlewares/validation.result.middleware.js"
-import { createCourse, getCourses, getCourse, updateCourse } from "./course.controller.js"
+import { createCourse, getCourses, getCourse, updateCourse, deleteCourse } from "./course.controller.js"
 
 courseRoute.post("/",
     authMiddleware,
@@ -31,5 +31,10 @@ courseRoute.put("/:id",
     updateCourse
 );
 
+courseRoute.delete("/:id",
+    authMiddleware,
+    roleMiddleware(ROLES.INSTRUCTOR, ROLES.ADMIN),
+    deleteCourse
+);
 
 export default courseRoute;

@@ -107,3 +107,30 @@ export const updateCourseService = async ({ data, instructorId, courseId }) => {
     // Return data
     return updatedCourse;
 };
+
+export const deleteCourseService = async ({ instructorId, courseId }) => {
+
+    // Check course id provided
+    if (!courseId) {
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.GENERAL.VALIDATION_ERROR);
+    };
+
+    // Check course id is valid id
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.GENERAL.VALIDATION_ERROR);
+    };
+
+    // Fetch course by id
+    const course = await courseModel.findById(courseId);
+    if (!course) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
+    };
+
+    // Check instructor is owned this course
+    if (instructorId.toString() !== course.instructor.toString()) {
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.COURSE.UNAUTHORIZED);
+    };
+
+    // Delete course
+    await courseModel.findByIdAndDelete(courseId);
+};
