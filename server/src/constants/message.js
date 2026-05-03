@@ -15,6 +15,19 @@ const MESSAGES = Object.freeze({
         NOT_FOUND: 'User not found',
     }),
 
+    //Course
+    COURSE: Object.freeze({
+        CREATED: 'Course created successfully',
+        UPDATED: 'Course updated successfully',
+        DELETED: 'Course deleted successfully',
+        NOT_FOUND: 'Course not found',
+        PUBLISHED: 'Course published successfully',
+        NOT_PUBLISHED: 'Course is not published',
+        UNAUTHORIZED: 'You are not allowed to modify this course',
+        FETCHED: 'Course fetched successfully',
+        FETCHED_ALL: 'Courses fetched successfully',
+    }),
+
     // General 
     GENERAL: Object.freeze({
         VALIDATION_ERROR: 'Validation failed',
