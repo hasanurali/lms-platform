@@ -2,6 +2,7 @@ import courseModel from "./course.model.js"
 import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
 import mongoose from "mongoose";
+import validateObjectId from "../../utils/validateObjectId.js";
 
 
 // Common population for instructor
@@ -57,15 +58,8 @@ export const getCoursesService = async ({ page = 1, limit = 10 }) => {
 
 export const getCourseService = async (courseId) => {
 
-    // Check course id provided
-    if (!courseId) {
-        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.GENERAL.VALIDATION_ERROR);
-    };
-
-    // Check course id is valid id
-    if (!mongoose.Types.ObjectId.isValid(courseId)) {
-        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.GENERAL.VALIDATION_ERROR);
-    };
+    // Check valid id
+    validateObjectId(courseId);
 
     // Fetch course by id
     const course = await courseModel.findById(courseId).populate(commonPopulate);
@@ -79,15 +73,8 @@ export const getCourseService = async (courseId) => {
 
 export const updateCourseService = async ({ data, instructorId, courseId }) => {
 
-    // Check course id provided
-    if (!courseId) {
-        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.GENERAL.VALIDATION_ERROR);
-    };
-
-    // Check course id is valid id
-    if (!mongoose.Types.ObjectId.isValid(courseId)) {
-        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.GENERAL.VALIDATION_ERROR);
-    };
+    // Check valid id
+    validateObjectId(courseId);
 
     // Fetch course by id
     const course = await courseModel.findById(courseId);
@@ -110,15 +97,8 @@ export const updateCourseService = async ({ data, instructorId, courseId }) => {
 
 export const deleteCourseService = async ({ instructorId, courseId }) => {
 
-    // Check course id provided
-    if (!courseId) {
-        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.GENERAL.VALIDATION_ERROR);
-    };
-
-    // Check course id is valid id
-    if (!mongoose.Types.ObjectId.isValid(courseId)) {
-        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.GENERAL.VALIDATION_ERROR);
-    };
+    // Check valid id
+    validateObjectId(courseId);
 
     // Fetch course by id
     const course = await courseModel.findById(courseId);

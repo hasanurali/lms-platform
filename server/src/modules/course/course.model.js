@@ -29,5 +29,8 @@ const courseSchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
+// Add index for faster query
+courseSchema.index({ instructor: 1 });
+courseSchema.index({ isPublished: 1, createdAt: -1 });
 
 export default mongoose.model('Course', courseSchema);
