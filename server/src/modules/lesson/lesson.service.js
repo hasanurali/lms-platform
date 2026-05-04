@@ -108,3 +108,23 @@ export const updateLessonService = async (data, lessonId, instructorId) => {
     // Return data
     return updatedLesson;
 };
+
+export const deleteLessonService = async (lessonId, instructorId) => {
+
+    // Check valid id
+    validateObjectId(lessonId);
+
+    // Check lesson exist by id
+    const lesson = await lessonModel.findById(lessonId).populate(getInstructorPopulation);
+    if (!lesson) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.LESSON.NOT_FOUND);
+    };
+
+    // Check instructor is owned this lesson
+    if (instructorId.toString() !== lesson.module.course.instructor.toString()) {
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.LESSON.UNAUTHORIZED);
+    };
+
+    // Delete lesson
+    await lessonModel.deleteOne({ _id: lessonId });
+};
