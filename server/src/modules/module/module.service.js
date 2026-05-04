@@ -37,3 +37,21 @@ export const createModuleService = async (title, instructorId, courseId) => {
     // Return data
     return module;
 };
+
+export const getModulesService = async (courseId) => {
+
+    // Check valid id
+    validateObjectId(courseId);
+
+    // Check course exist by id
+    const isCourse = await courseModel.exists({ _id: courseId });
+    if (!isCourse) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
+    };
+
+    // Fetch modules
+    const modules = await moduleModel.find({ course: courseId }).sort({ order: 1 });
+
+    // Return data
+    return modules;
+};

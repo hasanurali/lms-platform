@@ -1,5 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createModuleService } from "./module.service.js"
+import { createModuleService, getModulesService } from "./module.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 
@@ -21,4 +21,18 @@ export const createModule = asyncHandler(async (req, res) => {
     return res
         .status(HTTP_STATUS.CREATED)
         .json(new ApiResponse(MESSAGES.MODULE.CREATED, module));
+});
+
+export const getModules = asyncHandler(async (req, res) => {
+
+    // Get course id from request
+    const courseId = req.params.id;
+
+    // Get modules
+    const modules = await getModulesService(courseId);
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .json(new ApiResponse(MESSAGES.MODULE.FETCHED, modules));
 });
