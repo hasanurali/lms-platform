@@ -8,7 +8,7 @@ import validateObjectId from "../../utils/validateObjectId.js";
 // Common population for instructor
 const commonPopulate = {
     path: "instructor",
-    select: "name email"
+    select: "name email profilePicture"
 };
 
 export const createCourseService = async (data) => {

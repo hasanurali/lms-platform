@@ -12,7 +12,7 @@ const errorHandler = (err, req, res, next) => {
 
     if (err.code === 11000) {
         message = "Duplicate field value";
-        statusCode = 400;
+        statusCode = 409;
     }
 
     if (err.name === "JsonWebTokenError") {
