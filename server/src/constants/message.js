@@ -38,6 +38,16 @@ const MESSAGES = Object.freeze({
         NOT_FOUND: "Module not found",
     }),
 
+    // Lesson
+    LESSON: Object.freeze({
+        CREATED: "Lesson created successfully",
+        UPDATED: "Lesson updated successfully",
+        DELETED: "Lesson deleted successfully",
+        FETCHED: "Lesson fetched successfully",
+        FETCHED_ALL: 'Lessons fetched successfully',
+        NOT_FOUND: "Lesson not found",
+    }),
+
     // General 
     GENERAL: Object.freeze({
         VALIDATION_ERROR: 'Validation failed',
