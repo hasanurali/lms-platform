@@ -1,0 +1,42 @@
+import express from "express"
+const lessonRoute = express.Router()
+import authMiddleware from "../../middlewares/auth.middleware.js"
+import roleMiddleware from "../../middlewares/role.middleware.js"
+import { ROLES } from "../../constants/index.js"
+import { createLessonValidation, updateLessonValidation } from "./lesson.validation.js"
+import validate from "../../middlewares/validation.result.middleware.js"
+import { createLesson, getLessons, getLesson, updatelesson, deleteLesson } from "./lesson.controller.js"
+
+lessonRoute.post("/modules/:id/lessons",
+    authMiddleware,
+    roleMiddleware(ROLES.INSTRUCTOR, ROLES.ADMIN),
+    createLessonValidation,
+    validate,
+    createLesson
+);
+
+lessonRoute.get("/modules/:id/lessons",
+    authMiddleware,
+    getLessons
+);
+
+lessonRoute.get("/lessons/:id",
+    authMiddleware,
+    getLesson
+);
+
+lessonRoute.put("/lessons/:id",
+    authMiddleware,
+    roleMiddleware(ROLES.INSTRUCTOR, ROLES.ADMIN),
+    updateLessonValidation,
+    validate,
+    updatelesson
+);
+
+lessonRoute.delete("/lessons/:id",
+    authMiddleware,
+    roleMiddleware(ROLES.INSTRUCTOR, ROLES.ADMIN),
+    deleteLesson
+);
+
+export default lessonRoute;

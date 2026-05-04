@@ -36,6 +36,18 @@ const MESSAGES = Object.freeze({
         DELETED: "Module deleted successfully",
         FETCHED: "Modules fetched successfully",
         NOT_FOUND: "Module not found",
+        UNAUTHORIZED: 'You are not allowed to modify this module'
+    }),
+
+    // Lesson
+    LESSON: Object.freeze({
+        CREATED: "Lesson created successfully",
+        UPDATED: "Lesson updated successfully",
+        DELETED: "Lesson deleted successfully",
+        FETCHED: "Lesson fetched successfully",
+        FETCHED_ALL: 'Lessons fetched successfully',
+        NOT_FOUND: "Lesson not found",
+        UNAUTHORIZED: 'You are not allowed to modify this lesson'
     }),
 
     // General 

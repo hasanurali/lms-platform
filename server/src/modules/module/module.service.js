@@ -18,7 +18,7 @@ export const createModuleService = async (title, instructorId, courseId) => {
 
     // Check instructor is owned this course
     if (instructorId.toString() !== course.instructor.toString()) {
-        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.COURSE.UNAUTHORIZED);
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.MODULE.UNAUTHORIZED);
     };
 
     // Check module order
@@ -70,7 +70,7 @@ export const updateModuleService = async (title, moduleId, instructorId) => {
     // Check instructor owned this module
     const course = await courseModel.findOne({ _id: isModule.course, instructor: instructorId })
     if (!course) {
-        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.COURSE.UNAUTHORIZED)
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.MODULE.UNAUTHORIZED)
     }
 
     // Update module
@@ -94,7 +94,7 @@ export const deleteModuleService = async (moduleId, instructorId) => {
     // Check instructor owned this module
     const course = await courseModel.findOne({ _id: isModule.course, instructor: instructorId })
     if (!course) {
-        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.COURSE.UNAUTHORIZED)
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.MODULE.UNAUTHORIZED)
     }
 
     // Delete module
