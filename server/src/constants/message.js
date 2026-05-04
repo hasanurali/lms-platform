@@ -1,4 +1,5 @@
 const MESSAGES = Object.freeze({
+
     // Auth
     AUTH: Object.freeze({
         LOGIN_SUCCESS: 'Logged in successfully',
@@ -15,7 +16,7 @@ const MESSAGES = Object.freeze({
         NOT_FOUND: 'User not found',
     }),
 
-    //Course
+    // Course
     COURSE: Object.freeze({
         CREATED: 'Course created successfully',
         UPDATED: 'Course updated successfully',
@@ -28,10 +29,20 @@ const MESSAGES = Object.freeze({
         FETCHED_ALL: 'Courses fetched successfully',
     }),
 
+    // Module
+    MODULE: Object.freeze({
+        CREATED: "Module created successfully",
+        UPDATED: "Module updated successfully",
+        DELETED: "Module deleted successfully",
+        FETCHED: "Modules fetched successfully",
+        NOT_FOUND: "Module not found",
+    }),
+
     // General 
     GENERAL: Object.freeze({
         VALIDATION_ERROR: 'Validation failed',
-    }),
+    })
+
 });
 
 export default MESSAGES;
