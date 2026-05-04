@@ -1,5 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createLessonService, getLessonsService, getLessonService } from "./lesson.service.js"
+import { createLessonService, getLessonsService, getLessonService, updateLessonService } from "./lesson.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 
@@ -49,4 +49,31 @@ export const getLesson = asyncHandler(async (req, res) => {
     return res
         .status(HTTP_STATUS.OK)
         .json(new ApiResponse(MESSAGES.LESSON.FETCHED, lesson));
+});
+
+export const updatelesson = asyncHandler(async (req, res) => {
+
+
+    // Get data from request
+    const { title, videoUrl, content } = req.body;
+
+    // Get lesson id from request
+    const lessonId = req.params.id;
+
+     // Get instructor id from request
+    const instructorId = req.user._id;
+
+    // Check is valid data
+    const data = {};
+    if (title !== undefined) data.title = title;
+    if (videoUrl !== undefined) data.videoUrl = videoUrl;
+    if (content !== undefined) data.content = content;
+
+    // Update lesson
+    const lesson = await updateLessonService(data, lessonId, instructorId);
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .json(new ApiResponse(MESSAGES.LESSON.UPDATED, lesson));
 });

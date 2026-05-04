@@ -3,9 +3,9 @@ const lessonRoute = express.Router()
 import authMiddleware from "../../middlewares/auth.middleware.js"
 import roleMiddleware from "../../middlewares/role.middleware.js"
 import { ROLES } from "../../constants/index.js"
-import { createLessonValidation } from "./lesson.validation.js"
+import { createLessonValidation, updateLessonValidation } from "./lesson.validation.js"
 import validate from "../../middlewares/validation.result.middleware.js"
-import { createLesson, getLessons, getLesson } from "./lesson.controller.js"
+import { createLesson, getLessons, getLesson, updatelesson } from "./lesson.controller.js"
 
 lessonRoute.post("/modules/:id/lessons",
     authMiddleware,
@@ -23,6 +23,14 @@ lessonRoute.get("/modules/:id/lessons",
 lessonRoute.get("/lessons/:id",
     authMiddleware,
     getLesson
+);
+
+lessonRoute.put("/lessons/:id",
+    authMiddleware,
+    roleMiddleware(ROLES.INSTRUCTOR, ROLES.ADMIN),
+    updateLessonValidation,
+    validate,
+    updatelesson
 );
 
 export default lessonRoute;

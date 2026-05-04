@@ -20,3 +20,24 @@ export const createLessonValidation = [
         .trim()
         .isLength({ max: 1000 }).withMessage("Content must be less than 1000 characters")
 ];
+
+export const updateLessonValidation = [
+
+    // Title (optional)
+    body("title")
+        .optional({ checkFalsy: true })
+        .trim()
+        .isLength({ min: 3, max: 50 }).withMessage("Title must be 3-50 characters"),
+
+    // video url (optional)
+    body("videoUrl")
+        .optional({ checkFalsy: true })
+        .trim()
+        .isURL().withMessage("Video url must be a valid URL"),
+
+    // content (optional)
+    body("content")
+        .optional({ checkFalsy: true })
+        .trim()
+        .isLength({ max: 1000 }).withMessage("Content must be less than 1000 characters")
+];

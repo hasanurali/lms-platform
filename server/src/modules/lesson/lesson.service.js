@@ -5,6 +5,15 @@ import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
 
 
+// Get instructor population
+const getInstructorPopulation = {
+    path: "module",
+    populate: {
+        path: "course",
+        select: "instructor"
+    }
+}
+
 export const createLessonService = async (title, videoUrl, content, moduleId, instructorId) => {
 
     // Check valid id
@@ -75,4 +84,27 @@ export const getLessonService = async (lessonId) => {
 
     // Return data
     return lesson;
+};
+
+export const updateLessonService = async (data, lessonId, instructorId) => {
+
+    // Check valid id
+    validateObjectId(lessonId);
+
+    // Check lesson exist by id
+    const lesson = await lessonModel.findById(lessonId).populate(getInstructorPopulation);
+    if (!lesson) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.LESSON.NOT_FOUND);
+    };
+
+    // Check instructor is owned this lesson
+    if (instructorId.toString() !== lesson.module.course.instructor.toString()) {
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.LESSON.UNAUTHORIZED);
+    };
+
+    // Update lesson
+    const updatedLesson = await lessonModel.findByIdAndUpdate(lessonId, data, { returnDocument: "after" });
+
+    // Return data
+    return updatedLesson;
 };
