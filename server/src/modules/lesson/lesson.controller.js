@@ -1,5 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createLessonService, getLessonsService } from "./lesson.service.js"
+import { createLessonService, getLessonsService, getLessonService } from "./lesson.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 
@@ -35,4 +35,18 @@ export const getLessons = asyncHandler(async (req, res) => {
     return res
         .status(HTTP_STATUS.OK)
         .json(new ApiResponse(MESSAGES.LESSON.FETCHED_ALL, lessons));
+});
+
+export const getLesson = asyncHandler(async (req, res) => {
+
+    // Get lesson id from req
+    const lessonId = req.params.id;
+
+    // Get lesson
+    const lesson = await getLessonService(lessonId);
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .json(new ApiResponse(MESSAGES.LESSON.FETCHED, lesson));
 });

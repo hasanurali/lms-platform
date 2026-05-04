@@ -61,3 +61,18 @@ export const getLessonsService = async (moduleId) => {
     // Return data
     return lessons;
 };
+
+export const getLessonService = async (lessonId) => {
+
+    // Check valid id
+    validateObjectId(lessonId);
+
+    // Fetch lesson by id
+    const lesson = await lessonModel.findById(lessonId);
+    if (!lesson) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.LESSON.NOT_FOUND);
+    };
+
+    // Return data
+    return lesson;
+};
