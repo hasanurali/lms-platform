@@ -97,7 +97,7 @@ id: string (required) - Course ID
 | `401 Unauthorized` | `Token expired` | Access token has expired |
 | `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
 | `403 Forbidden` | `Access denied` | Authenticated user does not have INSTRUCTOR or ADMIN role |
-| `403 Forbidden` | `You are not allowed to modify this course` | Authenticated instructor does not own this course |
+| `403 Forbidden` | `You are not allowed to modify this module` | Authenticated instructor does not own the course this module belongs to |
 | `404 Not Found` | `Course not found` | No course exists with the given `id` |
 
 ---
@@ -205,7 +205,7 @@ id: string (required) - Module ID
 | `401 Unauthorized` | `Token expired` | Access token has expired |
 | `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
 | `403 Forbidden` | `Access denied` | Authenticated user does not have INSTRUCTOR or ADMIN role |
-| `403 Forbidden` | `You are not allowed to modify this course` | Authenticated instructor does not own the course this module belongs to |
+| `403 Forbidden` | `You are not allowed to modify this module` | Authenticated instructor does not own the course this module belongs to |
 | `404 Not Found` | `Module not found` | No module exists with the given `id` |
 
 ---
@@ -243,5 +243,5 @@ id: string (required) - Module ID
 | `401 Unauthorized` | `Token expired` | Access token has expired |
 | `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
 | `403 Forbidden` | `Access denied` | Authenticated user does not have INSTRUCTOR or ADMIN role |
-| `403 Forbidden` | `You are not allowed to modify this course` | Authenticated instructor does not own the course this module belongs to |
+| `403 Forbidden` | `You are not allowed to modify this module` | Authenticated instructor does not own the course this module belongs to |
 | `404 Not Found` | `Module not found` | No module exists with the given `id` |
