@@ -1,0 +1,24 @@
+import asyncHandler from "../../utils/asyncHandler.js"
+import { createLessonService } from "./lesson.service.js"
+import ApiResponse from "../../utils/apiResponse.js"
+import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
+
+export const createLesson = asyncHandler(async (req, res) => {
+
+    // Get data from request
+    const { title, videoUrl, content } = req.body;
+
+    // Get module id from request
+    const moduleId = req.params.id;
+
+    // Get instructor id from request
+    const instructorId = req.user._id;
+
+    // Create lesson
+    const lesson = await createLessonService(title, videoUrl, content, moduleId, instructorId);
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.CREATED)
+        .json(new ApiResponse(MESSAGES.LESSON.CREATED, lesson));
+});

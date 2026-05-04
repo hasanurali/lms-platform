@@ -6,6 +6,7 @@ import authRoute from "./modules/auth/auth.route.js"
 import userRoute from "./modules/user/user.route.js";
 import courseRoute from "./modules/course/course.route.js";
 import moduleRoute from "./modules/module/module.route.js";
+import lessonRoute from "./modules/lesson/lesson.route.js"
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/users", userRoute);
 app.use("/api/v1/courses", courseRoute);
 app.use("/api/v1", moduleRoute);
+app.use("/api/v1", lessonRoute);
 
 
 // Not found route
