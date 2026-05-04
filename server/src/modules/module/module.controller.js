@@ -1,5 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createModuleService, getModulesService, updateModuleService } from "./module.service.js"
+import { createModuleService, getModulesService, updateModuleService, deleteModuleService } from "./module.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 
@@ -55,4 +55,21 @@ export const updateModule = asyncHandler(async (req, res) => {
     return res
         .status(HTTP_STATUS.OK)
         .json(new ApiResponse(MESSAGES.MODULE.UPDATED, module));
+});
+
+export const deleteModule = asyncHandler(async (req, res) => {
+
+    // Get module id from request
+    const moduleId = req.params.id;
+
+    // Get instructor id from request
+    const instructorId = req.user._id
+
+    // Delete module
+    await deleteModuleService(moduleId, instructorId);
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .json(new ApiResponse(MESSAGES.MODULE.DELETED));
 });

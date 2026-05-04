@@ -79,3 +79,24 @@ export const updateModuleService = async (title, moduleId, instructorId) => {
     // Return data
     return updatedModule;
 };
+
+export const deleteModuleService = async (moduleId, instructorId) => {
+
+    // Check valid id
+    validateObjectId(moduleId);
+
+    // Check module exist by id
+    const isModule = await moduleModel.findById(moduleId);
+    if (!isModule) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.MODULE.NOT_FOUND);
+    };
+
+    // Check instructor owned this module
+    const course = await courseModel.findOne({ _id: isModule.course, instructor: instructorId })
+    if (!course) {
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.COURSE.UNAUTHORIZED)
+    }
+
+    // Delete module
+    await moduleModel.deleteOne(moduleId);
+};
