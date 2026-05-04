@@ -25,9 +25,18 @@ export const createEnrollmentService = async (courseId, userId) => {
     // Enroll user in the course
     let enrollCourse = await enrollmentModel.create({ user: userId, course: courseId });
 
-    // Get populate course with enrollment
+    // Get populated course with enrollment
     const populatedEnrollment = await enrollmentModel.findById(enrollCourse._id).populate("course")
 
     // Return data
     return populatedEnrollment;
+};
+
+export const getEnrollmentsService = async (userId) => {
+
+    // Fetch user enrolled courses
+    let enrollCourses = await enrollmentModel.find({ user: userId }).populate("course");
+
+    // Return data
+    return enrollCourses;
 };
