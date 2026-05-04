@@ -43,3 +43,21 @@ export const createLessonService = async (title, videoUrl, content, moduleId, in
     // Return data
     return lesson;
 };
+
+export const getLessonsService = async (moduleId) => {
+
+    // Check valid id
+    validateObjectId(moduleId);
+
+    // Check module exist by id
+    const isModule = await moduleModel.exists({ _id: moduleId });
+    if (!isModule) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.MODULE.NOT_FOUND);
+    };
+
+    // Fetch lessons
+    const lessons = await lessonModel.find({ module: moduleId }).sort({ order: 1 });
+
+    // Return data
+    return lessons;
+};

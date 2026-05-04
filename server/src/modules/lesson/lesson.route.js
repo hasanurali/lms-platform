@@ -5,7 +5,7 @@ import roleMiddleware from "../../middlewares/role.middleware.js"
 import { ROLES } from "../../constants/index.js"
 import { createLessonValidation } from "./lesson.validation.js"
 import validate from "../../middlewares/validation.result.middleware.js"
-import { createLesson } from "./lesson.controller.js"
+import { createLesson, getLessons } from "./lesson.controller.js"
 
 lessonRoute.post("/modules/:id/lessons",
     authMiddleware,
@@ -13,6 +13,11 @@ lessonRoute.post("/modules/:id/lessons",
     createLessonValidation,
     validate,
     createLesson
+);
+
+lessonRoute.get("/modules/:id/lessons",
+    authMiddleware,
+    getLessons
 );
 
 export default lessonRoute;
