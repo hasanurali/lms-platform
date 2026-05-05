@@ -8,6 +8,7 @@ import courseRoute from "./modules/course/course.route.js";
 import moduleRoute from "./modules/module/module.route.js";
 import lessonRoute from "./modules/lesson/lesson.route.js";
 import enrollmentRoute from "./modules/enrollment/enrollment.route.js";
+import progressRoute from "./modules/progress/progress.route.js";
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use("/api/v1/courses", courseRoute);
 app.use("/api/v1", moduleRoute);
 app.use("/api/v1", lessonRoute);
 app.use("/api/v1", enrollmentRoute);
+app.use("/api/v1/progress", progressRoute);
 
 
 // Not found route
