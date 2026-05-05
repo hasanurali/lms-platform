@@ -105,3 +105,38 @@ export const completeLessonService = async ({ courseId, lessonId, userId }) => {
     // Return data
     return progress;
 };
+
+export const setLastAccessedLessonService = async ({ courseId, lessonId, userId }) => {
+
+    // Validate ids
+    validateObjectId(courseId);
+    validateObjectId(lessonId);
+
+    // Check course exists
+    const course = await courseModel.exists({ _id: courseId });
+    if (!course) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
+    }
+
+    // Get modules
+    const modules = await moduleModel.find({ course: courseId }).select("_id");
+    const moduleIds = modules.map(m => m._id);
+
+    // Check lesson belong to this course
+    const isValidLesson = await lessonModel.exists({ _id: lessonId, module: { $in: moduleIds } });
+    if (!isValidLesson) {
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.GENERAL.VALIDATION_ERROR)
+    };
+
+    // Update last lesson
+    let progress = await progressModel.findOneAndUpdate(
+        { user: userId, course: courseId },
+        {
+            $set: { lastAccessLesson: lessonId }
+        },
+        { upsert: true, new: true }
+    );
+
+    // Return data
+    return progress;
+};

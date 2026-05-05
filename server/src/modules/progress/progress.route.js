@@ -1,7 +1,7 @@
 import express from "express"
 const progressRoute = express.Router()
 import authMiddleware from "../../middlewares/auth.middleware.js"
-import { getProgress, completeLesson } from "./progress.controller.js"
+import { getProgress, completeLesson, setLastAccessedLesson } from "./progress.controller.js"
 
 
 progressRoute.get("/:courseId",
@@ -12,6 +12,11 @@ progressRoute.get("/:courseId",
 progressRoute.post("/complete-lesson",
     authMiddleware,
     completeLesson
+);
+
+progressRoute.post("/last-lesson",
+    authMiddleware,
+    setLastAccessedLesson
 );
 
 
