@@ -60,7 +60,14 @@ const MESSAGES = Object.freeze({
     // General 
     GENERAL: Object.freeze({
         VALIDATION_ERROR: 'Validation failed',
-    })
+    }),
+
+    // Progress
+    PROGRESS: Object.freeze({
+        FETCHED: 'Progress fetched successfully',
+        UPDATED: 'Progress updated successfully',
+        COMPLETED: 'Course completed successfully',
+    }),
 
 });
 
