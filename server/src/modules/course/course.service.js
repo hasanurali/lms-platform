@@ -1,4 +1,7 @@
 import courseModel from "./course.model.js"
+import moduleModel from "../module/module.model.js"
+import lessonModel from "../lesson/lesson.model.js"
+import progressModel from "../progress/progress.model.js"
 import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
 import mongoose from "mongoose";
@@ -52,6 +55,77 @@ export const getCoursesService = async ({ page = 1, limit = 10 }) => {
             pages: Math.ceil(total / safeLimit),
             hasNext: safePage * safeLimit < total,
             hasPrev: safePage > 1,
+        }
+    };
+};
+
+export const getFullCourseService = async (courseId, userId) => {
+
+    // Validate ID
+    validateObjectId(courseId);
+
+    // Fetch course
+    const course = await courseModel.findById(courseId).populate(commonPopulate);
+    if (!course) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
+    }
+
+    // Get modules
+    const modules = await moduleModel.find({ course: courseId }).sort({ order: 1 }).lean();
+    const moduleIds = modules.map(m => m._id);
+
+    // Get lessons
+    const lessons = await lessonModel.find({ module: { $in: moduleIds } }).sort({ order: 1 }).lean();
+
+    // Group lessons by module
+    const lessonMap = new Map();
+    lessons.forEach(lesson => {
+        const moduleId = lesson.module.toString();
+
+        lessonMap.has(moduleId) ?
+            lessonMap.get(moduleId).push(lesson)
+            :
+            lessonMap.set(moduleId, [lesson])
+    });
+
+    // Attach lessons to modules
+    const modulesWithLessons = modules.map(module => ({
+        ...module,
+        lessons: lessonMap.get(module._id.toString()) || []
+    }));
+
+    // Get progress (optional if not logged in)
+    let progress = null;
+    if (userId) {
+        progress = await progressModel.findOne({ user: userId, course: courseId });
+    };
+
+    // Add completion flag to lessons
+    if (progress) {
+        let completedSet = new Set(progress.completedLessons.map(_id => _id.toString()));
+
+        modulesWithLessons.forEach(module => {
+            module.lessons = module.lessons.map(lesson => ({
+                ...lesson,
+                completed: completedSet.has(lesson._id.toString())
+            }));
+        });
+    };
+
+    // Calculate progress percentage
+    let progressPercentage = 0
+    if (progress && lessons.length > 0) {
+        progressPercentage = Math.round((progress.completedLessons.length / lessons.length) * 100);
+    };
+
+    // Return data
+    return {
+        course,
+        modules: modulesWithLessons,
+        progress: {
+            percentage: progressPercentage,
+            completed: progress?.completed || false,
+            lastAccessLesson: progress?.lastAccessLesson || null
         }
     };
 };

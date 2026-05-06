@@ -201,7 +201,127 @@ id: string (required) - Course ID
 
 ---
 
-### 4. Update Course
+### 4. Get Full Course
+**Endpoint:** `GET /courses/:id/full`
+
+**Authentication:** Optional (cookie `accessToken` or `Authorization: Bearer <token>`)
+
+**Authorization:** Any user, authenticated or not
+
+**Description:** Retrieves a course with its full structure — all modules and their nested lessons. If the request includes a valid token, each lesson includes a `completed` boolean based on the user's progress. If not authenticated, lesson completion flags are omitted and progress defaults to zero. Invalid or expired tokens are silently ignored and the request is treated as unauthenticated.
+
+**URL Parameters:**
+```
+id: string (required) - Course ID
+```
+
+**Success Response:**
+- **Status:** `200 OK`
+- **Message:** `Course fetched successfully`
+- **Response (authenticated):**
+```json
+{
+  "message": "Course fetched successfully",
+  "data": {
+    "course": {
+      "_id": "ObjectId",
+      "title": "Introduction to JavaScript",
+      "description": "Learn JavaScript from basics to advanced",
+      "instructor": {
+        "_id": "ObjectId",
+        "name": "John Doe",
+        "email": "john@example.com"
+      },
+      "price": 49.99,
+      "thumbnail": "https://example.com/thumbnail.jpg",
+      "isPublished": true,
+      "createdAt": "2026-05-03T10:30:00Z",
+      "updatedAt": "2026-05-03T10:30:00Z"
+    },
+    "modules": [
+      {
+        "_id": "ObjectId",
+        "course": "ObjectId",
+        "title": "Getting Started",
+        "order": 1,
+        "lessons": [
+          {
+            "_id": "ObjectId",
+            "module": "ObjectId",
+            "title": "What is JavaScript?",
+            "videoUrl": "https://example.com/videos/intro.mp4",
+            "content": "Introduction to JavaScript.",
+            "order": 1,
+            "completed": true
+          }
+        ]
+      }
+    ],
+    "progress": {
+      "percentage": 50,
+      "completed": false,
+      "lastAccessLesson": "ObjectId"
+    }
+  }
+}
+```
+- **Response (unauthenticated):**
+```json
+{
+  "message": "Course fetched successfully",
+  "data": {
+    "course": {
+      "_id": "ObjectId",
+      "title": "Introduction to JavaScript",
+      "description": "Learn JavaScript from basics to advanced",
+      "instructor": {
+        "_id": "ObjectId",
+        "name": "John Doe",
+        "email": "john@example.com"
+      },
+      "price": 49.99,
+      "thumbnail": "https://example.com/thumbnail.jpg",
+      "isPublished": true,
+      "createdAt": "2026-05-03T10:30:00Z",
+      "updatedAt": "2026-05-03T10:30:00Z"
+    },
+    "modules": [
+      {
+        "_id": "ObjectId",
+        "course": "ObjectId",
+        "title": "Getting Started",
+        "order": 1,
+        "lessons": [
+          {
+            "_id": "ObjectId",
+            "module": "ObjectId",
+            "title": "What is JavaScript?",
+            "videoUrl": "https://example.com/videos/intro.mp4",
+            "content": "Introduction to JavaScript.",
+            "order": 1
+          }
+        ]
+      }
+    ],
+    "progress": {
+      "percentage": 0,
+      "completed": false,
+      "lastAccessLesson": null
+    }
+  }
+}
+```
+
+**Error Responses:**
+
+| Status | Message | Reason |
+|--------|---------|--------|
+| `400 Bad Request` | `Validation failed` | `id` is not a valid MongoDB ObjectId |
+| `404 Not Found` | `Course not found` | No course exists with the given `id` |
+
+---
+
+### 5. Update Course
 **Endpoint:** `PUT /courses/:id`
 
 **Authentication:** Required (cookie `accessToken` or `Authorization: Bearer <token>`)
@@ -292,7 +412,7 @@ id: string (required) - Course ID
 
 ---
 
-### 5. Delete Course
+### 6. Delete Course
 **Endpoint:** `DELETE /courses/:id`
 
 **Authentication:** Required (cookie `accessToken` or `Authorization: Bearer <token>`)
