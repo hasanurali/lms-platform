@@ -2,6 +2,7 @@ import courseModel from "./course.model.js"
 import moduleModel from "../module/module.model.js"
 import lessonModel from "../lesson/lesson.model.js"
 import progressModel from "../progress/progress.model.js"
+import enrollmentModel from "../enrollment/enrollment.model.js"
 import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
 import mongoose from "mongoose";
@@ -185,6 +186,19 @@ export const deleteCourseService = async ({ instructorId, courseId }) => {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.COURSE.UNAUTHORIZED);
     };
 
+    // Delete progress and enrollment of this course
+    await progressModel.deleteMany({ course: courseId });
+    await enrollmentModel.deleteMany({ course: courseId });
+
+    // Get all module ids of this course
+    const moduleIds = await moduleModel.distinct("_id", { course: courseId });
+
+    // Delete lessons of those modules
+    await lessonModel.deleteMany({ module: { $in: moduleIds } });
+
+    // Delete all modules
+    await moduleModel.deleteMany({ course: courseId })
+
     // Delete course
-    await courseModel.findByIdAndDelete(courseId);
+    await courseModel.deleteOne({ _id: courseId });
 };
