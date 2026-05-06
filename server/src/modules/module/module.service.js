@@ -1,5 +1,6 @@
 import courseModel from "../course/course.model.js"
 import moduleModel from "./module.model.js"
+import lessonModel from "../lesson/lesson.model.js"
 import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
@@ -97,6 +98,9 @@ export const deleteModuleService = async (moduleId, instructorId) => {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.MODULE.UNAUTHORIZED)
     }
 
+    // Delete lessons of this module
+    await lessonModel.deleteMany({ module: moduleId });
+
     // Delete module
-    await moduleModel.deleteOne(moduleId);
+    await moduleModel.deleteOne({ _id: moduleId });
 };
