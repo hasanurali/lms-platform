@@ -419,7 +419,7 @@ id: string (required) - Course ID
 
 **Authorization:** INSTRUCTOR or ADMIN role (must be course owner)
 
-**Description:** Permanently deletes a course.
+**Description:** Permanently deletes a course and all of its associated data, including modules, lessons, enrollments, and progress records.
 
 **URL Parameters:**
 ```

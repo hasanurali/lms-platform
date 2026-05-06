@@ -217,7 +217,7 @@ id: string (required) - Module ID
 
 **Authorization:** INSTRUCTOR or ADMIN role (must own the course this module belongs to)
 
-**Description:** Permanently deletes a module.
+**Description:** Permanently deletes a module and all of its associated lessons.
 
 **URL Parameters:**
 ```
