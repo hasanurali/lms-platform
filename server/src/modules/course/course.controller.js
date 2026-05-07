@@ -5,7 +5,7 @@ import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 
 export const createCourse = asyncHandler(async (req, res) => {
 
-    //Get data from request
+    // Get data from request
     const { title, description, price, thumbnail } = req.body;
 
     // Get instructor id from request
@@ -26,7 +26,7 @@ export const getCourses = asyncHandler(async (req, res) => {
     const { page, limit } = req.query;
 
     // Get courses data
-    const coursesData = await getCoursesService({ page, limit });
+    const coursesData = await getCoursesService(page, limit);
 
     // Send response
     return res
@@ -40,7 +40,7 @@ export const getFullCourse = asyncHandler(async (req, res) => {
     const courseId = req.params.id;
 
     const userId = req?.user?._id;
-   
+
     // Get full detailed course
     const detailedCourse = await getFullCourseService(courseId, userId);
 
@@ -85,7 +85,7 @@ export const updateCourse = asyncHandler(async (req, res) => {
     if (isPublished !== undefined) data.isPublished = isPublished;
 
     // Update course
-    const course = await updateCourseService({ data, instructorId, courseId });
+    const course = await updateCourseService(data, instructorId, courseId);
 
     // Check is published 
     if (course.isPublished) {
@@ -112,7 +112,7 @@ export const deleteCourse = asyncHandler(async (req, res) => {
     const instructorId = req.user._id;
 
     // delete course
-    await deleteCourseService({ instructorId, courseId });
+    await deleteCourseService(instructorId, courseId);
 
     // Send response
     return res

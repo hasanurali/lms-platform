@@ -3,12 +3,27 @@ import JWT_CONFIG from "./jwt.config.js"
 import COOKIE_CONFIGURATION from "./cookie.config.js";
 
 // Validate required env
-const required = ["MONGO_URI", "JWT_REFRESH_KEY", "JWT_ACCESS_KEY"];
+const required = [
+    "MONGO_URI",
+    "JWT_ACCESS_KEY",
+    "JWT_REFRESH_KEY",
+    "JWT_ACCESS_EXPIRY",
+    "JWT_REFRESH_EXPIRY",
+];
+
 required.forEach((key) => {
     if (!process.env[key]) {
         throw new Error(`Missing required env variable: ${key}`);
     }
 });
+
+if (process.env.JWT_ACCESS_KEY.length < 32) {
+    throw new Error("JWT_ACCESS_KEY too weak");
+};
+
+if (process.env.JWT_REFRESH_KEY.length < 32) {
+    throw new Error("JWT_REFRESH_KEY too weak");
+};
 
 export const config = Object.freeze({
 

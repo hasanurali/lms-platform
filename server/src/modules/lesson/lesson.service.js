@@ -1,5 +1,6 @@
 import lessonModel from "./lesson.model.js"
 import moduleModel from "../module/module.model.js";
+import enrollmentModel from "../enrollment/enrollment.model.js"
 import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
@@ -71,7 +72,7 @@ export const getLessonsService = async (moduleId) => {
     return lessons;
 };
 
-export const getLessonService = async (lessonId) => {
+export const getLessonService = async (userId, lessonId) => {
 
     // Check valid id
     validateObjectId(lessonId);
@@ -81,6 +82,13 @@ export const getLessonService = async (lessonId) => {
     if (!lesson) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.LESSON.NOT_FOUND);
     };
+
+    // Check user enrolled in this course
+    const module = await moduleModel.findById(lesson.module);
+    const isEnrolled = await enrollmentModel.exists({ user: userId, course: module.course });
+    if (!isEnrolled) {
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.ENROLLMENT.REQUIRED)
+    }
 
     // Return data
     return lesson;

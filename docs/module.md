@@ -105,9 +105,9 @@ id: string (required) - Course ID
 ### 2. Get Modules
 **Endpoint:** `GET /courses/:id/modules`
 
-**Authentication:** Required (cookie `accessToken` or `Authorization: Bearer <token>`)
+**Authentication:** Not required
 
-**Authorization:** Any authenticated user
+**Authorization:** None
 
 **Description:** Retrieves all modules for the specified course, sorted by `order` ascending.
 
@@ -149,9 +149,6 @@ id: string (required) - Course ID
 | Status | Message | Reason |
 |--------|---------|--------|
 | `400 Bad Request` | `Validation failed` | `id` is not a valid MongoDB ObjectId |
-| `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
-| `401 Unauthorized` | `Token expired` | Access token has expired |
-| `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
 | `404 Not Found` | `Course not found` | No course exists with the given `id` |
 
 ---

@@ -27,9 +27,8 @@ export const registerValidation = [
 
     // Role
     body('role')
-        .optional()
+        .optional({ checkFalsy: true })
         .trim()
-        .notEmpty().withMessage("Role is required")
         .isIn(['student', 'instructor'])
         .withMessage('role must be student or instructor'),
 ];

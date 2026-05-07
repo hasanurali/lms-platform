@@ -26,7 +26,7 @@ export const login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
     // Authenticate user
-    const { user, accessToken, refreshToken } = await loginUser({ email, password });
+    const { user, accessToken, refreshToken } = await loginUser(email, password);
 
     // Send response
     return res

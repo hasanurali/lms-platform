@@ -113,9 +113,9 @@ id: string (required) - Module ID
 ### 2. Get Lessons
 **Endpoint:** `GET /modules/:id/lessons`
 
-**Authentication:** Required (cookie `accessToken` or `Authorization: Bearer <token>`)
+**Authentication:** Not required
 
-**Authorization:** Any authenticated user
+**Authorization:** None
 
 **Description:** Retrieves all lessons for the specified module, sorted by `order` ascending.
 
@@ -161,9 +161,6 @@ id: string (required) - Module ID
 | Status | Message | Reason |
 |--------|---------|--------|
 | `400 Bad Request` | `Validation failed` | `id` is not a valid MongoDB ObjectId |
-| `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
-| `401 Unauthorized` | `Token expired` | Access token has expired |
-| `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
 | `404 Not Found` | `Module not found` | No module exists with the given `id` |
 
 ---
@@ -173,9 +170,9 @@ id: string (required) - Module ID
 
 **Authentication:** Required (cookie `accessToken` or `Authorization: Bearer <token>`)
 
-**Authorization:** Any authenticated user
+**Authorization:** Any authenticated user enrolled in the course this lesson belongs to
 
-**Description:** Retrieves a single lesson by its ID.
+**Description:** Retrieves a single lesson by its ID. The authenticated user must be enrolled in the course this lesson belongs to.
 
 **URL Parameters:**
 ```
@@ -210,6 +207,7 @@ id: string (required) - Lesson ID
 | `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
 | `401 Unauthorized` | `Token expired` | Access token has expired |
 | `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
+| `403 Forbidden` | `You must enroll in this course to access this content` | Authenticated user is not enrolled in the course this lesson belongs to |
 | `404 Not Found` | `Lesson not found` | No lesson exists with the given `id` |
 
 ---
