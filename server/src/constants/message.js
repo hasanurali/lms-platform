@@ -16,7 +16,7 @@ const MESSAGES = Object.freeze({
         NOT_FOUND: 'User not found',
         FETCHED: 'User fetched successfully',
         FETCHED_ALL: 'Users fetched successfully',
-        UPDATE: 'Profile update successfully',
+        UPDATE: 'Profile updated successfully',
     }),
 
     // Course
