@@ -1,4 +1,5 @@
 import { HTTP_STATUS } from "../constants/index.js"
+import ApiError from "../utils/apiError.js";
 
 const authorizeRoles = (...roles) => {
     return (req, res, next) => {
