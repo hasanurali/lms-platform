@@ -26,3 +26,12 @@ export const getUserService = async (userId) => {
     // Return data
     return user;
 };
+
+export const updateProfileService = async (userId, data) => {
+
+    // Update profile by user id
+    const user = await userModel.findByIdAndUpdate(userId, data, { returnDocument: "after" });
+
+    // Return data
+    return user;
+};

@@ -1,5 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { getUsersService, getUserService } from "./user.service.js"
+import { getUsersService, getUserService, updateProfileService } from "./user.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 
@@ -37,4 +37,27 @@ export const getUser = asyncHandler(async (req, res) => {
     return res
         .status(HTTP_STATUS.OK)
         .json(new ApiResponse(MESSAGES.USER.FETCHED, user));
+});
+
+export const updateProfile = asyncHandler(async (req, res) => {
+
+    // Get data from request
+    const { name, profilePicture, bio } = req.body;
+
+    // Get current user id from request
+    const userId = req.user._id;
+
+    // Check is valid data
+    const data = {};
+    if (name) data.name = name;
+    if (profilePicture) data.profilePicture = profilePicture;
+    if (bio) data.bio = bio;
+
+    // Get updated user
+    const updatedUser = await updateProfileService(userId, data);
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .json(new ApiResponse(MESSAGES.USER.UPDATE, updatedUser));
 });
