@@ -1,4 +1,7 @@
 import userModel from "./user.model.js";
+import ApiError from "../../utils/apiError.js";
+import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
+import validateObjectId from "../../utils/validateObjectId.js"
 
 export const getUsersService = async () => {
 
@@ -7,4 +10,19 @@ export const getUsersService = async () => {
 
     // Return data
     return users;
+};
+
+export const getUserService = async (userId) => {
+
+    // Check valid id
+    validateObjectId(userId);
+
+    // Fetch user by id
+    const user = await userModel.findById(userId);
+    if (!user) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.USER.NOT_FOUND)
+    };
+
+    // Return data
+    return user;
 };
