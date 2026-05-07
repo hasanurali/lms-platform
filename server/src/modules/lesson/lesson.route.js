@@ -16,7 +16,6 @@ lessonRoute.post("/modules/:id/lessons",
 );
 
 lessonRoute.get("/modules/:id/lessons",
-    authMiddleware,
     getLessons
 );
 

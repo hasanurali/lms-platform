@@ -2,6 +2,7 @@ import courseModel from "../course/course.model.js";
 import moduleModel from "../module/module.model.js";
 import progressModel from "./progress.model.js"
 import lessonModel from "../lesson/lesson.model.js";
+import enrollmentModel from "../enrollment/enrollment.model.js";
 import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
@@ -16,7 +17,13 @@ export const getProgressService = async (courseId, userId) => {
     const course = await courseModel.exists({ _id: courseId });
     if (!course) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
-    }
+    };
+
+    // Check user enrolled in this course
+    const isEnrolled = await enrollmentModel.exists({ user: userId, course: courseId });
+    if (!isEnrolled) {
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.ENROLLMENT.REQUIRED)
+    };
 
     // Get modules
     const modules = await moduleModel.find({ course: courseId }).select("_id");
@@ -62,7 +69,13 @@ export const completeLessonService = async ({ courseId, lessonId, userId }) => {
     const course = await courseModel.exists({ _id: courseId });
     if (!course) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
-    }
+    };
+
+    // Check user enrolled in this course
+    const isEnrolled = await enrollmentModel.exists({ user: userId, course: courseId });
+    if (!isEnrolled) {
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.ENROLLMENT.REQUIRED)
+    };
 
     // Check if course already completed
     let progress = await progressModel.findOne({ user: userId, course: courseId });
@@ -116,7 +129,13 @@ export const setLastAccessedLessonService = async ({ courseId, lessonId, userId 
     const course = await courseModel.exists({ _id: courseId });
     if (!course) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
-    }
+    };
+
+    // Check user enrolled in this course
+    const isEnrolled = await enrollmentModel.exists({ user: userId, course: courseId });
+    if (!isEnrolled) {
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.ENROLLMENT.REQUIRED)
+    };
 
     // Get modules
     const modules = await moduleModel.find({ course: courseId }).select("_id");

@@ -17,7 +17,6 @@ moduleRoute.post("/courses/:id/modules",
 );
 
 moduleRoute.get("/courses/:id/modules",
-    authMiddleware,
     getModules
 );
 

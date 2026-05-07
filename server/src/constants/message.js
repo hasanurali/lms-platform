@@ -55,6 +55,7 @@ const MESSAGES = Object.freeze({
         ENROLL_SUCCESS: "Successfully enrolled in the course",
         ALREADY_ENROLLED: "You are already enrolled in this course",
         ENROLLMENT_FETCHED: "Enrolled courses fetched successfully",
+        REQUIRED: "You must enroll in this course to access this content"
     }),
 
     // General 

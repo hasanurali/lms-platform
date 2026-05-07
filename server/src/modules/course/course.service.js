@@ -5,7 +5,6 @@ import progressModel from "../progress/progress.model.js"
 import enrollmentModel from "../enrollment/enrollment.model.js"
 import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
-import mongoose from "mongoose";
 import validateObjectId from "../../utils/validateObjectId.js";
 
 
@@ -27,7 +26,7 @@ export const createCourseService = async (data) => {
     return populatedData;
 };
 
-export const getCoursesService = async ({ page = 1, limit = 10 }) => {
+export const getCoursesService = async (page = 1, limit = 10) => {
 
     // Calculate page and limit
     const safePage = Math.max(parseInt(page) || 1, 1);
@@ -146,7 +145,7 @@ export const getCourseService = async (courseId) => {
     return course;
 };
 
-export const updateCourseService = async ({ data, instructorId, courseId }) => {
+export const updateCourseService = async (data, instructorId, courseId) => {
 
     // Check valid id
     validateObjectId(courseId);
@@ -170,7 +169,7 @@ export const updateCourseService = async ({ data, instructorId, courseId }) => {
     return updatedCourse;
 };
 
-export const deleteCourseService = async ({ instructorId, courseId }) => {
+export const deleteCourseService = async (instructorId, courseId) => {
 
     // Check valid id
     validateObjectId(courseId);

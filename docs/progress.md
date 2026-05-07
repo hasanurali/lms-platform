@@ -40,9 +40,10 @@ If both are present, the cookie takes priority.
 
 ## Notes
 
-- Any authenticated user can access progress endpoints regardless of role.
+- Any authenticated user can access progress endpoints regardless of role, provided they are enrolled in the course.
+- All three endpoints require the user to be enrolled — unenrolled users receive a `403` error.
 - Progress is tracked per user per course via a unique `{ user, course }` index.
-- If no progress record exists yet, `GET /progress/:courseId` returns a default response with `0%` progress rather than a 404.
+- If enrolled but no progress record exists yet, `GET /progress/:courseId` returns a default response with `0%` progress rather than a 404.
 - `completedLessons` uses a set — marking the same lesson complete multiple times has no effect.
 - A course is automatically marked `completed: true` when all lessons in the course are completed.
 - If a course is already marked completed, `POST /progress/complete-lesson` returns immediately with the existing progress.
@@ -59,7 +60,7 @@ If both are present, the cookie takes priority.
 
 **Authorization:** Any authenticated user
 
-**Description:** Retrieves the authenticated user's progress for a specific course, including completed lessons, last accessed lesson, completion status, and overall percentage.
+**Description:** Retrieves the authenticated user's progress for a specific course. The user must be enrolled in the course.
 
 **URL Parameters:**
 ```
@@ -88,7 +89,7 @@ courseId: string (required) - Course ID
   }
 }
 ```
-- **Response (no progress yet):**
+- **Response (enrolled but no progress yet):**
 ```json
 {
   "message": "Progress fetched successfully",
@@ -111,6 +112,7 @@ courseId: string (required) - Course ID
 | `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
 | `401 Unauthorized` | `Token expired` | Access token has expired |
 | `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
+| `403 Forbidden` | `You must enroll in this course to access this content` | Authenticated user is not enrolled in this course |
 | `404 Not Found` | `Course not found` | No course exists with the given `courseId` |
 
 ---
@@ -122,7 +124,7 @@ courseId: string (required) - Course ID
 
 **Authorization:** Any authenticated user
 
-**Description:** Marks a lesson as completed for the authenticated user within a course. If all lessons in the course are completed, the course is automatically marked as completed. Marking an already-completed lesson has no effect. If the course is already completed, the existing progress is returned immediately.
+**Description:** Marks a lesson as completed for the authenticated user within a course. The user must be enrolled in the course. If all lessons in the course are completed, the course is automatically marked as completed. Marking an already-completed lesson has no effect. If the course is already completed, the existing progress is returned immediately.
 
 **Request Body:**
 ```json
@@ -177,6 +179,7 @@ courseId: string (required) - Course ID
 | `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
 | `401 Unauthorized` | `Token expired` | Access token has expired |
 | `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
+| `403 Forbidden` | `You must enroll in this course to access this content` | Authenticated user is not enrolled in this course |
 | `404 Not Found` | `Course not found` | No course exists with the given `course` ID |
 
 ---
@@ -188,7 +191,7 @@ courseId: string (required) - Course ID
 
 **Authorization:** Any authenticated user
 
-**Description:** Updates the last accessed lesson for the authenticated user within a course. Creates a progress record if one does not exist yet. Does not affect completed lessons or completion status.
+**Description:** Updates the last accessed lesson for the authenticated user within a course. The user must be enrolled in the course. Creates a progress record if one does not exist yet. Does not affect completed lessons or completion status.
 
 **Request Body:**
 ```json
@@ -226,4 +229,5 @@ courseId: string (required) - Course ID
 | `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
 | `401 Unauthorized` | `Token expired` | Access token has expired |
 | `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
+| `403 Forbidden` | `You must enroll in this course to access this content` | Authenticated user is not enrolled in this course |
 | `404 Not Found` | `Course not found` | No course exists with the given `course` ID |

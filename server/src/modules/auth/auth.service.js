@@ -32,7 +32,7 @@ export const createUser = async (data) => {
     };
 };
 
-export const loginUser = async ({ email, password }) => {
+export const loginUser = async (email, password) => {
 
     // Check user exists
     const user = await userModel.findOne({ email }).select("+password");

@@ -86,7 +86,6 @@ Cookies are cleared on logout.
 | `400 Bad Request` | `Must contain at least one number` | `password` missing digit |
 | `400 Bad Request` | `Must contain at least one special character` | `password` missing `@$!%*?&` |
 | `400 Bad Request` | `role must be student or instructor` | `role` is not a valid value |
-| `400 Bad Request` | `Role is required` | `role` is provided but empty string |
 | `409 Conflict` | `Email already registered` | An account with this email already exists |
 
 ---
