@@ -1,6 +1,7 @@
 import "dotenv/config"
 import JWT_CONFIG from "./jwt.config.js"
 import COOKIE_CONFIGURATION from "./cookie.config.js";
+import { cloudinary } from "./cloudinary.config.js";
 
 // Validate required env
 const required = [
@@ -9,6 +10,9 @@ const required = [
     "JWT_REFRESH_KEY",
     "JWT_ACCESS_EXPIRY",
     "JWT_REFRESH_EXPIRY",
+    "CLOUDINARY_CLOUD_NAME",
+    "CLOUDINARY_API_KEY",
+    "CLOUDINARY_API_SECRET"
 ];
 
 required.forEach((key) => {
@@ -37,6 +41,8 @@ export const config = Object.freeze({
 
     jwt: JWT_CONFIG,
 
-    cookie: COOKIE_CONFIGURATION
+    cookie: COOKIE_CONFIGURATION,
+
+    cloudinary,
 
 });
