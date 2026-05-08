@@ -27,9 +27,21 @@ const userSchema = new mongoose.Schema({
         default: ""
     },
     profilePicture: {
-        type: String,
-        default: function () {
-            return `https://api.dicebear.com/9.x/identicon/svg?seed=${this._id || this.email}`;
+        url: {
+            type: String,
+            default: function () {
+                return `https://api.dicebear.com/9.x/identicon/svg?seed=${this._id || this.email}`;
+            }
+        },
+        publicId: {
+            type: String,
+            default: null,
+            select: false
+        },
+        hash: {
+            type: String,
+            default: null,
+            select: false
         }
     },
     role: {

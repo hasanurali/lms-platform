@@ -1,7 +1,9 @@
 import userModel from "./user.model.js";
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, CLOUDINARY } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js"
+import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/Cloudinary.js"
+import crypto from "crypto"
 
 export const getUsersService = async () => {
 
@@ -28,6 +30,31 @@ export const getUserService = async (userId) => {
 };
 
 export const updateProfileService = async (userId, data) => {
+
+    let { imageFile } = data;
+
+    if (imageFile) {
+
+        const userImage = await userModel.findById(userId).select("profilePicture");
+        const currentImageHash = crypto.createHash("md5").update(imageFile.buffer).digest("hex");
+
+        // Check is same image
+        if (userImage.profilePicture?.hash !== currentImageHash) {
+
+            // Delete from cloudinary
+            await deleteFromCloudinary(userImage.profilePicture.publicId)
+
+            // Uplode to cloudinary
+            const { url, public_id, hash } = await uploadToCloudinary(imageFile, CLOUDINARY.FOLDER.AVATAR);
+            data.profilePicture = {
+                url,
+                publicId: public_id,
+                hash
+            }
+        }
+
+        delete data.imageFile;
+    };
 
     // Update profile by user id
     const user = await userModel.findByIdAndUpdate(userId, data, { returnDocument: "after" });
