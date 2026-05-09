@@ -35,13 +35,11 @@ const userSchema = new mongoose.Schema({
         },
         publicId: {
             type: String,
-            default: null,
-            select: false
+            default: null
         },
         hash: {
             type: String,
-            default: null,
-            select: false
+            default: null
         }
     },
     role: {
@@ -99,6 +97,8 @@ userSchema.methods.toJSON = function () {
     const obj = this.toObject();
     delete obj.password;
     delete obj.refreshToken;
+    delete obj.profilePicture.publicId;
+    delete obj.profilePicture.hash;
     return obj;
 };
 
