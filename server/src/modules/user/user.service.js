@@ -2,7 +2,7 @@ import userModel from "./user.model.js";
 import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES, CLOUDINARY } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js"
-import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/Cloudinary.js"
+import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/cloudinary.js"
 import crypto from "crypto"
 
 export const getUsersService = async () => {

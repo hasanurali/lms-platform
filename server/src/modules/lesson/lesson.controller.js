@@ -46,7 +46,7 @@ export const getLesson = asyncHandler(async (req, res) => {
     const lessonId = req.params.id;
 
     // Get user from request
-    const user = req.user._id
+    const user = req.user;
 
     // Get lesson
     const lesson = await getLessonService(user, lessonId);

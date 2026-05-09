@@ -4,7 +4,7 @@ import enrollmentModel from "../enrollment/enrollment.model.js"
 import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES, ROLES, CLOUDINARY } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
-import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/Cloudinary.js";
+import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/cloudinary.js";
 import crypto from "crypto"
 
 
@@ -149,7 +149,7 @@ export const updateLessonService = async (data, lessonId, instructorId) => {
         if (lesson.video.hash !== currentVideoHash) {
 
             // Delete video from cloudinary
-            await deleteFromCloudinary(lesson.video.publicId)
+            await deleteFromCloudinary(lesson.video.publicId, CLOUDINARY.TYPE.VIDEO)
 
             // Uplode video to cloudinary
             const { url, public_id, hash } = await uploadToCloudinary(videoFile, CLOUDINARY.FOLDER.LESSON, CLOUDINARY.TYPE.VIDEO);
@@ -188,7 +188,7 @@ export const deleteLessonService = async (lessonId, instructorId) => {
     };
 
     // Delete lesson video from cloudinary
-    await deleteFromCloudinary(lesson.video.publicId)
+    await deleteFromCloudinary(lesson.video.publicId, CLOUDINARY.TYPE.VIDEO)
 
     // Delete lesson
     await lessonModel.deleteOne({ _id: lessonId });

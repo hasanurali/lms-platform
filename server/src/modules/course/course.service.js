@@ -105,7 +105,7 @@ export const getFullCourseService = async (courseId, userId) => {
     const moduleIds = modules.map(m => m._id);
 
     // Get lessons
-    const lessons = await lessonModel.find({ module: { $in: moduleIds } }).sort({ order: 1 }).lean();
+    const lessons = await lessonModel.find({ module: { $in: moduleIds } }).select("-video.publicId -video.hash").sort({ order: 1 }).lean();
 
     // Group lessons by module
     const lessonMap = new Map();
@@ -248,10 +248,21 @@ export const deleteCourseService = async (instructorId, courseId) => {
     // Get all module ids of this course
     const moduleIds = await moduleModel.distinct("_id", { course: courseId });
 
+    // Get all lessons of those modules
+    const lessons = await lessonModel.find({ module: { $in: moduleIds } }).select("video.publicId -_id");
+
+    // Delete all lesson videos from cloudinary
+    if (lessons.length > 0) {
+        const deletePromises = lessons.map(({ video }) =>
+            deleteFromCloudinary(video.publicId, CLOUDINARY.TYPE.VIDEO)
+        );
+        await Promise.all(deletePromises);
+    };
+
     // Delete lessons of those modules
     await lessonModel.deleteMany({ module: { $in: moduleIds } });
 
-    // Delete all modules
+    // Delete all modules of this course
     await moduleModel.deleteMany({ course: courseId })
 
     // Delete thumbnail from cloudinary

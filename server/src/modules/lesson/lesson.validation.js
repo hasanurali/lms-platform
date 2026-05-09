@@ -23,12 +23,6 @@ export const updateLessonValidation = [
         .trim()
         .isLength({ min: 3, max: 50 }).withMessage("Title must be 3-50 characters"),
 
-    // video url (optional)
-    body("videoUrl")
-        .optional({ checkFalsy: true })
-        .trim()
-        .isURL().withMessage("Video url must be a valid URL"),
-
     // content (optional)
     body("content")
         .optional({ checkFalsy: true })
