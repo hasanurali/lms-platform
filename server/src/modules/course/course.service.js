@@ -4,17 +4,36 @@ import lessonModel from "../lesson/lesson.model.js"
 import progressModel from "../progress/progress.model.js"
 import enrollmentModel from "../enrollment/enrollment.model.js"
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, CLOUDINARY } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
+import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/Cloudinary.js"
+import crypto from "crypto";
 
 
 // Common population for instructor
 const commonPopulate = {
     path: "instructor",
-    select: "name email profilePicture"
+    select: "name email profilePicture.url"
 };
 
 export const createCourseService = async (data) => {
+
+    const { thumbnailFile } = data;
+
+    // Check thumbnail file is provided
+    if (!thumbnailFile) {
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.COURSE.THUMBNAIL_REQUIRED);
+    };
+
+    // Upload thumbnail to cloudinary
+    const { url, public_id, hash } = await uploadToCloudinary(thumbnailFile, CLOUDINARY.FOLDER.THUMBNAIL);
+    data.thumbnail = {
+        url,
+        publicId: public_id,
+        hash
+    }
+
+    delete data.thumbnailFile;
 
     // Create course
     const course = await courseModel.create(data);
@@ -147,6 +166,8 @@ export const getCourseService = async (courseId) => {
 
 export const updateCourseService = async (data, instructorId, courseId) => {
 
+    const { thumbnailFile } = data;
+
     // Check valid id
     validateObjectId(courseId);
 
@@ -159,6 +180,30 @@ export const updateCourseService = async (data, instructorId, courseId) => {
     // Check instructor is owned this course
     if (instructorId.toString() !== course.instructor.toString()) {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.COURSE.UNAUTHORIZED);
+    };
+
+
+    if (thumbnailFile) {
+
+        const course = await courseModel.findById(courseId).select("thumbnail");
+        const currentThumbnailHash = crypto.createHash("md5").update(thumbnailFile.buffer).digest("hex");
+
+        // Check if same thumbnail
+        if (course.thumbnail.hash !== currentThumbnailHash) {
+
+            // Delete thumbnail from cloudinary
+            await deleteFromCloudinary(course.thumbnail.publicId)
+
+            // Uplode thumbnail to cloudinary
+            const { url, public_id, hash } = await uploadToCloudinary(thumbnailFile, CLOUDINARY.FOLDER.THUMBNAIL);
+            data.thumbnail = {
+                url,
+                publicId: public_id,
+                hash
+            }
+        }
+
+        delete data.thumbnailFile;
     };
 
     // Update course
@@ -197,6 +242,9 @@ export const deleteCourseService = async (instructorId, courseId) => {
 
     // Delete all modules
     await moduleModel.deleteMany({ course: courseId })
+
+    // Delete thumbnail from cloudinary
+    await deleteFromCloudinary(course.thumbnail.publicId)
 
     // Delete course
     await courseModel.deleteOne({ _id: courseId });

@@ -19,12 +19,6 @@ export const createCourseValidation = [
         .optional()
         .isInt({ min: 0, max: 100000 })
         .withMessage("Price must be between 0 and 100000"),
-
-    // Thumbnail (optional)
-    body("thumbnail")
-        .optional({ checkFalsy: true })
-        .trim()
-        .isURL().withMessage("Thumbnail must be a valid URL"),
 ];
 
 export const updateCourseValidation = [
@@ -46,12 +40,6 @@ export const updateCourseValidation = [
         .optional()
         .isInt({ min: 0, max: 100000 })
         .withMessage("Price must be between 0 and 100000"),
-
-    // Thumbnail (optional)
-    body("thumbnail")
-        .optional({ checkFalsy: true })
-        .trim()
-        .isURL().withMessage("Thumbnail must be a valid URL"),
 
     // Published (optional)
     body("isPublished")

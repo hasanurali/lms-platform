@@ -20,8 +20,18 @@ const courseSchema = new mongoose.Schema({
         default: 0
     },
     thumbnail: {
-        type: String,
-        default: null
+        url: {
+            type: String,
+            required: true
+        },
+        publicId: {
+            type: String,
+            required: true
+        },
+        hash: {
+            type: String,
+            required: true
+        }
     },
     isPublished: {
         type: Boolean,
@@ -32,5 +42,13 @@ const courseSchema = new mongoose.Schema({
 // Add index for faster query
 courseSchema.index({ instructor: 1 });
 courseSchema.index({ isPublished: 1, createdAt: -1 });
+
+// Remove sansitive field from response
+courseSchema.methods.toJSON = function () {
+    const obj = this.toObject();
+    delete obj.thumbnail?.publicId;
+    delete obj.thumbnail?.hash;
+    return obj;
+};
 
 export default mongoose.model('Course', courseSchema);

@@ -7,10 +7,12 @@ import { createCourseValidation, updateCourseValidation } from "./course.validat
 import validate from "../../middlewares/validation.result.middleware.js"
 import { createCourse, getCourses, getFullCourse, getCourse, updateCourse, deleteCourse } from "./course.controller.js"
 import optionalMiddleware from "../../middlewares/optional.middleware.js"
+import multerImageMiddleware from "../../middlewares/multerImage.middleware.js"
 
 courseRoute.post("/",
     authMiddleware,
     roleMiddleware(ROLES.INSTRUCTOR, ROLES.ADMIN),
+    multerImageMiddleware.single("thumbnail"),
     createCourseValidation,
     validate,
     createCourse
@@ -32,6 +34,7 @@ courseRoute.get("/:id",
 courseRoute.put("/:id",
     authMiddleware,
     roleMiddleware(ROLES.INSTRUCTOR, ROLES.ADMIN),
+    multerImageMiddleware.single("thumbnail"),
     updateCourseValidation,
     validate,
     updateCourse

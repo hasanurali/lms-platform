@@ -30,6 +30,7 @@ const MESSAGES = Object.freeze({
         UNAUTHORIZED: 'You are not allowed to modify this course',
         FETCHED: 'Course fetched successfully',
         FETCHED_ALL: 'Courses fetched successfully',
+        THUMBNAIL_REQUIRED: "Thumbnail is required"
     }),
 
     // Module
