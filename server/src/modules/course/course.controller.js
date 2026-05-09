@@ -1,5 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createCourseService, getCoursesService, getFullCourseService, getCourseService, updateCourseService, deleteCourseService } from "./course.service.js"
+import { createCourseService, getCoursesService, getMyCoursesService, getFullCourseService, getCourseService, updateCourseService, deleteCourseService } from "./course.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 
@@ -35,6 +35,20 @@ export const getCourses = asyncHandler(async (req, res) => {
     return res
         .status(HTTP_STATUS.OK)
         .json(new ApiResponse(MESSAGES.COURSE.FETCHED_ALL, coursesData));
+});
+
+export const getMyCourses = asyncHandler(async (req, res) => {
+
+    // Get Instructor id from request
+    const instructorId = req.user._id
+
+    // Get my courses
+    const myCourses = await getMyCoursesService(instructorId);
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .json(new ApiResponse(MESSAGES.COURSE.FETCHED_ALL, myCourses));
 });
 
 export const getFullCourse = asyncHandler(async (req, res) => {

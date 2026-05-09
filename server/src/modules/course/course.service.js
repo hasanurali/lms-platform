@@ -78,6 +78,17 @@ export const getCoursesService = async (page = 1, limit = 10) => {
     };
 };
 
+export const getMyCoursesService = async (instructorId) => {
+
+    // Get courses created by the authenticated instructor
+    const courses = await courseModel.find({ instructor: instructorId })
+        .populate(commonPopulate)
+        .sort({ createdAt: -1 });
+
+    // Return data
+    return courses;
+};
+
 export const getFullCourseService = async (courseId, userId) => {
 
     // Validate ID

@@ -5,7 +5,7 @@ import roleMiddleware from "../../middlewares/role.middleware.js"
 import { ROLES } from "../../constants/index.js"
 import { createCourseValidation, updateCourseValidation } from "./course.validation.js"
 import validate from "../../middlewares/validation.result.middleware.js"
-import { createCourse, getCourses, getFullCourse, getCourse, updateCourse, deleteCourse } from "./course.controller.js"
+import { createCourse, getCourses, getMyCourses, getFullCourse, getCourse, updateCourse, deleteCourse } from "./course.controller.js"
 import optionalMiddleware from "../../middlewares/optional.middleware.js"
 import multerImageMiddleware from "../../middlewares/multerImage.middleware.js"
 
@@ -21,6 +21,12 @@ courseRoute.post("/",
 courseRoute.get("/",
     getCourses
 );
+
+courseRoute.get("/my",
+    authMiddleware,
+    roleMiddleware(ROLES.INSTRUCTOR, ROLES.ADMIN),
+    getMyCourses
+)
 
 courseRoute.get("/:id/full",
     optionalMiddleware,
