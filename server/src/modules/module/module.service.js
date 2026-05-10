@@ -2,8 +2,9 @@ import courseModel from "../course/course.model.js"
 import moduleModel from "./module.model.js"
 import lessonModel from "../lesson/lesson.model.js"
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, CLOUDINARY } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
+import { deleteFromCloudinary } from "../../utils/cloudinary.js"
 
 
 export const createModuleService = async (title, instructorId, courseId) => {
@@ -96,7 +97,18 @@ export const deleteModuleService = async (moduleId, instructorId) => {
     const course = await courseModel.findOne({ _id: isModule.course, instructor: instructorId })
     if (!course) {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.MODULE.UNAUTHORIZED)
-    }
+    };
+
+    // Get all lessons of this module
+    const lessons = await lessonModel.find({ module: moduleId }).select("video.publicId -_id");
+
+    // Delete all lesson videos from cloudinary
+    if (lessons.length > 0) {
+        const deletePromises = lessons.map(({ video }) =>
+            deleteFromCloudinary(video.publicId, CLOUDINARY.TYPE.VIDEO)
+        );
+        await Promise.all(deletePromises);
+    };
 
     // Delete lessons of this module
     await lessonModel.deleteMany({ module: moduleId });

@@ -27,9 +27,19 @@ const userSchema = new mongoose.Schema({
         default: ""
     },
     profilePicture: {
-        type: String,
-        default: function () {
-            return `https://api.dicebear.com/9.x/identicon/svg?seed=${this._id || this.email}`;
+        url: {
+            type: String,
+            default: function () {
+                return `https://api.dicebear.com/9.x/identicon/svg?seed=${this._id || this.email}`;
+            }
+        },
+        publicId: {
+            type: String,
+            default: null
+        },
+        hash: {
+            type: String,
+            default: null
         }
     },
     role: {
@@ -87,6 +97,8 @@ userSchema.methods.toJSON = function () {
     const obj = this.toObject();
     delete obj.password;
     delete obj.refreshToken;
+    delete obj.profilePicture.publicId;
+    delete obj.profilePicture.hash;
     return obj;
 };
 

@@ -6,7 +6,10 @@ import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 export const createLesson = asyncHandler(async (req, res) => {
 
     // Get data from request
-    const { title, videoUrl, content } = req.body;
+    const { title, content } = req.body;
+
+    // Get video data from request by multer
+    const videoFile = req.file;
 
     // Get module id from request
     const moduleId = req.params.id;
@@ -15,7 +18,7 @@ export const createLesson = asyncHandler(async (req, res) => {
     const instructorId = req.user._id;
 
     // Create lesson
-    const lesson = await createLessonService(title, videoUrl, content, moduleId, instructorId);
+    const lesson = await createLessonService(title, videoFile, content, moduleId, instructorId);
 
     // Send response
     return res
@@ -42,11 +45,11 @@ export const getLesson = asyncHandler(async (req, res) => {
     // Get lesson id from req
     const lessonId = req.params.id;
 
-    // Get user id from request
-    const userId = req.user._id
+    // Get user from request
+    const user = req.user;
 
     // Get lesson
-    const lesson = await getLessonService(userId, lessonId);
+    const lesson = await getLessonService(user, lessonId);
 
     // Send response
     return res
@@ -58,7 +61,10 @@ export const updatelesson = asyncHandler(async (req, res) => {
 
 
     // Get data from request
-    const { title, videoUrl, content } = req.body;
+    const { title, content } = req.body;
+
+    // Get video data from request by multer
+    const videoFile = req.file;
 
     // Get lesson id from request
     const lessonId = req.params.id;
@@ -69,7 +75,7 @@ export const updatelesson = asyncHandler(async (req, res) => {
     // Check is valid data
     const data = {};
     if (title !== undefined) data.title = title;
-    if (videoUrl !== undefined) data.videoUrl = videoUrl;
+    if (videoFile !== undefined) data.videoFile = videoFile;
     if (content !== undefined) data.content = content;
 
     // Update lesson

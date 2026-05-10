@@ -4,17 +4,36 @@ import lessonModel from "../lesson/lesson.model.js"
 import progressModel from "../progress/progress.model.js"
 import enrollmentModel from "../enrollment/enrollment.model.js"
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, CLOUDINARY } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
+import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/Cloudinary.js"
+import crypto from "crypto";
 
 
 // Common population for instructor
 const commonPopulate = {
     path: "instructor",
-    select: "name email profilePicture"
+    select: "name email profilePicture.url"
 };
 
 export const createCourseService = async (data) => {
+
+    const { thumbnailFile } = data;
+
+    // Check thumbnail file is provided
+    if (!thumbnailFile) {
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.COURSE.THUMBNAIL_REQUIRED);
+    };
+
+    // Upload thumbnail to cloudinary
+    const { url, public_id, hash } = await uploadToCloudinary(thumbnailFile, CLOUDINARY.FOLDER.THUMBNAIL);
+    data.thumbnail = {
+        url,
+        publicId: public_id,
+        hash
+    }
+
+    delete data.thumbnailFile;
 
     // Create course
     const course = await courseModel.create(data);
@@ -59,6 +78,17 @@ export const getCoursesService = async (page = 1, limit = 10) => {
     };
 };
 
+export const getMyCoursesService = async (instructorId) => {
+
+    // Get courses created by the authenticated instructor
+    const courses = await courseModel.find({ instructor: instructorId })
+        .populate(commonPopulate)
+        .sort({ createdAt: -1 });
+
+    // Return data
+    return courses;
+};
+
 export const getFullCourseService = async (courseId, userId) => {
 
     // Validate ID
@@ -75,7 +105,7 @@ export const getFullCourseService = async (courseId, userId) => {
     const moduleIds = modules.map(m => m._id);
 
     // Get lessons
-    const lessons = await lessonModel.find({ module: { $in: moduleIds } }).sort({ order: 1 }).lean();
+    const lessons = await lessonModel.find({ module: { $in: moduleIds } }).select("-video.publicId -video.hash").sort({ order: 1 }).lean();
 
     // Group lessons by module
     const lessonMap = new Map();
@@ -147,6 +177,8 @@ export const getCourseService = async (courseId) => {
 
 export const updateCourseService = async (data, instructorId, courseId) => {
 
+    const { thumbnailFile } = data;
+
     // Check valid id
     validateObjectId(courseId);
 
@@ -159,6 +191,30 @@ export const updateCourseService = async (data, instructorId, courseId) => {
     // Check instructor is owned this course
     if (instructorId.toString() !== course.instructor.toString()) {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.COURSE.UNAUTHORIZED);
+    };
+
+
+    if (thumbnailFile) {
+
+        const course = await courseModel.findById(courseId).select("thumbnail");
+        const currentThumbnailHash = crypto.createHash("md5").update(thumbnailFile.buffer).digest("hex");
+
+        // Check if same thumbnail
+        if (course.thumbnail.hash !== currentThumbnailHash) {
+
+            // Delete thumbnail from cloudinary
+            await deleteFromCloudinary(course.thumbnail.publicId)
+
+            // Uplode thumbnail to cloudinary
+            const { url, public_id, hash } = await uploadToCloudinary(thumbnailFile, CLOUDINARY.FOLDER.THUMBNAIL);
+            data.thumbnail = {
+                url,
+                publicId: public_id,
+                hash
+            }
+        }
+
+        delete data.thumbnailFile;
     };
 
     // Update course
@@ -192,11 +248,25 @@ export const deleteCourseService = async (instructorId, courseId) => {
     // Get all module ids of this course
     const moduleIds = await moduleModel.distinct("_id", { course: courseId });
 
+    // Get all lessons of those modules
+    const lessons = await lessonModel.find({ module: { $in: moduleIds } }).select("video.publicId -_id");
+
+    // Delete all lesson videos from cloudinary
+    if (lessons.length > 0) {
+        const deletePromises = lessons.map(({ video }) =>
+            deleteFromCloudinary(video.publicId, CLOUDINARY.TYPE.VIDEO)
+        );
+        await Promise.all(deletePromises);
+    };
+
     // Delete lessons of those modules
     await lessonModel.deleteMany({ module: { $in: moduleIds } });
 
-    // Delete all modules
+    // Delete all modules of this course
     await moduleModel.deleteMany({ course: courseId })
+
+    // Delete thumbnail from cloudinary
+    await deleteFromCloudinary(course.thumbnail.publicId)
 
     // Delete course
     await courseModel.deleteOne({ _id: courseId });

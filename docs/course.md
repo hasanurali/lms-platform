@@ -38,6 +38,13 @@ If both are present, the cookie takes priority. The token is verified and can pr
 
 ---
 
+## Notes
+
+- `thumbnail.publicId` and `thumbnail.hash` are never returned in any response — they are stripped by the model's `toJSON()` method. Only `thumbnail.url` is exposed.
+- `GET /courses/` only returns published courses.
+
+---
+
 ## Endpoints
 
 ### 1. Create a Course
@@ -47,17 +54,16 @@ If both are present, the cookie takes priority. The token is verified and can pr
 
 **Authorization:** INSTRUCTOR or ADMIN role
 
-**Description:** Creates a new course. Only instructors and admins can create courses.
+**Description:** Creates a new course. Thumbnail must be uploaded as a file. Only instructors and admins can create courses.
 
-**Request Body:**
-```json
-{
-  "title": "string (required)",
-  "description": "string (required)",
-  "price": "number (optional, default: 0)",
-  "thumbnail": "string (optional, URL to thumbnail image)"
-}
-```
+**Request Body:** `multipart/form-data`
+
+| Field | Type | Required |
+|-------|------|----------|
+| `title` | string | Yes |
+| `description` | string | Yes |
+| `price` | number | No (default: 0) |
+| `thumbnail` | file (jpg, jpeg, png, webp, max 2MB) | Yes |
 
 **Success Response:**
 - **Status:** `201 Created`
@@ -73,10 +79,15 @@ If both are present, the cookie takes priority. The token is verified and can pr
     "instructor": {
       "_id": "ObjectId",
       "name": "John Doe",
-      "email": "john@example.com"
+      "email": "john@example.com",
+      "profilePicture": {
+        "url": "https://example.com/avatar.jpg"
+      }
     },
     "price": 49.99,
-    "thumbnail": "https://example.com/thumbnail.jpg",
+    "thumbnail": {
+      "url": "https://res.cloudinary.com/example/thumbnail.jpg"
+    },
     "isPublished": false,
     "createdAt": "2026-05-03T10:30:00Z",
     "updatedAt": "2026-05-03T10:30:00Z"
@@ -93,7 +104,8 @@ If both are present, the cookie takes priority. The token is verified and can pr
 | `400 Bad Request` | `Description is required` | `description` is missing or empty |
 | `400 Bad Request` | `Description must be 10-500 characters` | `description` length out of range |
 | `400 Bad Request` | `Price must be between 0 and 100000` | `price` is not an integer or out of range |
-| `400 Bad Request` | `Thumbnail must be a valid URL` | `thumbnail` is not a valid URL |
+| `400 Bad Request` | `Thumbnail is required` | No thumbnail file uploaded |
+| `400 Bad Request` | `Only jpg, jpeg, png and webp files are allowed` | Uploaded file has an invalid type |
 | `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
 | `401 Unauthorized` | `Token expired` | Access token has expired |
 | `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
@@ -130,10 +142,15 @@ limit: number (optional, default: 10, min: 1, max: 50)
         "instructor": {
           "_id": "ObjectId",
           "name": "John Doe",
-          "email": "john@example.com"
+          "email": "john@example.com",
+          "profilePicture": {
+            "url": "https://example.com/avatar.jpg"
+          }
         },
         "price": 49.99,
-        "thumbnail": "https://example.com/thumbnail.jpg",
+        "thumbnail": {
+          "url": "https://res.cloudinary.com/example/thumbnail.jpg"
+        },
         "isPublished": true,
         "createdAt": "2026-05-03T10:30:00Z",
         "updatedAt": "2026-05-03T10:30:00Z"
@@ -155,40 +172,44 @@ limit: number (optional, default: 10, min: 1, max: 50)
 
 ---
 
-### 3. Get Course by ID
-**Endpoint:** `GET /courses/:id`
+### 3. Get My Courses
+**Endpoint:** `GET /courses/my`
 
-**Authentication:** Not required
+**Authentication:** Required (cookie `accessToken` or `Authorization: Bearer <token>`)
 
-**Description:** Retrieves a single course by its ID.
+**Authorization:** INSTRUCTOR or ADMIN role
 
-**URL Parameters:**
-```
-id: string (required) - Course ID
-```
+**Description:** Retrieves all courses created by the authenticated instructor or admin, including unpublished ones. Results are sorted by most recently created.
 
 **Success Response:**
 - **Status:** `200 OK`
-- **Message:** `Course fetched successfully`
+- **Message:** `Courses fetched successfully`
 - **Response:**
 ```json
 {
-  "message": "Course fetched successfully",
-  "data": {
-    "_id": "ObjectId",
-    "title": "Introduction to JavaScript",
-    "description": "Learn JavaScript from basics to advanced",
-    "instructor": {
+  "message": "Courses fetched successfully",
+  "data": [
+    {
       "_id": "ObjectId",
-      "name": "John Doe",
-      "email": "john@example.com"
-    },
-    "price": 49.99,
-    "thumbnail": "https://example.com/thumbnail.jpg",
-    "isPublished": true,
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-03T10:30:00Z"
-  }
+      "title": "Introduction to JavaScript",
+      "description": "Learn JavaScript from basics to advanced",
+      "instructor": {
+        "_id": "ObjectId",
+        "name": "John Doe",
+        "email": "john@example.com",
+        "profilePicture": {
+          "url": "https://example.com/avatar.jpg"
+        }
+      },
+      "price": 49.99,
+      "thumbnail": {
+        "url": "https://res.cloudinary.com/example/thumbnail.jpg"
+      },
+      "isPublished": false,
+      "createdAt": "2026-05-03T10:30:00Z",
+      "updatedAt": "2026-05-03T10:30:00Z"
+    }
+  ]
 }
 ```
 
@@ -196,8 +217,10 @@ id: string (required) - Course ID
 
 | Status | Message | Reason |
 |--------|---------|--------|
-| `400 Bad Request` | `Validation failed` | `id` is not a valid MongoDB ObjectId |
-| `404 Not Found` | `Course not found` | No course exists with the given `id` |
+| `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
+| `401 Unauthorized` | `Token expired` | Access token has expired |
+| `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
+| `403 Forbidden` | `Access denied` | Authenticated user does not have INSTRUCTOR or ADMIN role |
 
 ---
 
@@ -230,10 +253,15 @@ id: string (required) - Course ID
       "instructor": {
         "_id": "ObjectId",
         "name": "John Doe",
-        "email": "john@example.com"
+        "email": "john@example.com",
+        "profilePicture": {
+          "url": "https://example.com/avatar.jpg"
+        }
       },
       "price": 49.99,
-      "thumbnail": "https://example.com/thumbnail.jpg",
+      "thumbnail": {
+        "url": "https://res.cloudinary.com/example/thumbnail.jpg"
+      },
       "isPublished": true,
       "createdAt": "2026-05-03T10:30:00Z",
       "updatedAt": "2026-05-03T10:30:00Z"
@@ -249,7 +277,9 @@ id: string (required) - Course ID
             "_id": "ObjectId",
             "module": "ObjectId",
             "title": "What is JavaScript?",
-            "videoUrl": "https://example.com/videos/intro.mp4",
+            "video": {
+              "url": "https://res.cloudinary.com/example/intro.mp4"
+            },
             "content": "Introduction to JavaScript.",
             "order": 1,
             "completed": true
@@ -277,10 +307,15 @@ id: string (required) - Course ID
       "instructor": {
         "_id": "ObjectId",
         "name": "John Doe",
-        "email": "john@example.com"
+        "email": "john@example.com",
+        "profilePicture": {
+          "url": "https://example.com/avatar.jpg"
+        }
       },
       "price": 49.99,
-      "thumbnail": "https://example.com/thumbnail.jpg",
+      "thumbnail": {
+        "url": "https://res.cloudinary.com/example/thumbnail.jpg"
+      },
       "isPublished": true,
       "createdAt": "2026-05-03T10:30:00Z",
       "updatedAt": "2026-05-03T10:30:00Z"
@@ -296,7 +331,9 @@ id: string (required) - Course ID
             "_id": "ObjectId",
             "module": "ObjectId",
             "title": "What is JavaScript?",
-            "videoUrl": "https://example.com/videos/intro.mp4",
+            "video": {
+              "url": "https://res.cloudinary.com/example/intro.mp4"
+            },
             "content": "Introduction to JavaScript.",
             "order": 1
           }
@@ -321,30 +358,80 @@ id: string (required) - Course ID
 
 ---
 
-### 5. Update Course
-**Endpoint:** `PUT /courses/:id`
+### 5. Get Course by ID
+**Endpoint:** `GET /courses/:id`
 
-**Authentication:** Required (cookie `accessToken` or `Authorization: Bearer <token>`)
+**Authentication:** Not required
 
-**Authorization:** INSTRUCTOR or ADMIN role (must be course owner)
-
-**Description:** Updates course details. Can update title, description, price, thumbnail, and publication status. The response message differs based on whether the course is published after the update.
+**Description:** Retrieves a single course by its ID.
 
 **URL Parameters:**
 ```
 id: string (required) - Course ID
 ```
 
-**Request Body (all fields optional):**
+**Success Response:**
+- **Status:** `200 OK`
+- **Message:** `Course fetched successfully`
+- **Response:**
 ```json
 {
-  "title": "string",
-  "description": "string",
-  "price": "number",
-  "thumbnail": "string",
-  "isPublished": "boolean"
+  "message": "Course fetched successfully",
+  "data": {
+    "_id": "ObjectId",
+    "title": "Introduction to JavaScript",
+    "description": "Learn JavaScript from basics to advanced",
+    "instructor": {
+      "_id": "ObjectId",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "profilePicture": {
+        "url": "https://example.com/avatar.jpg"
+      }
+    },
+    "price": 49.99,
+    "thumbnail": {
+      "url": "https://res.cloudinary.com/example/thumbnail.jpg"
+    },
+    "isPublished": true,
+    "createdAt": "2026-05-03T10:30:00Z",
+    "updatedAt": "2026-05-03T10:30:00Z"
+  }
 }
 ```
+
+**Error Responses:**
+
+| Status | Message | Reason |
+|--------|---------|--------|
+| `400 Bad Request` | `Validation failed` | `id` is not a valid MongoDB ObjectId |
+| `404 Not Found` | `Course not found` | No course exists with the given `id` |
+
+---
+
+### 6. Update Course
+**Endpoint:** `PUT /courses/:id`
+
+**Authentication:** Required (cookie `accessToken` or `Authorization: Bearer <token>`)
+
+**Authorization:** INSTRUCTOR or ADMIN role (must be course owner)
+
+**Description:** Updates course details. Only fields provided are updated. If a new thumbnail file is uploaded and it differs from the existing one, the old thumbnail is deleted from Cloudinary and replaced. The response message differs based on whether the course is published after the update.
+
+**URL Parameters:**
+```
+id: string (required) - Course ID
+```
+
+**Request Body:** `multipart/form-data` (all fields optional)
+
+| Field | Type | Required |
+|-------|------|----------|
+| `title` | string | No |
+| `description` | string | No |
+| `price` | number | No |
+| `isPublished` | boolean | No |
+| `thumbnail` | file (jpg, jpeg, png, webp, max 2MB) | No |
 
 **Success Response:**
 - **Status:** `200 OK`
@@ -361,10 +448,15 @@ id: string (required) - Course ID
     "instructor": {
       "_id": "ObjectId",
       "name": "John Doe",
-      "email": "john@example.com"
+      "email": "john@example.com",
+      "profilePicture": {
+        "url": "https://example.com/avatar.jpg"
+      }
     },
     "price": 49.99,
-    "thumbnail": "https://example.com/thumbnail.jpg",
+    "thumbnail": {
+      "url": "https://res.cloudinary.com/example/thumbnail.jpg"
+    },
     "isPublished": true,
     "createdAt": "2026-05-03T10:30:00Z",
     "updatedAt": "2026-05-03T12:00:00Z"
@@ -382,10 +474,15 @@ id: string (required) - Course ID
     "instructor": {
       "_id": "ObjectId",
       "name": "John Doe",
-      "email": "john@example.com"
+      "email": "john@example.com",
+      "profilePicture": {
+        "url": "https://example.com/avatar.jpg"
+      }
     },
     "price": 49.99,
-    "thumbnail": "https://example.com/thumbnail.jpg",
+    "thumbnail": {
+      "url": "https://res.cloudinary.com/example/thumbnail.jpg"
+    },
     "isPublished": false,
     "createdAt": "2026-05-03T10:30:00Z",
     "updatedAt": "2026-05-03T12:00:00Z"
@@ -400,8 +497,8 @@ id: string (required) - Course ID
 | `400 Bad Request` | `Title must be 3-50 characters` | `title` length out of range |
 | `400 Bad Request` | `Description must be 10-500 characters` | `description` length out of range |
 | `400 Bad Request` | `Price must be between 0 and 100000` | `price` is not an integer or out of range |
-| `400 Bad Request` | `Thumbnail must be a valid URL` | `thumbnail` is not a valid URL |
 | `400 Bad Request` | `Is published must be a boolean` | `isPublished` is not a boolean |
+| `400 Bad Request` | `Only jpg, jpeg, png and webp files are allowed` | Uploaded file has an invalid type |
 | `400 Bad Request` | `Validation failed` | `id` is not a valid MongoDB ObjectId |
 | `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
 | `401 Unauthorized` | `Token expired` | Access token has expired |
@@ -412,14 +509,14 @@ id: string (required) - Course ID
 
 ---
 
-### 6. Delete Course
+### 7. Delete Course
 **Endpoint:** `DELETE /courses/:id`
 
 **Authentication:** Required (cookie `accessToken` or `Authorization: Bearer <token>`)
 
 **Authorization:** INSTRUCTOR or ADMIN role (must be course owner)
 
-**Description:** Permanently deletes a course and all of its associated data, including modules, lessons, enrollments, and progress records.
+**Description:** Permanently deletes a course and all of its associated data, including modules, lessons and their videos from Cloudinary, enrollments, progress records, and the course thumbnail from Cloudinary.
 
 **URL Parameters:**
 ```

@@ -42,7 +42,10 @@ export const getUser = asyncHandler(async (req, res) => {
 export const updateProfile = asyncHandler(async (req, res) => {
 
     // Get data from request
-    const { name, profilePicture, bio } = req.body;
+    const { name, bio } = req.body;
+
+    // Get image data from request by multer
+    const imageFile = req.file;
 
     // Get current user id from request
     const userId = req.user._id;
@@ -50,7 +53,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
     // Check is valid data
     const data = {};
     if (name) data.name = name;
-    if (profilePicture) data.profilePicture = profilePicture;
+    if (imageFile) data.imageFile = imageFile;
     if (bio) data.bio = bio;
 
     // Get updated user

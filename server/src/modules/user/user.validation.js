@@ -8,11 +8,6 @@ export const updateProfileValidation = [
         .isLength({ min: 3, max: 30 }).withMessage("Name must be 3-30 characters")
         .matches(/^[a-zA-Z\s]+$/).withMessage("Name must contain only letters"),
 
-    // profile piture (optional)
-    body("profilePicture")
-        .optional({ checkFalsy: true })
-        .isURL().withMessage("profile picture must be a valid URL"),
-
     // bio (optional)
     body("bio")
         .optional({ checkFalsy: true })

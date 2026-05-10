@@ -30,6 +30,7 @@ const MESSAGES = Object.freeze({
         UNAUTHORIZED: 'You are not allowed to modify this course',
         FETCHED: 'Course fetched successfully',
         FETCHED_ALL: 'Courses fetched successfully',
+        THUMBNAIL_REQUIRED: "Thumbnail is required"
     }),
 
     // Module
@@ -50,7 +51,8 @@ const MESSAGES = Object.freeze({
         FETCHED: "Lesson fetched successfully",
         FETCHED_ALL: 'Lessons fetched successfully',
         NOT_FOUND: "Lesson not found",
-        UNAUTHORIZED: 'You are not allowed to modify this lesson'
+        UNAUTHORIZED: 'You are not allowed to modify this lesson',
+        VIDEO_REQUIRED: "Video is required"
     }),
 
     // Enrollment

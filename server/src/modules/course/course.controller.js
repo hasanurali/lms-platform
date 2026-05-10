@@ -1,18 +1,21 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createCourseService, getCoursesService, getFullCourseService, getCourseService, updateCourseService, deleteCourseService } from "./course.service.js"
+import { createCourseService, getCoursesService, getMyCoursesService, getFullCourseService, getCourseService, updateCourseService, deleteCourseService } from "./course.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 
 export const createCourse = asyncHandler(async (req, res) => {
 
     // Get data from request
-    const { title, description, price, thumbnail } = req.body;
+    const { title, description, price } = req.body;
+
+    // Get thumbnail data from request by multer
+    const thumbnailFile = req.file;
 
     // Get instructor id from request
     const instructorId = req.user._id;
 
     // Create course
-    const course = await createCourseService({ title, description, instructor: instructorId, price, thumbnail });
+    const course = await createCourseService({ title, description, instructor: instructorId, price, thumbnailFile });
 
     // Send response
     return res
@@ -32,6 +35,20 @@ export const getCourses = asyncHandler(async (req, res) => {
     return res
         .status(HTTP_STATUS.OK)
         .json(new ApiResponse(MESSAGES.COURSE.FETCHED_ALL, coursesData));
+});
+
+export const getMyCourses = asyncHandler(async (req, res) => {
+
+    // Get Instructor id from request
+    const instructorId = req.user._id
+
+    // Get my courses
+    const myCourses = await getMyCoursesService(instructorId);
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .json(new ApiResponse(MESSAGES.COURSE.FETCHED_ALL, myCourses));
 });
 
 export const getFullCourse = asyncHandler(async (req, res) => {
@@ -70,6 +87,9 @@ export const updateCourse = asyncHandler(async (req, res) => {
     // Get data from request
     const { title, description, price, thumbnail, isPublished } = req.body;
 
+    // Get thumbnail data from request by multer
+    const thumbnailFile = req.file;
+
     // Get course id from request
     const courseId = req.params.id;
 
@@ -78,11 +98,11 @@ export const updateCourse = asyncHandler(async (req, res) => {
 
     // Check is valid data
     const data = {};
-    if (title !== undefined) data.title = title;
-    if (description !== undefined) data.description = description;
-    if (price !== undefined) data.price = price;
-    if (thumbnail !== undefined) data.thumbnail = thumbnail;
-    if (isPublished !== undefined) data.isPublished = isPublished;
+    if (title) data.title = title;
+    if (description) data.description = description;
+    if (price) data.price = price;
+    if (thumbnailFile) data.thumbnailFile = thumbnailFile;
+    if (isPublished) data.isPublished = isPublished;
 
     // Update course
     const course = await updateCourseService(data, instructorId, courseId);

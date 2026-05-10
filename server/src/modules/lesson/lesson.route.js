@@ -6,10 +6,12 @@ import { ROLES } from "../../constants/index.js"
 import { createLessonValidation, updateLessonValidation } from "./lesson.validation.js"
 import validate from "../../middlewares/validation.result.middleware.js"
 import { createLesson, getLessons, getLesson, updatelesson, deleteLesson } from "./lesson.controller.js"
+import multerVideoMiddleware from "../../middlewares/multerVideo.middleware.js"
 
 lessonRoute.post("/modules/:id/lessons",
     authMiddleware,
     roleMiddleware(ROLES.INSTRUCTOR, ROLES.ADMIN),
+    multerVideoMiddleware.single("video"),
     createLessonValidation,
     validate,
     createLesson
@@ -27,6 +29,7 @@ lessonRoute.get("/lessons/:id",
 lessonRoute.put("/lessons/:id",
     authMiddleware,
     roleMiddleware(ROLES.INSTRUCTOR, ROLES.ADMIN),
+    multerVideoMiddleware.single("video"),
     updateLessonValidation,
     validate,
     updatelesson

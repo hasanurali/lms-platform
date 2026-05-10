@@ -40,10 +40,11 @@ If both are present, the cookie takes priority.
 
 ## Notes
 
-- `password` and `refreshToken` are never returned in any response — they are stripped by the model's `toJSON()` method.
-- `profilePicture` defaults to an auto-generated dicebear avatar URL if not set.
+- `password`, `refreshToken`, `profilePicture.publicId`, and `profilePicture.hash` are never returned in any response — they are stripped by the model's `toJSON()` method. Only `profilePicture.url` is exposed.
+- `profilePicture.url` defaults to an auto-generated dicebear avatar URL if not set.
 - `bio` defaults to an empty string `""`.
 - `GET /users/` excludes admin accounts from results.
+- If a new profile picture is uploaded and it matches the existing one (checked by MD5 hash), the existing image is kept and no Cloudinary upload occurs.
 
 ---
 
@@ -56,7 +57,7 @@ If both are present, the cookie takes priority.
 
 **Authorization:** Any authenticated user
 
-**Description:** Returns the profile of the currently authenticated user. Data is read directly from the auth token — no additional database call is made.
+**Description:** Returns the profile of the currently authenticated user. Data is read directly from the auth middleware — no additional database call is made.
 
 **Success Response:**
 - **Status:** `200 OK`
@@ -70,7 +71,9 @@ If both are present, the cookie takes priority.
     "name": "John Doe",
     "email": "john@example.com",
     "bio": "",
-    "profilePicture": "https://api.dicebear.com/9.x/identicon/svg?seed=...",
+    "profilePicture": {
+      "url": "https://api.dicebear.com/9.x/identicon/svg?seed=..."
+    },
     "role": "student",
     "createdAt": "2026-05-03T10:30:00Z",
     "updatedAt": "2026-05-03T10:30:00Z"
@@ -110,7 +113,9 @@ If both are present, the cookie takes priority.
       "name": "John Doe",
       "email": "john@example.com",
       "bio": "",
-      "profilePicture": "https://api.dicebear.com/9.x/identicon/svg?seed=...",
+      "profilePicture": {
+        "url": "https://api.dicebear.com/9.x/identicon/svg?seed=..."
+      },
       "role": "student",
       "createdAt": "2026-05-03T10:30:00Z",
       "updatedAt": "2026-05-03T10:30:00Z"
@@ -156,7 +161,9 @@ id: string (required) - User ID
     "name": "John Doe",
     "email": "john@example.com",
     "bio": "",
-    "profilePicture": "https://api.dicebear.com/9.x/identicon/svg?seed=...",
+    "profilePicture": {
+      "url": "https://api.dicebear.com/9.x/identicon/svg?seed=..."
+    },
     "role": "student",
     "createdAt": "2026-05-03T10:30:00Z",
     "updatedAt": "2026-05-03T10:30:00Z"
@@ -183,16 +190,15 @@ id: string (required) - User ID
 
 **Authorization:** Any authenticated user
 
-**Description:** Updates the authenticated user's profile. Only fields provided in the request body are updated; omitted fields remain unchanged.
+**Description:** Updates the authenticated user's profile. Only fields provided are updated. If a new profile picture is uploaded and differs from the existing one, the old image is deleted from Cloudinary and replaced.
 
-**Request Body (all fields optional):**
-```json
-{
-  "name": "string",
-  "profilePicture": "string (valid URL)",
-  "bio": "string (max 500 characters)"
-}
-```
+**Request Body:** `multipart/form-data` (all fields optional)
+
+| Field | Type | Required |
+|-------|------|----------|
+| `name` | string (3-30 characters, letters only) | No |
+| `bio` | string (max 500 characters) | No |
+| `profilePicture` | file (jpg, jpeg, png, webp, max 2MB) | No |
 
 **Success Response:**
 - **Status:** `200 OK`
@@ -206,7 +212,9 @@ id: string (required) - User ID
     "name": "John Doe",
     "email": "john@example.com",
     "bio": "Updated bio here.",
-    "profilePicture": "https://example.com/avatar.jpg",
+    "profilePicture": {
+      "url": "https://res.cloudinary.com/example/avatar.jpg"
+    },
     "role": "student",
     "createdAt": "2026-05-03T10:30:00Z",
     "updatedAt": "2026-05-04T09:00:00Z"
@@ -218,6 +226,11 @@ id: string (required) - User ID
 
 | Status | Message | Reason |
 |--------|---------|--------|
+| `400 Bad Request` | `Name must be 3-30 characters` | `name` length out of range |
+| `400 Bad Request` | `Name must contain only letters` | `name` contains non-letter characters |
+| `400 Bad Request` | `Bio must be less than 500 characters` | `bio` exceeds 500 characters |
+| `400 Bad Request` | `Only jpg, jpeg, png and webp files are allowed` | Uploaded file has an invalid type |
 | `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
 | `401 Unauthorized` | `Token expired` | Access token has expired |
 | `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
+| `404 Not Found` | `User not found` | No user exists with the given ID |

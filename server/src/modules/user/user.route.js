@@ -5,6 +5,8 @@ import roleMiddleware from "../../middlewares/role.middleware.js"
 import { ROLES } from "../../constants/index.js"
 import { me, getUsers, getUser, updateProfile } from "./user.controller.js"
 import { updateProfileValidation } from "./user.validation.js"
+import validate from "../../middlewares/validation.result.middleware.js"
+import multerImageMiddleware from "../../middlewares/multerImage.middleware.js"
 
 userRoute.get("/me",
     authMiddleware,
@@ -24,7 +26,9 @@ userRoute.get("/:id",
 
 userRoute.put("/me",
     authMiddleware,
+    multerImageMiddleware.single("profilePicture"),
     updateProfileValidation,
+    validate,
     updateProfile
 );
 
