@@ -2,6 +2,7 @@ import "dotenv/config"
 import JWT_CONFIG from "./jwt.config.js"
 import COOKIE_CONFIGURATION from "./cookie.config.js";
 import { cloudinary } from "./cloudinary.config.js";
+import corsOptions from "./cors.config.js";
 
 // Validate required env
 const required = [
@@ -45,4 +46,5 @@ export const config = Object.freeze({
 
     cloudinary,
 
+    corsOptions,
 });

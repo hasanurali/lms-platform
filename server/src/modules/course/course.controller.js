@@ -26,7 +26,7 @@ export const createCourse = asyncHandler(async (req, res) => {
 export const getCourses = asyncHandler(async (req, res) => {
 
     // Get page and limit from req
-    const { page, limit } = req.query;
+    const { page, limit } = req.cleanQuery;
 
     // Get courses data
     const coursesData = await getCoursesService(page, limit);

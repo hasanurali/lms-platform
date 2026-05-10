@@ -1,8 +1,15 @@
 import express from "express";
 import cors from "cors";
-import cookiePerser from "cookie-parser"
+import cookieParser from "cookie-parser";
+import helmet from "helmet";
+import hpp from "hpp";
+
+import { apiLimiter } from "./middlewares/rateLimit.middleware.js";
 import errorHandler from "./middlewares/error.middleware.js";
-import authRoute from "./modules/auth/auth.route.js"
+import mongoSanitizeMiddleware from "./middlewares/mongoSanitize.middleware.js"
+import { config } from "./config/index.js";
+
+import authRoute from "./modules/auth/auth.route.js";
 import userRoute from "./modules/user/user.route.js";
 import courseRoute from "./modules/course/course.route.js";
 import moduleRoute from "./modules/module/module.route.js";
@@ -12,14 +19,21 @@ import progressRoute from "./modules/progress/progress.route.js";
 
 const app = express();
 
+// Security Middlewares
+app.use(helmet());
+app.use(mongoSanitizeMiddleware);
+app.use(hpp());
 
-// Middlewares
-app.use(cors());
+// General Middlewares
+app.use(cors(config.corsOptions));
 app.use(express.json());
-app.use(cookiePerser());
+app.use(express.urlencoded({ extended: true }))
+app.use(cookieParser());
 
+// Global Api Rate Limiter
+app.use("/api/v1", apiLimiter);
 
-// Test route
+// Test Route
 app.get("/", (req, res) => {
     res.json({
         success: true,
@@ -37,7 +51,7 @@ app.use("/api/v1", enrollmentRoute);
 app.use("/api/v1/progress", progressRoute);
 
 
-// Not found route
+// Not Found Route
 app.use((req, res) => {
     res.status(404).json({
         success: false,
@@ -45,7 +59,7 @@ app.use((req, res) => {
     });
 });
 
-// Globle error handler
+// Global Error Handler
 app.use(errorHandler);
 
 export default app;
