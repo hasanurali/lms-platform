@@ -1,7 +1,7 @@
 # Lesson API Documentation
 
 ## Overview
-The Lesson API allows instructors and admins to create, update, and delete lessons within a module. Any authenticated user can retrieve lessons. Lessons are ordered automatically based on creation sequence.
+The Lesson API allows instructors and admins to create, update, and delete lessons within a module. Access to individual lessons is restricted to enrolled users, the course instructor, and admins.
 
 ---
 
@@ -43,6 +43,9 @@ If both are present, the cookie takes priority.
 - **Lesson order** is assigned automatically. The first lesson in a module gets `order: 1`; each subsequent lesson increments by 1. Order cannot be set or changed via the API.
 - Lessons are always returned sorted by `order` ascending.
 - `content` is optional and defaults to `null` if not provided.
+- `video.publicId` and `video.hash` are never returned — only `video.url` is exposed.
+- Videos are uploaded to Cloudinary. If an update provides the same video file (matched by MD5 hash), the existing video is kept and no upload occurs.
+- Deleting a lesson also deletes its video from Cloudinary.
 
 ---
 
@@ -55,21 +58,20 @@ If both are present, the cookie takes priority.
 
 **Authorization:** INSTRUCTOR or ADMIN role (must own the course this lesson's module belongs to)
 
-**Description:** Creates a new lesson under the specified module. The `order` field is assigned automatically.
+**Description:** Creates a new lesson under the specified module. The video must be uploaded as a file. The `order` field is assigned automatically.
 
 **URL Parameters:**
 ```
 id: string (required) - Module ID
 ```
 
-**Request Body:**
-```json
-{
-  "title": "string (required)",
-  "videoUrl": "string (required)",
-  "content": "string (optional, max 1000 characters)"
-}
-```
+**Request Body:** `multipart/form-data`
+
+| Field | Type | Required |
+|-------|------|----------|
+| `title` | string | Yes |
+| `video` | file (mp4, mkv, webm, avi, max 500MB) | Yes |
+| `content` | string (max 1000 characters) | No |
 
 **Success Response:**
 - **Status:** `201 Created`
@@ -82,7 +84,9 @@ id: string (required) - Module ID
     "_id": "ObjectId",
     "module": "ObjectId",
     "title": "What is JavaScript?",
-    "videoUrl": "https://example.com/videos/intro.mp4",
+    "video": {
+      "url": "https://res.cloudinary.com/example/intro.mp4"
+    },
     "content": "In this lesson we cover the basics of JavaScript.",
     "order": 1,
     "createdAt": "2026-05-03T10:30:00Z",
@@ -97,9 +101,9 @@ id: string (required) - Module ID
 |--------|---------|--------|
 | `400 Bad Request` | `Title is required` | `title` is missing or empty |
 | `400 Bad Request` | `Title must be 3-50 characters` | `title` length out of range |
-| `400 Bad Request` | `Video url is required` | `videoUrl` is missing or empty |
-| `400 Bad Request` | `Video url must be a valid URL` | `videoUrl` is not a valid URL |
 | `400 Bad Request` | `Content must be less than 1000 characters` | `content` exceeds 1000 characters |
+| `400 Bad Request` | `Video is required` | No video file uploaded |
+| `400 Bad Request` | `Only mp4, mkv, webm and avi files are allowed` | Uploaded file has an invalid type |
 | `400 Bad Request` | `Validation failed` | `id` is not a valid MongoDB ObjectId |
 | `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
 | `401 Unauthorized` | `Token expired` | Access token has expired |
@@ -136,7 +140,9 @@ id: string (required) - Module ID
       "_id": "ObjectId",
       "module": "ObjectId",
       "title": "What is JavaScript?",
-      "videoUrl": "https://example.com/videos/intro.mp4",
+      "video": {
+        "url": "https://res.cloudinary.com/example/intro.mp4"
+      },
       "content": "In this lesson we cover the basics of JavaScript.",
       "order": 1,
       "createdAt": "2026-05-03T10:30:00Z",
@@ -146,7 +152,9 @@ id: string (required) - Module ID
       "_id": "ObjectId",
       "module": "ObjectId",
       "title": "Variables and Data Types",
-      "videoUrl": "https://example.com/videos/variables.mp4",
+      "video": {
+        "url": "https://res.cloudinary.com/example/variables.mp4"
+      },
       "content": null,
       "order": 2,
       "createdAt": "2026-05-03T11:00:00Z",
@@ -170,9 +178,9 @@ id: string (required) - Module ID
 
 **Authentication:** Required (cookie `accessToken` or `Authorization: Bearer <token>`)
 
-**Authorization:** Any authenticated user enrolled in the course this lesson belongs to
+**Authorization:** ADMIN, the course instructor, or any user enrolled in the course this lesson belongs to
 
-**Description:** Retrieves a single lesson by its ID. The authenticated user must be enrolled in the course this lesson belongs to.
+**Description:** Retrieves a single lesson by its ID. Access is granted to admins and the course instructor without enrollment check. All other authenticated users must be enrolled in the course.
 
 **URL Parameters:**
 ```
@@ -190,7 +198,9 @@ id: string (required) - Lesson ID
     "_id": "ObjectId",
     "module": "ObjectId",
     "title": "What is JavaScript?",
-    "videoUrl": "https://example.com/videos/intro.mp4",
+    "video": {
+      "url": "https://res.cloudinary.com/example/intro.mp4"
+    },
     "content": "In this lesson we cover the basics of JavaScript.",
     "order": 1,
     "createdAt": "2026-05-03T10:30:00Z",
@@ -207,7 +217,7 @@ id: string (required) - Lesson ID
 | `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
 | `401 Unauthorized` | `Token expired` | Access token has expired |
 | `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
-| `403 Forbidden` | `You must enroll in this course to access this content` | Authenticated user is not enrolled in the course this lesson belongs to |
+| `403 Forbidden` | `You must enroll in this course to access this content` | Authenticated user is not an admin, not the course instructor, and not enrolled in the course |
 | `404 Not Found` | `Lesson not found` | No lesson exists with the given `id` |
 
 ---
@@ -219,21 +229,20 @@ id: string (required) - Lesson ID
 
 **Authorization:** INSTRUCTOR or ADMIN role (must own the course this lesson belongs to)
 
-**Description:** Updates lesson fields. Only fields provided in the request body are updated; omitted fields remain unchanged. `order` cannot be changed.
+**Description:** Updates lesson fields. Only fields provided are updated. If a new video file is uploaded and it differs from the existing one (checked by MD5 hash), the old video is deleted from Cloudinary and replaced. `order` cannot be changed.
 
 **URL Parameters:**
 ```
 id: string (required) - Lesson ID
 ```
 
-**Request Body (all fields optional):**
-```json
-{
-  "title": "string",
-  "videoUrl": "string",
-  "content": "string (max 1000 characters)"
-}
-```
+**Request Body:** `multipart/form-data` (all fields optional)
+
+| Field | Type | Required |
+|-------|------|----------|
+| `title` | string | No |
+| `video` | file (mp4, mkv, webm, avi, max 500MB) | No |
+| `content` | string (max 1000 characters) | No |
 
 **Success Response:**
 - **Status:** `200 OK`
@@ -246,7 +255,9 @@ id: string (required) - Lesson ID
     "_id": "ObjectId",
     "module": "ObjectId",
     "title": "Updated Lesson Title",
-    "videoUrl": "https://example.com/videos/updated.mp4",
+    "video": {
+      "url": "https://res.cloudinary.com/example/updated.mp4"
+    },
     "content": "Updated content here.",
     "order": 1,
     "createdAt": "2026-05-03T10:30:00Z",
@@ -260,8 +271,8 @@ id: string (required) - Lesson ID
 | Status | Message | Reason |
 |--------|---------|--------|
 | `400 Bad Request` | `Title must be 3-50 characters` | `title` is provided but length is out of range |
-| `400 Bad Request` | `Video url must be a valid URL` | `videoUrl` is provided but not a valid URL |
 | `400 Bad Request` | `Content must be less than 1000 characters` | `content` exceeds 1000 characters |
+| `400 Bad Request` | `Only mp4, mkv, webm and avi files are allowed` | Uploaded file has an invalid type |
 | `400 Bad Request` | `Validation failed` | `id` is not a valid MongoDB ObjectId |
 | `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
 | `401 Unauthorized` | `Token expired` | Access token has expired |
@@ -279,7 +290,7 @@ id: string (required) - Lesson ID
 
 **Authorization:** INSTRUCTOR or ADMIN role (must own the course this lesson belongs to)
 
-**Description:** Permanently deletes a lesson.
+**Description:** Permanently deletes a lesson and its video from Cloudinary.
 
 **URL Parameters:**
 ```

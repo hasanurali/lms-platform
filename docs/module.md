@@ -214,7 +214,7 @@ id: string (required) - Module ID
 
 **Authorization:** INSTRUCTOR or ADMIN role (must own the course this module belongs to)
 
-**Description:** Permanently deletes a module and all of its associated lessons.
+**Description:** Permanently deletes a module, all of its associated lessons, and their videos from Cloudinary.
 
 **URL Parameters:**
 ```
