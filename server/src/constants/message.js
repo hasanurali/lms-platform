@@ -52,7 +52,8 @@ const MESSAGES = Object.freeze({
         FETCHED_ALL: 'Lessons fetched successfully',
         NOT_FOUND: "Lesson not found",
         UNAUTHORIZED: 'You are not allowed to modify this lesson',
-        VIDEO_REQUIRED: "Video is required"
+        VIDEO_REQUIRED: "Video is required",
+        NOT_IN_COURSE: "This lesson does not belong to the specified course"
     }),
 
     // Enrollment
