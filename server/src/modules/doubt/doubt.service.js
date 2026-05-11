@@ -109,3 +109,51 @@ export const getMyDoubtsService = async (userId) => {
     // Return data
     return doubts
 };
+
+export const getCourseDoubtsService = async (courseId, user, page = 1, limit = 10) => {
+
+    // Check valid id
+    validateObjectId(courseId);
+
+    // Check course exist
+    const course = await courseModel.findById(courseId);
+    if (!course) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
+    };
+
+    // Check valid authorization
+    if (user.role !== ROLES.ADMIN && course.instructor.toString() !== user._id.toString()) {
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.DOUBT.UNAUTHORIZED);
+    };
+
+    // Calculate page and limit
+    const safePage = Math.max(parseInt(page) || 1, 1);
+    const safeLimit = Math.min(Math.max(parseInt(limit) || 10, 1), 50);
+
+    // Calculate skip
+    const skip = (safePage - 1) * safeLimit;
+
+
+    // Fetch course doubts
+    const doubts = await doubtModel.find({ course: courseId })
+        .skip(skip)
+        .limit(safeLimit)
+        .sort({ lastReplyAt: -1 })
+        .populate("student", "name");
+
+    // Total count for pagination
+    const total = await doubtModel.countDocuments({ course: courseId });
+
+    // Return data
+    return {
+        data: doubts,
+        pagination: {
+            total,
+            page: safePage,
+            limit: safeLimit,
+            pages: Math.ceil(total / safeLimit),
+            hasNext: safePage * safeLimit < total,
+            hasPrev: safePage > 1,
+        }
+    };
+};

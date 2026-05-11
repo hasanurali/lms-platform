@@ -1,5 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createDoubtService, getLessonDoubtsService, getMyDoubtsService } from "./doubt.service.js"
+import { createDoubtService, getLessonDoubtsService, getMyDoubtsService, getCourseDoubtsService } from "./doubt.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 
@@ -42,6 +42,26 @@ export const getMyDoubts = asyncHandler(async (req, res) => {
 
     // Get doubts
     const doubts = await getMyDoubtsService(userId);
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .json(new ApiResponse(MESSAGES.DOUBT.FETCHED_ALL, doubts));
+});
+
+export const getCourseDoubts = asyncHandler(async (req, res) => {
+
+    // Get course id from request
+    const courseId = req.params.id;
+
+    // Get page and limit from req
+    const { page, limit } = req.cleanQuery;
+
+    // Get user from request
+    const user = req.user;
+
+    // Get doubts
+    const doubts = await getCourseDoubtsService(courseId, user, page, limit);
 
     // Send response
     return res
