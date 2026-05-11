@@ -27,3 +27,13 @@ export const createDoubtValidation = [
         .isLength({ min: 5, max: 5000 })
         .withMessage("Description must be between 5 and 5000 characters")
 ];
+
+export const createReplyValidation = [
+
+    // Message
+    body("message")
+        .trim()
+        .notEmpty().withMessage("Message is required")
+        .isLength({ min: 5, max: 5000 })
+        .withMessage("Message must be between 5 and 5000 characters")
+];

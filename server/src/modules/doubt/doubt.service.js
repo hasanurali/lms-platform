@@ -4,7 +4,7 @@ import lessonModel from "../lesson/lesson.model.js"
 import enrollmentModel from "../enrollment/enrollment.model.js"
 import replyModel from "./reply.model.js"
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES, ROLES } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, ROLES, DOUBT_STATUS } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js"
 
 
@@ -195,4 +195,48 @@ export const getDoubtDetailsService = async (doubtId) => {
         doubt,
         replies
     }
+};
+
+export const replyToDoubtService = async (message, doubtId, user) => {
+
+    // Check valid id
+    validateObjectId(doubtId);
+
+    // Check doubt exists
+    const doubt = await doubtModel.findById(doubtId).populate("course", "instructor");
+    if (!doubt) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.DOUBT.NOT_FOUND);
+    };
+
+    // Check doubt is not close
+    if (doubt.status === DOUBT_STATUS.CLOSED) {
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.DOUBT.ALREADY_CLOSED);
+    };
+
+    // Check valid authorization
+    if (user.role !== ROLES.ADMIN
+        && doubt.course.instructor.toString() !== user._id.toString()
+        && doubt.student.toString() !== user._id.toString()) {
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.DOUBT.UNAUTHORIZED);
+    };
+
+    // Create reply
+    const reply = await replyModel.create({
+        doubt: doubtId,
+        author: user._id,
+        message
+    });
+
+    // Update last reply timestamp
+    doubt.lastReplyAt = new Date();
+    await doubt.save();
+
+    // Populate reply
+    await reply.populate(
+        "author",
+        "name profilePicture role"
+    );
+
+    // Return data
+    return reply;
 };

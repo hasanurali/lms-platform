@@ -2,9 +2,9 @@ import express from "express"
 const doubtRoute = express.Router()
 import authMiddleware from "../../middlewares/auth.middleware.js"
 import roleMiddleware from "../../middlewares/role.middleware.js"
-import { createDoubtValidation } from "./doubt.validation.js"
+import { createDoubtValidation, createReplyValidation } from "./doubt.validation.js"
 import validate from "../../middlewares/validation.result.middleware.js"
-import { createDoubt, getLessonDoubts, getMyDoubts, getCourseDoubts, getDoubtDetails } from "./doubt.controller.js"
+import { createDoubt, getLessonDoubts, getMyDoubts, getCourseDoubts, getDoubtDetails, replyToDoubt } from "./doubt.controller.js"
 import { ROLES } from "../../constants/index.js"
 
 
@@ -34,6 +34,13 @@ doubtRoute.get("/courses/:id/doubts",
 doubtRoute.get("/doubts/:id",
     authMiddleware,
     getDoubtDetails
+);
+
+doubtRoute.post("/doubts/:id/replies",
+    authMiddleware,
+    createReplyValidation,
+    validate,
+    replyToDoubt
 );
 
 
