@@ -5,6 +5,7 @@ import enrollmentModel from "../enrollment/enrollment.model.js"
 import replyModel from "./reply.model.js"
 import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES, ROLES } from "../../constants/index.js";
+import validateObjectId from "../../utils/validateObjectId.js"
 
 
 export const createDoubtService = async (courseId, lessonId, title, description, user) => {
@@ -78,4 +79,23 @@ export const createDoubtService = async (courseId, lessonId, title, description,
         doubt,
         reply
     };
+};
+
+export const getLessonDoubtsService = async (lessonId) => {
+
+    // Check valid id
+    validateObjectId(lessonId)
+
+    // Check lesson exist
+    const lesson = await lessonModel.exists({ _id: lessonId });
+    if (!lesson) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.LESSON.NOT_FOUND)
+    };
+
+    const doubts = await doubtModel.find({ lesson: lessonId })
+        .populate("student", "name")
+        .sort({ lastReplyAt: -1 });
+
+    // Return data
+    return doubts
 };
