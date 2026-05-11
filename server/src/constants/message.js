@@ -75,6 +75,24 @@ const MESSAGES = Object.freeze({
         COMPLETED: 'Course completed successfully',
     }),
 
+    // Doubt
+    DOUBT: Object.freeze({
+        CREATED: "Doubt created successfully",
+        FETCHED: "Doubt fetched successfully",
+        FETCHED_ALL: "Doubts fetched successfully",
+        REPLY_ADDED: "Reply added successfully",
+        MARKED_AS_ANSWERED: "Doubt marked as answered successfully",
+        CLOSED: "Doubt closed successfully",
+        NOT_FOUND: "Doubt not found",
+        ALREADY_CLOSED: "This doubt is already closed",
+        ALREADY_ANSWERED: "This doubt is already answered",
+        CANNOT_REPLY_TO_CLOSED: "Cannot reply to a closed doubt",
+        UNAUTHORIZED: "You are not authorized to access this doubt",
+        NOT_ENROLLED: "You must enroll in this course to ask a doubt",
+        ONLY_OWNER_CAN_CLOSE: "Only the student who created this doubt can close it",
+        ONLY_INSTRUCTOR_CAN_ANSWER: "Only the course instructor or admin can mark this doubt as answered"
+    })
+
 });
 
 export default MESSAGES;
