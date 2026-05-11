@@ -1,5 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createDoubtService, getLessonDoubtsService } from "./doubt.service.js"
+import { createDoubtService, getLessonDoubtsService, getMyDoubtsService } from "./doubt.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 
@@ -28,6 +28,20 @@ export const getLessonDoubts = asyncHandler(async (req, res) => {
 
     // Get doubts
     const doubts = await getLessonDoubtsService(lessonId);
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .json(new ApiResponse(MESSAGES.DOUBT.FETCHED_ALL, doubts));
+});
+
+export const getMyDoubts = asyncHandler(async (req, res) => {
+
+    // Get user id from request
+    const userId = req.user._id;
+
+    // Get doubts
+    const doubts = await getMyDoubtsService(userId);
 
     // Send response
     return res

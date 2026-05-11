@@ -99,3 +99,13 @@ export const getLessonDoubtsService = async (lessonId) => {
     // Return data
     return doubts
 };
+
+export const getMyDoubtsService = async (userId) => {
+
+    // Get user all doubts
+    const doubts = await doubtModel.find({ student: userId })
+        .sort({ lastReplyAt: -1 });
+
+    // Return data
+    return doubts
+};
