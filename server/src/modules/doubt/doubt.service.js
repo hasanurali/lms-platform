@@ -157,3 +157,42 @@ export const getCourseDoubtsService = async (courseId, user, page = 1, limit = 1
         }
     };
 };
+
+export const getDoubtDetailsService = async (doubtId) => {
+
+    // Check valid id
+    validateObjectId(doubtId);
+
+    // Fetch doubt
+    const doubt = await doubtModel.findById(doubtId).populate([
+        {
+            path: "course",
+            select: "title"
+        },
+        {
+            path: "lesson",
+            select: "title"
+        },
+        {
+            path: "student",
+            select: "name"
+        }
+    ]);
+
+    // Check doubt exists
+    if (!doubt) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.DOUBT.NOT_FOUND);
+    };
+
+    // Fetch replies
+    const replies = await replyModel.find({ doubt: doubtId }).populate(
+        "author",
+        "name profilePicture role"
+    ).sort({ createdAt: 1 })
+
+    // Return data
+    return {
+        doubt,
+        replies
+    }
+};
