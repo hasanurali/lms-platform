@@ -208,7 +208,7 @@ export const replyToDoubtService = async (message, doubtId, user) => {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.DOUBT.NOT_FOUND);
     };
 
-    // Check doubt is not close
+    // Check doubt is close
     if (doubt.status === DOUBT_STATUS.CLOSED) {
         throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.DOUBT.ALREADY_CLOSED);
     };
@@ -239,4 +239,55 @@ export const replyToDoubtService = async (message, doubtId, user) => {
 
     // Return data
     return reply;
+};
+
+export const markDoubtAnsweredService = async (doubtId, user) => {
+
+    // Check valid id
+    validateObjectId(doubtId);
+
+    // Check doubt exists
+    const doubt = await doubtModel.findById(doubtId).populate("course", "instructor");
+    if (!doubt) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.DOUBT.NOT_FOUND);
+    };
+
+    // Check doubt is close
+    if (doubt.status === DOUBT_STATUS.CLOSED) {
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.DOUBT.ALREADY_CLOSED);
+    };
+
+    // Check doubt is answered
+    if (doubt.status === DOUBT_STATUS.ANSWERED) {
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.DOUBT.ALREADY_ANSWERED);
+    };
+
+
+    // Check valid authorization
+    if (user.role !== ROLES.ADMIN && doubt.course.instructor.toString() !== user._id.toString()) {
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.DOUBT.ONLY_INSTRUCTOR_CAN_ANSWER);
+    };
+
+    // Marked the doubt as answered
+    doubt.status = DOUBT_STATUS.ANSWERED;
+    await doubt.save();
+
+    // Populate doubt
+    await doubt.populate([
+        {
+            path: "course",
+            select: "title"
+        },
+        {
+            path: "lesson",
+            select: "title"
+        },
+        {
+            path: "student",
+            select: "name"
+        }
+    ]);
+
+    // Return data
+    return doubt;
 };

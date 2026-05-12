@@ -4,7 +4,7 @@ import authMiddleware from "../../middlewares/auth.middleware.js"
 import roleMiddleware from "../../middlewares/role.middleware.js"
 import { createDoubtValidation, createReplyValidation } from "./doubt.validation.js"
 import validate from "../../middlewares/validation.result.middleware.js"
-import { createDoubt, getLessonDoubts, getMyDoubts, getCourseDoubts, getDoubtDetails, replyToDoubt } from "./doubt.controller.js"
+import { createDoubt, getLessonDoubts, getMyDoubts, getCourseDoubts, getDoubtDetails, replyToDoubt, markDoubtAnswered } from "./doubt.controller.js"
 import { ROLES } from "../../constants/index.js"
 
 
@@ -41,6 +41,12 @@ doubtRoute.post("/doubts/:id/replies",
     createReplyValidation,
     validate,
     replyToDoubt
+);
+
+doubtRoute.put("/doubts/:id/mark-answered",
+    authMiddleware,
+    roleMiddleware(ROLES.ADMIN, ROLES.INSTRUCTOR),
+    markDoubtAnswered
 );
 
 

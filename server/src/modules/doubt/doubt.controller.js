@@ -1,5 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createDoubtService, getLessonDoubtsService, getMyDoubtsService, getCourseDoubtsService, getDoubtDetailsService, replyToDoubtService } from "./doubt.service.js"
+import { createDoubtService, getLessonDoubtsService, getMyDoubtsService, getCourseDoubtsService, getDoubtDetailsService, replyToDoubtService, markDoubtAnsweredService } from "./doubt.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 
@@ -101,4 +101,21 @@ export const replyToDoubt = asyncHandler(async (req, res) => {
     return res
         .status(HTTP_STATUS.CREATED)
         .json(new ApiResponse(MESSAGES.DOUBT.REPLY_ADDED, reply));
+});
+
+export const markDoubtAnswered = asyncHandler(async (req, res) => {
+
+    // Get doubt id from request
+    const doubtId = req.params.id;
+
+    // Get user from request
+    const user = req.user;
+
+    // Mark doubt as answered
+    const doubt = await markDoubtAnsweredService(doubtId, user);
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .json(new ApiResponse(MESSAGES.DOUBT.MARKED_AS_ANSWERED, doubt));
 });
