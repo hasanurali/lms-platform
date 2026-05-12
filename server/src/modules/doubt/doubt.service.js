@@ -291,3 +291,48 @@ export const markDoubtAnsweredService = async (doubtId, user) => {
     // Return data
     return doubt;
 };
+
+export const closeDoubtService = async (doubtId, userId) => {
+
+    // Check valid id
+    validateObjectId(doubtId);
+
+    // Check doubt exists
+    const doubt = await doubtModel.findById(doubtId);
+    if (!doubt) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.DOUBT.NOT_FOUND);
+    };
+
+    // Check doubt is close
+    if (doubt.status === DOUBT_STATUS.CLOSED) {
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.DOUBT.ALREADY_CLOSED);
+    };
+
+    // Check valid authorization
+    if (doubt.student.toString() !== userId.toString()) {
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.DOUBT.ONLY_OWNER_CAN_CLOSE);
+    };
+
+    // Close the doubt
+    doubt.status = DOUBT_STATUS.CLOSED;
+    await doubt.save();
+
+    // Populate doubt
+    await doubt.populate([
+        {
+            path: "course",
+            select: "title"
+        },
+        {
+            path: "lesson",
+            select: "title"
+        },
+        {
+            path: "student",
+            select: "name"
+        }
+    ]);
+
+    // Return data
+    return doubt;
+};
