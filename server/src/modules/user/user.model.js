@@ -97,8 +97,12 @@ userSchema.methods.toJSON = function () {
     const obj = this.toObject();
     delete obj.password;
     delete obj.refreshToken;
-    delete obj.profilePicture.publicId;
-    delete obj.profilePicture.hash;
+
+    if (obj.profilePicture) {
+        delete obj.profilePicture.publicId;
+        delete obj.profilePicture.hash;
+    };
+    
     return obj;
 };
 

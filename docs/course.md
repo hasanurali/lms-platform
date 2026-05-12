@@ -516,7 +516,7 @@ id: string (required) - Course ID
 
 **Authorization:** INSTRUCTOR or ADMIN role (must be course owner)
 
-**Description:** Permanently deletes a course and all of its associated data, including modules, lessons and their videos from Cloudinary, enrollments, progress records, and the course thumbnail from Cloudinary.
+**Description:** Permanently deletes a course and all of its associated data, including modules, lessons and their videos from Cloudinary, enrollments, progress records, doubts, replies, and the course thumbnail from Cloudinary.
 
 **URL Parameters:**
 ```

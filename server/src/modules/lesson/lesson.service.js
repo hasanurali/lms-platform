@@ -1,6 +1,8 @@
 import lessonModel from "./lesson.model.js"
 import moduleModel from "../module/module.model.js";
 import enrollmentModel from "../enrollment/enrollment.model.js"
+import doubtModel from "../doubt/doubt.model.js";
+import replyModel from "../doubt/reply.model.js";
 import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES, ROLES, CLOUDINARY } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
@@ -189,6 +191,20 @@ export const deleteLessonService = async (lessonId, instructorId) => {
 
     // Delete lesson video from cloudinary
     await deleteFromCloudinary(lesson.video.publicId, CLOUDINARY.TYPE.VIDEO)
+
+
+    // Get all doubt ids of this lesson
+    const doubtIds = await doubtModel.distinct("_id", { lesson: lessonId });
+
+    // Delete all replies of those doubts
+    await replyModel.deleteMany({
+        doubt: { $in: doubtIds }
+    });
+
+    // Delete all doubts
+    await doubtModel.deleteMany({
+        lesson: lessonId
+    });
 
     // Delete lesson
     await lessonModel.deleteOne({ _id: lessonId });
