@@ -290,7 +290,7 @@ id: string (required) - Lesson ID
 
 **Authorization:** INSTRUCTOR or ADMIN role (must own the course this lesson belongs to)
 
-**Description:** Permanently deletes a lesson and its video from Cloudinary.
+**Description:** Permanently deletes a lesson, its video from Cloudinary, and all associated doubts and replies.
 
 **URL Parameters:**
 ```
