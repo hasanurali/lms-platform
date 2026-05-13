@@ -8,16 +8,20 @@ const errorHandler = (err, req, res, next) => {
     if (err.name === "CastError") {
         message = "Invalid ID";
         statusCode = 400;
+        err.isOperational = true;
     }
 
     if (err.code === 11000) {
-        message = "Duplicate field value";
+        const field = Object.keys(err.keyValue)[0];
+        message = `${field} already exists`;
         statusCode = 409;
+        err.isOperational = true;
     }
 
     if (err.name === "JsonWebTokenError") {
         message = "Invalid token";
         statusCode = 401;
+        err.isOperational = true;
     }
 
     if (process.env.NODE_ENV === "production" && !err.isOperational) {

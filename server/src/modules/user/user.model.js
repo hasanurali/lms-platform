@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { config } from '../../config/index.js'
 import { ROLES } from '../../constants/index.js'
+import crypto from "crypto"
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -76,14 +77,20 @@ userSchema.methods.generateAccessToken = function () {
     return token;
 };
 
+// Hash token
+userSchema.methods.hashToken = function (token) {
+    return crypto.createHash("sha256").update(token).digest("hex");
+};
+
 // Set hashed refresh token in db
-userSchema.methods.setRefreshToken = async function (token) {
-    this.refreshToken = await bcrypt.hash(token, config.bcryptRounds)
+userSchema.methods.setRefreshToken = function (token) {
+    this.refreshToken = crypto.createHash("sha256").update(token).digest("hex");
 };
 
 // Compare hashed refresh token
-userSchema.methods.compareRefreshToken = async function (token) {
-    return await bcrypt.compare(token, this.refreshToken)
+userSchema.methods.compareRefreshToken = function (token) {
+    const hashed = crypto.createHash("sha256").update(token).digest("hex");
+    return this.refreshToken === hashed;
 };
 
 // Compare hashed password
@@ -102,7 +109,7 @@ userSchema.methods.toJSON = function () {
         delete obj.profilePicture.publicId;
         delete obj.profilePicture.hash;
     };
-    
+
     return obj;
 };
 
