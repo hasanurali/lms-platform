@@ -5,19 +5,29 @@ import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 
 export const me = asyncHandler(async (req, res) => {
 
-    // Get user from req
+    // Get user from request
     const user = req.user;
 
     // Send response
     return res
         .status(HTTP_STATUS.OK)
-        .json(new ApiResponse(MESSAGES.USER.FETCHED, user));
+        .json(new ApiResponse(MESSAGES.USER.FETCHED, {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            bio: user.bio,
+            profilePicture: user.profilePicture?.url,
+            role: user.role,
+        }));
 });
 
 export const getUsers = asyncHandler(async (req, res) => {
 
+    // Get page and limit from request
+    const { page, limit } = req.cleanQuery;
+
     // Get users
-    const users = await getUsersService();
+    const users = await getUsersService(page, limit);
 
     // Send response
     return res
@@ -47,8 +57,8 @@ export const updateProfile = asyncHandler(async (req, res) => {
     // Get image data from request by multer
     const imageFile = req.file;
 
-    // Get current user id from request
-    const userId = req.user._id;
+    // Get current user from request
+    const user = req.user;
 
     // Check is valid data
     const data = {};
@@ -57,7 +67,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
     if (bio) data.bio = bio;
 
     // Get updated user
-    const updatedUser = await updateProfileService(userId, data);
+    const updatedUser = await updateProfileService(user, data);
 
     // Send response
     return res
