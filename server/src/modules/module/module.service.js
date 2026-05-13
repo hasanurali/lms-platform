@@ -12,8 +12,13 @@ export const createModuleService = async (title, instructorId, courseId) => {
     // Check valid id
     validateObjectId(courseId);
 
-    // Fetch course by id
-    const course = await courseModel.findById(courseId);
+    // Parallelize db calls for find course instructor and last module
+    const [course, lastModule] = await Promise.all([
+        courseModel.findById(courseId).select("instructor").lean(),
+        moduleModel.findOne({ course: courseId }).sort({ order: -1 }).select("order").lean()
+    ]);
+
+    // Check course exists
     if (!course) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
     };
@@ -22,9 +27,6 @@ export const createModuleService = async (title, instructorId, courseId) => {
     if (instructorId.toString() !== course.instructor.toString()) {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.MODULE.UNAUTHORIZED);
     };
-
-    // Check module order
-    const lastModule = await moduleModel.findOne({ course: courseId }).sort({ order: -1 });
 
     // Set module order
     const order = lastModule ? lastModule.order + 1 : 1;
@@ -37,7 +39,12 @@ export const createModuleService = async (title, instructorId, courseId) => {
     });
 
     // Return data
-    return module;
+    return {
+        _id: module._id,
+        title: module.title,
+        course: module.course,
+        order: module.order
+    };
 };
 
 export const getModulesService = async (courseId) => {
@@ -45,14 +52,16 @@ export const getModulesService = async (courseId) => {
     // Check valid id
     validateObjectId(courseId);
 
+    // Parallelize db call for check course and find module
+    const [course, modules] = await Promise.all([
+        courseModel.exists({ _id: courseId }),
+        moduleModel.find({ course: courseId }).sort({ order: 1 }).select("_id title course order").lean()
+    ]);
+
     // Check course exist by id
-    const isCourse = await courseModel.exists({ _id: courseId });
-    if (!isCourse) {
+    if (!course) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
     };
-
-    // Fetch modules
-    const modules = await moduleModel.find({ course: courseId }).sort({ order: 1 });
 
     // Return data
     return modules;
@@ -64,19 +73,21 @@ export const updateModuleService = async (title, moduleId, instructorId) => {
     validateObjectId(moduleId);
 
     // Check module exist by id
-    const isModule = await moduleModel.findById(moduleId);
-    if (!isModule) {
+    const module = await moduleModel.findById(moduleId).select("course").lean();
+    if (!module) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.MODULE.NOT_FOUND);
     };
 
     // Check instructor owned this module
-    const course = await courseModel.findOne({ _id: isModule.course, instructor: instructorId })
+    const course = await courseModel.exists({ _id: module.course, instructor: instructorId })
     if (!course) {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.MODULE.UNAUTHORIZED)
     }
 
     // Update module
-    const updatedModule = await moduleModel.findByIdAndUpdate(moduleId, { title }, { returnDocument: "after" });
+    const updatedModule = await moduleModel.findByIdAndUpdate(moduleId, { title }, { returnDocument: "after" })
+        .select("_id title course order")
+        .lean();
 
     // Return data
     return updatedModule;
@@ -88,31 +99,24 @@ export const deleteModuleService = async (moduleId, instructorId) => {
     validateObjectId(moduleId);
 
     // Check module exist by id
-    const isModule = await moduleModel.findById(moduleId);
-    if (!isModule) {
+    const module = await moduleModel.findById(moduleId).select("course").lean();
+    if (!module) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.MODULE.NOT_FOUND);
     };
 
     // Check instructor owned this module
-    const course = await courseModel.findOne({ _id: isModule.course, instructor: instructorId })
+    const course = await courseModel.exists({ _id: module.course, instructor: instructorId })
     if (!course) {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.MODULE.UNAUTHORIZED)
     };
 
     // Get all lessons of this module
-    const lessons = await lessonModel.find({ module: moduleId }).select("video.publicId -_id");
+    const lessons = await lessonModel.find({ module: moduleId }).select("video -_id").lean();
 
-    // Delete all lesson videos from cloudinary
-    if (lessons.length > 0) {
-        const deletePromises = lessons.map(({ video }) =>
-            deleteFromCloudinary(video.publicId, CLOUDINARY.TYPE.VIDEO)
-        );
-        await Promise.all(deletePromises);
-    };
-
-    // Delete lessons of this module
-    await lessonModel.deleteMany({ module: moduleId });
-
-    // Delete module
-    await moduleModel.deleteOne({ _id: moduleId });
+    // parallelize independent deletes
+    await Promise.all([
+        lessonModel.deleteMany({ module: moduleId }),
+        moduleModel.deleteOne({ _id: moduleId }),
+        ...lessons.map(({ video }) => deleteFromCloudinary(video.publicId, CLOUDINARY.TYPE.VIDEO))
+    ]);
 };
