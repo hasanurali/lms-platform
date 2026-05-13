@@ -1,3 +1,4 @@
+import mongoose from "mongoose"
 import courseModel from "./course.model.js"
 import moduleModel from "../module/module.model.js"
 import lessonModel from "../lesson/lesson.model.js"
@@ -15,8 +16,11 @@ import crypto from "crypto";
 // Common population for instructor
 const commonPopulate = {
     path: "instructor",
-    select: "name email profilePicture.url"
+    select: "name email profilePicture"
 };
+
+// Common course selection fields
+const commonCourseSelection = "_id title description thumbnail instructor price isPublished"
 
 export const createCourseService = async (data) => {
 
@@ -38,13 +42,27 @@ export const createCourseService = async (data) => {
     delete data.thumbnailFile;
 
     // Create course
-    const course = await courseModel.create(data);
+    const course = new courseModel(data);
+    await course.save();
 
     // Get populated instructor data with course
-    const populatedData = await courseModel.findById(course._id).populate(commonPopulate)
+    const populatedData = await course.populate(commonPopulate);
 
     // Return data
-    return populatedData;
+    return {
+        _id: populatedData._id,
+        title: populatedData.title,
+        description: populatedData.description,
+        instructor: {
+            _id: populatedData.instructor._id,
+            name: populatedData.instructor.name,
+            email: populatedData.instructor.email,
+            profilePicture: populatedData.instructor.profilePicture?.url,
+        },
+        price: populatedData.price,
+        thumbnail: populatedData.thumbnail?.url,
+        isPublished: populatedData.isPublished,
+    };
 };
 
 export const getCoursesService = async (page = 1, limit = 10) => {
@@ -57,14 +75,33 @@ export const getCoursesService = async (page = 1, limit = 10) => {
     const skip = (safePage - 1) * safeLimit;
 
     // Fetch courses
-    const courses = await courseModel.find({ isPublished: true })
-        .skip(skip)
-        .limit(safeLimit)
-        .sort({ createdAt: -1 })
-        .populate(commonPopulate);
+    const result = await courseModel.aggregate([
+        { $match: { isPublished: true } },
+        {
+            $facet: {
+                data: [
+                    { $sort: { createdAt: -1 } },
+                    { $skip: skip },
+                    { $limit: safeLimit },
+                    {
+                        $project: {
+                            _id: 1,
+                            title: 1,
+                            description: 1,
+                            thumbnail: "$thumbnail.url",
+                            instructor: 1,
+                            price: 1,
+                            isPublished: 1
+                        }
+                    }
+                ],
+                total: [{ $count: "count" }]
+            }
+        }
+    ]);
 
-    // Total count for pagination
-    const total = await courseModel.countDocuments({ isPublished: true });
+    const courses = result[0].data;
+    const total = result[0].total[0]?.count || 0;
 
     // Return data
     return {
@@ -80,15 +117,56 @@ export const getCoursesService = async (page = 1, limit = 10) => {
     };
 };
 
-export const getMyCoursesService = async (instructorId) => {
+export const getMyCoursesService = async (instructorId, page = 1, limit = 10) => {
 
-    // Get courses created by the authenticated instructor
-    const courses = await courseModel.find({ instructor: instructorId })
-        .populate(commonPopulate)
-        .sort({ createdAt: -1 });
+    // Calculate page and limit
+    const safePage = Math.max(parseInt(page) || 1, 1);
+    const safeLimit = Math.min(Math.max(parseInt(limit) || 10, 1), 50);
+
+    // Calculate skip
+    const skip = (safePage - 1) * safeLimit;
+
+    // Fetch courses
+    const result = await courseModel.aggregate([
+        { $match: { instructor: instructorId } },
+        {
+            $facet: {
+                data: [
+                    { $sort: { createdAt: -1 } },
+                    { $skip: skip },
+                    { $limit: safeLimit },
+                    {
+                        $project: {
+                            _id: 1,
+                            title: 1,
+                            description: 1,
+                            thumbnail: "$thumbnail.url",
+                            instructor: 1,
+                            price: 1,
+                            isPublished: 1
+                        }
+                    }
+                ],
+                total: [{ $count: "count" }]
+            }
+        }
+    ]);
+
+    const courses = result[0].data;
+    const total = result[0].total[0]?.count || 0;
 
     // Return data
-    return courses;
+    return {
+        data: courses,
+        pagination: {
+            total,
+            page: safePage,
+            limit: safeLimit,
+            pages: Math.ceil(total / safeLimit),
+            hasNext: safePage * safeLimit < total,
+            hasPrev: safePage > 1,
+        }
+    };
 };
 
 export const getFullCourseService = async (courseId, userId) => {
@@ -96,18 +174,36 @@ export const getFullCourseService = async (courseId, userId) => {
     // Validate ID
     validateObjectId(courseId);
 
-    // Fetch course
-    const course = await courseModel.findById(courseId).populate(commonPopulate);
+    // parallelize independent calls
+    const [course, modules, progress] = await Promise.all([
+        courseModel.findById(courseId).populate(commonPopulate).select(commonCourseSelection).lean(),
+        moduleModel.find({ course: courseId }).sort({ order: 1 }).select("_id course title").lean(),
+        userId ? progressModel.findOne({ user: userId, course: courseId }).lean() : Promise.resolve(null)
+    ]);
+
+    // Check course exists
     if (!course) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
     }
 
-    // Get modules
-    const modules = await moduleModel.find({ course: courseId }).sort({ order: 1 }).lean();
-    const moduleIds = modules.map(m => m._id);
+    // Convert modules to module ids
+    const moduleIds = modules.map(m => new mongoose.Types.ObjectId(m._id));
 
     // Get lessons
-    const lessons = await lessonModel.find({ module: { $in: moduleIds } }).select("-video.publicId -video.hash").sort({ order: 1 }).lean();
+    const lessons = await lessonModel.aggregate([
+        { $match: { module: { $in: moduleIds } } },
+        { $sort: { order: 1 } },
+        {
+            $project: {
+                _id: 1,
+                module: 1,
+                title: 1,
+                content: 1,
+                video: "$video.url",
+                order: 1
+            }
+        }
+    ]);
 
     // Group lessons by module
     const lessonMap = new Map();
@@ -125,12 +221,6 @@ export const getFullCourseService = async (courseId, userId) => {
         ...module,
         lessons: lessonMap.get(module._id.toString()) || []
     }));
-
-    // Get progress (optional if not logged in)
-    let progress = null;
-    if (userId) {
-        progress = await progressModel.findOne({ user: userId, course: courseId });
-    };
 
     // Add completion flag to lessons
     if (progress) {
@@ -152,7 +242,16 @@ export const getFullCourseService = async (courseId, userId) => {
 
     // Return data
     return {
-        course,
+        course: {
+            ...course,
+            thumbnail: course.thumbnail?.url,
+            instructor: {
+                _id: course.instructor._id,
+                name: course.instructor.name,
+                email: course.instructor.email,
+                profilePicture: course.instructor.profilePicture?.url,
+            }
+        },
         modules: modulesWithLessons,
         progress: {
             percentage: progressPercentage,
@@ -168,13 +267,26 @@ export const getCourseService = async (courseId) => {
     validateObjectId(courseId);
 
     // Fetch course by id
-    const course = await courseModel.findById(courseId).populate(commonPopulate);
+    const course = await courseModel.findById(courseId).populate(commonPopulate)
+        .select(commonCourseSelection)
+        .lean();
+
+    // Check course exists
     if (!course) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
     };
 
     // Return data
-    return course;
+    return {
+        ...course,
+        thumbnail: course.thumbnail?.url,
+        instructor: {
+            _id: course.instructor._id,
+            name: course.instructor.name,
+            email: course.instructor.email,
+            profilePicture: course.instructor.profilePicture?.url
+        }
+    }
 };
 
 export const updateCourseService = async (data, instructorId, courseId) => {
@@ -185,7 +297,7 @@ export const updateCourseService = async (data, instructorId, courseId) => {
     validateObjectId(courseId);
 
     // Fetch course by id
-    const course = await courseModel.findById(courseId);
+    const course = await courseModel.findById(courseId).select("instructor thumbnail").lean();
     if (!course) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
     };
@@ -198,33 +310,43 @@ export const updateCourseService = async (data, instructorId, courseId) => {
 
     if (thumbnailFile) {
 
-        const course = await courseModel.findById(courseId).select("thumbnail");
         const currentThumbnailHash = crypto.createHash("md5").update(thumbnailFile.buffer).digest("hex");
 
         // Check if same thumbnail
-        if (course.thumbnail.hash !== currentThumbnailHash) {
+        if (course.thumbnail?.hash !== currentThumbnailHash) {
 
-            // Delete thumbnail from cloudinary
-            await deleteFromCloudinary(course.thumbnail.publicId)
+            // Upload new thumbnail while deleting the old one
+            const [uploadResult] = await Promise.all([
+                uploadToCloudinary(thumbnailFile, CLOUDINARY.FOLDER.THUMBNAIL),
+                course.thumbnail?.publicId ? deleteFromCloudinary(course.thumbnail?.publicId) : Promise.resolve()
+            ]);
 
-            // Uplode thumbnail to cloudinary
-            const { url, public_id, hash } = await uploadToCloudinary(thumbnailFile, CLOUDINARY.FOLDER.THUMBNAIL);
             data.thumbnail = {
-                url,
-                publicId: public_id,
-                hash
-            }
+                url: uploadResult.url,
+                publicId: uploadResult.public_id,
+                hash: uploadResult.hash
+            };
         }
-
         delete data.thumbnailFile;
-    };
+    }
 
     // Update course
     const updatedCourse = await courseModel.findByIdAndUpdate(courseId, data, { returnDocument: "after" })
-        .populate(commonPopulate);
+        .populate(commonPopulate)
+        .select(commonCourseSelection)
+        .lean();
 
     // Return data
-    return updatedCourse;
+    return {
+        ...updatedCourse,
+        thumbnail: updatedCourse.thumbnail?.url,
+        instructor: {
+            _id: updatedCourse.instructor._id,
+            name: updatedCourse.instructor.name,
+            email: updatedCourse.instructor.email,
+            profilePicture: updatedCourse.instructor.profilePicture?.url
+        }
+    }
 };
 
 export const deleteCourseService = async (instructorId, courseId) => {
@@ -233,7 +355,7 @@ export const deleteCourseService = async (instructorId, courseId) => {
     validateObjectId(courseId);
 
     // Fetch course by id
-    const course = await courseModel.findById(courseId);
+    const course = await courseModel.findById(courseId).select("instructor thumbnail").lean();
     if (!course) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
     };
@@ -243,46 +365,25 @@ export const deleteCourseService = async (instructorId, courseId) => {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.COURSE.UNAUTHORIZED);
     };
 
-    // Delete progress and enrollment of this course
-    await progressModel.deleteMany({ course: courseId });
-    await enrollmentModel.deleteMany({ course: courseId });
-
-    // Get all module ids of this course
-    const moduleIds = await moduleModel.distinct("_id", { course: courseId });
+    // parallelize independent find
+    const [moduleIds, doubtIds] = await Promise.all([
+        moduleModel.distinct("_id", { course: courseId }),
+        doubtModel.distinct("_id", { course: courseId })
+    ]);
 
     // Get all lessons of those modules
-    const lessons = await lessonModel.find({ module: { $in: moduleIds } }).select("video.publicId -_id");
+    const lessons = await lessonModel.find({ module: { $in: moduleIds } }).select("video.publicId -_id").lean();
 
-    // Delete all lesson videos from cloudinary
-    if (lessons.length > 0) {
-        const deletePromises = lessons.map(({ video }) =>
-            deleteFromCloudinary(video.publicId, CLOUDINARY.TYPE.VIDEO)
-        );
-        await Promise.all(deletePromises);
-    };
-
-    // Delete lessons of those modules
-    await lessonModel.deleteMany({ module: { $in: moduleIds } });
-
-    // Delete all modules of this course
-    await moduleModel.deleteMany({ course: courseId })
-
-    // Delete thumbnail from cloudinary
-    await deleteFromCloudinary(course.thumbnail.publicId)
-
-    // Get all doubt ids of this course
-    const doubtIds = await doubtModel.distinct("_id", { course: courseId });
-
-    // Delete all replies of those doubts
-    await replyModel.deleteMany({
-        doubt: { $in: doubtIds }
-    });
-
-    // Delete all doubts
-    await doubtModel.deleteMany({
-        course: courseId
-    });
-
-    // Delete course
-    await courseModel.deleteOne({ _id: courseId });
+    // parallelize independent deletes
+    await Promise.all([
+        progressModel.deleteMany({ course: courseId }),
+        enrollmentModel.deleteMany({ course: courseId }),
+        lessonModel.deleteMany({ module: { $in: moduleIds } }),
+        moduleModel.deleteMany({ course: courseId }),
+        replyModel.deleteMany({ doubt: { $in: doubtIds } }),
+        doubtModel.deleteMany({ course: courseId }),
+        courseModel.deleteOne({ _id: courseId }),
+        deleteFromCloudinary(course.thumbnail.publicId),
+        ...lessons.map(({ video }) => deleteFromCloudinary(video.publicId, CLOUDINARY.TYPE.VIDEO))
+    ]);
 };
