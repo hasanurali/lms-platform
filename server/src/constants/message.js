@@ -53,7 +53,8 @@ const MESSAGES = Object.freeze({
         NOT_FOUND: "Lesson not found",
         UNAUTHORIZED: 'You are not allowed to modify this lesson',
         VIDEO_REQUIRED: "Video is required",
-        NOT_IN_COURSE: "This lesson does not belong to the specified course"
+        NOT_IN_COURSE: "This lesson does not belong to the specified course",
+        CORRUPTED: "Lesson data is corrupted"
     }),
 
     // Enrollment
