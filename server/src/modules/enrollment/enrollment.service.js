@@ -10,15 +10,19 @@ export const createEnrollmentService = async (courseId, userId) => {
     // Check valid id
     validateObjectId(courseId);
 
-    // Fetch course by id
-    const course = await courseModel.exists({ _id: courseId });
+    // parallelize fetch course and check enrollment
+    const [course, enroll] = await Promise.all([
+        courseModel.exists({ _id: courseId }),
+        enrollmentModel.exists({ user: userId, course: courseId })
+    ]);
+
+    // Check course exists
     if (!course) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
     };
 
     // Check user enrollment in this course
-    const isEnroll = await enrollmentModel.exists({ user: userId, course: courseId });
-    if (isEnroll) {
+    if (enroll) {
         throw new ApiError(HTTP_STATUS.CONFLICT, MESSAGES.ENROLLMENT.ALREADY_ENROLLED);
     };
 
@@ -26,17 +30,73 @@ export const createEnrollmentService = async (courseId, userId) => {
     let enrollCourse = await enrollmentModel.create({ user: userId, course: courseId });
 
     // Get populated course with enrollment
-    const populatedEnrollment = await enrollmentModel.findById(enrollCourse._id).populate("course")
+    const populatedEnrollment = await enrollmentModel.aggregate([
+        { $match: { _id: enrollment._id } },
+        {
+            $lookup: {
+                from: "courses",
+                localField: "course",
+                foreignField: "_id",
+                as: "course"
+            }
+        },
+        { $unwind: "$course" },
+        {
+            $project: {
+                _id: 1,
+                user: 1,
+                course: {
+                    _id: "$course._id",
+                    title: "$course.title",
+                    description: "$course.description",
+                    thumbnail: "$course.thumbnail.url",
+                    instructor: "$course.instructor",
+                    price: "$course.price",
+                    isPublished: "$course.isPublished"
+                }
+            }
+        }
+    ]);
 
     // Return data
-    return populatedEnrollment;
+    return populatedEnrollment[0];
 };
 
 export const getEnrollmentsService = async (userId) => {
 
     // Fetch user enrolled courses
-    let enrollCourses = await enrollmentModel.find({ user: userId }).populate("course");
+    let enrollCourses = await enrollmentModel.aggregate([
+        { $match: { user: userId } },
+        {
+            $lookup: {
+                from: "courses",
+                localField: "course",
+                foreignField: "_id",
+                as: "course"
+            }
+        },
+        {
+            $unwind: {
+                path: "$course",
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                user: 1,
+                course: {
+                    _id: "$course._id",
+                    title: "$course.title",
+                    description: "$course.description",
+                    thumbnail: "$course.thumbnail.url",
+                    instructor: "$course.instructor",
+                    price: "$course.price",
+                    isPublished: "$course.isPublished"
+                }
+            }
+        }
+    ])
 
-    // Return data
-    return enrollCourses;
+    return enrollCourses
 };
