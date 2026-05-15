@@ -93,6 +93,18 @@ const MESSAGES = Object.freeze({
         NOT_ENROLLED: "You must enroll in this course to ask a doubt",
         ONLY_OWNER_CAN_CLOSE: "Only the student who created this doubt can close it",
         ONLY_INSTRUCTOR_CAN_ANSWER: "Only the course instructor or admin can mark this doubt as answered"
+    }),
+
+    REVIEW: Object.freeze({
+        CREATED: "Review created successfully",
+        UPDATED: "Review updated successfully",
+        DELETED: "Review deleted successfully",
+        FETCHED_ALL: "Reviews fetched successfully",
+
+        NOT_FOUND: "Review not found",
+        ALREADY_EXISTS: "You have already reviewed this course",
+        NOT_ENROLLED: "You must be enrolled in this course to submit a review",
+        UNAUTHORIZED: "You are not authorized to modify this review"
     })
 
 });
