@@ -58,7 +58,7 @@ If both are present, the cookie takes priority.
 
 **Authentication:** Required (cookie `accessToken` or `Authorization: Bearer <token>`)
 
-**Authorization:** Any authenticated user
+**Authorization:** Any authenticated user enrolled in the course
 
 **Description:** Retrieves the authenticated user's progress for a specific course. The user must be enrolled in the course.
 
@@ -81,9 +81,7 @@ courseId: string (required) - Course ID
       "course": "ObjectId",
       "completedLessons": ["ObjectId", "ObjectId"],
       "lastAccessLesson": "ObjectId",
-      "completed": false,
-      "createdAt": "2026-05-03T10:30:00Z",
-      "updatedAt": "2026-05-03T12:00:00Z"
+      "completed": false
     },
     "progressPercentage": 40
   }
@@ -122,7 +120,7 @@ courseId: string (required) - Course ID
 
 **Authentication:** Required (cookie `accessToken` or `Authorization: Bearer <token>`)
 
-**Authorization:** Any authenticated user
+**Authorization:** Any authenticated user enrolled in the course
 
 **Description:** Marks a lesson as completed for the authenticated user within a course. The user must be enrolled in the course. If all lessons in the course are completed, the course is automatically marked as completed. Marking an already-completed lesson has no effect. If the course is already completed, the existing progress is returned immediately.
 
@@ -148,9 +146,7 @@ courseId: string (required) - Course ID
     "course": "ObjectId",
     "completedLessons": ["ObjectId", "ObjectId", "ObjectId"],
     "lastAccessLesson": "ObjectId",
-    "completed": true,
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-04T10:00:00Z"
+    "completed": true
   }
 }
 ```
@@ -164,9 +160,7 @@ courseId: string (required) - Course ID
     "course": "ObjectId",
     "completedLessons": ["ObjectId"],
     "lastAccessLesson": "ObjectId",
-    "completed": false,
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-04T09:30:00Z"
+    "completed": false
   }
 }
 ```
@@ -175,7 +169,8 @@ courseId: string (required) - Course ID
 
 | Status | Message | Reason |
 |--------|---------|--------|
-| `400 Bad Request` | `Validation failed` | `course` or `lesson` is not a valid MongoDB ObjectId, or lesson does not belong to this course |
+| `400 Bad Request` | `Validation failed` | `course` or `lesson` is not a valid MongoDB ObjectId |
+| `400 Bad Request` | `This lesson does not belong to the specified course` | `lesson` does not belong to the given `course` |
 | `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
 | `401 Unauthorized` | `Token expired` | Access token has expired |
 | `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
@@ -189,7 +184,7 @@ courseId: string (required) - Course ID
 
 **Authentication:** Required (cookie `accessToken` or `Authorization: Bearer <token>`)
 
-**Authorization:** Any authenticated user
+**Authorization:** Any authenticated user enrolled in the course
 
 **Description:** Updates the last accessed lesson for the authenticated user within a course. The user must be enrolled in the course. Creates a progress record if one does not exist yet. Does not affect completed lessons or completion status.
 
@@ -214,9 +209,7 @@ courseId: string (required) - Course ID
     "course": "ObjectId",
     "completedLessons": ["ObjectId"],
     "lastAccessLesson": "ObjectId",
-    "completed": false,
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-04T09:45:00Z"
+    "completed": false
   }
 }
 ```
@@ -225,7 +218,8 @@ courseId: string (required) - Course ID
 
 | Status | Message | Reason |
 |--------|---------|--------|
-| `400 Bad Request` | `Validation failed` | `course` or `lesson` is not a valid MongoDB ObjectId, or lesson does not belong to this course |
+| `400 Bad Request` | `Validation failed` | `course` or `lesson` is not a valid MongoDB ObjectId |
+| `400 Bad Request` | `This lesson does not belong to the specified course` | `lesson` does not belong to the given `course` |
 | `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
 | `401 Unauthorized` | `Token expired` | Access token has expired |
 | `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |

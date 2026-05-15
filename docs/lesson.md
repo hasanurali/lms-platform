@@ -43,9 +43,9 @@ If both are present, the cookie takes priority.
 - **Lesson order** is assigned automatically. The first lesson in a module gets `order: 1`; each subsequent lesson increments by 1. Order cannot be set or changed via the API.
 - Lessons are always returned sorted by `order` ascending.
 - `content` is optional and defaults to `null` if not provided.
-- `video.publicId` and `video.hash` are never returned — only `video.url` is exposed.
+- `video` is returned as a plain string URL in all responses.
 - Videos are uploaded to Cloudinary. If an update provides the same video file (matched by MD5 hash), the existing video is kept and no upload occurs.
-- Deleting a lesson also deletes its video from Cloudinary.
+- Deleting a lesson also deletes its video from Cloudinary and all associated doubts and replies.
 
 ---
 
@@ -84,13 +84,9 @@ id: string (required) - Module ID
     "_id": "ObjectId",
     "module": "ObjectId",
     "title": "What is JavaScript?",
-    "video": {
-      "url": "https://res.cloudinary.com/example/intro.mp4"
-    },
+    "video": "https://res.cloudinary.com/example/intro.mp4",
     "content": "In this lesson we cover the basics of JavaScript.",
-    "order": 1,
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-03T10:30:00Z"
+    "order": 1
   }
 }
 ```
@@ -140,25 +136,17 @@ id: string (required) - Module ID
       "_id": "ObjectId",
       "module": "ObjectId",
       "title": "What is JavaScript?",
-      "video": {
-        "url": "https://res.cloudinary.com/example/intro.mp4"
-      },
+      "video": "https://res.cloudinary.com/example/intro.mp4",
       "content": "In this lesson we cover the basics of JavaScript.",
-      "order": 1,
-      "createdAt": "2026-05-03T10:30:00Z",
-      "updatedAt": "2026-05-03T10:30:00Z"
+      "order": 1
     },
     {
       "_id": "ObjectId",
       "module": "ObjectId",
       "title": "Variables and Data Types",
-      "video": {
-        "url": "https://res.cloudinary.com/example/variables.mp4"
-      },
+      "video": "https://res.cloudinary.com/example/variables.mp4",
       "content": null,
-      "order": 2,
-      "createdAt": "2026-05-03T11:00:00Z",
-      "updatedAt": "2026-05-03T11:00:00Z"
+      "order": 2
     }
   ]
 }
@@ -180,7 +168,7 @@ id: string (required) - Module ID
 
 **Authorization:** ADMIN, the course instructor, or any user enrolled in the course this lesson belongs to
 
-**Description:** Retrieves a single lesson by its ID. Access is granted to admins and the course instructor without enrollment check. All other authenticated users must be enrolled in the course.
+**Description:** Retrieves a single lesson by its ID. Access is granted to admins and the course instructor without an enrollment check. All other authenticated users must be enrolled in the course.
 
 **URL Parameters:**
 ```
@@ -198,13 +186,9 @@ id: string (required) - Lesson ID
     "_id": "ObjectId",
     "module": "ObjectId",
     "title": "What is JavaScript?",
-    "video": {
-      "url": "https://res.cloudinary.com/example/intro.mp4"
-    },
+    "video": "https://res.cloudinary.com/example/intro.mp4",
     "content": "In this lesson we cover the basics of JavaScript.",
-    "order": 1,
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-03T10:30:00Z"
+    "order": 1
   }
 }
 ```
@@ -219,6 +203,7 @@ id: string (required) - Lesson ID
 | `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
 | `403 Forbidden` | `You must enroll in this course to access this content` | Authenticated user is not an admin, not the course instructor, and not enrolled in the course |
 | `404 Not Found` | `Lesson not found` | No lesson exists with the given `id` |
+| `500 Internal Server Error` | `Lesson data is corrupted` | Lesson exists but its module or course reference is broken |
 
 ---
 
@@ -255,13 +240,9 @@ id: string (required) - Lesson ID
     "_id": "ObjectId",
     "module": "ObjectId",
     "title": "Updated Lesson Title",
-    "video": {
-      "url": "https://res.cloudinary.com/example/updated.mp4"
-    },
+    "video": "https://res.cloudinary.com/example/updated.mp4",
     "content": "Updated content here.",
-    "order": 1,
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-03T12:00:00Z"
+    "order": 1
   }
 }
 ```

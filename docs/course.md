@@ -28,7 +28,7 @@ Protected endpoints require a valid access token, accepted in either of two ways
 | Cookie | `accessToken=<token>` (set automatically on login) |
 | Header | `Authorization: Bearer <token>` |
 
-If both are present, the cookie takes priority. The token is verified and can produce the following errors:
+If both are present, the cookie takes priority.
 
 | Status | Message | Reason |
 |--------|---------|--------|
@@ -40,7 +40,8 @@ If both are present, the cookie takes priority. The token is verified and can pr
 
 ## Notes
 
-- `thumbnail.publicId` and `thumbnail.hash` are never returned in any response — they are stripped by the model's `toJSON()` method. Only `thumbnail.url` is exposed.
+- `thumbnail` is returned as a plain string URL in all responses.
+- `instructor.profilePicture` is returned as a plain string URL in all responses.
 - `GET /courses/` only returns published courses.
 
 ---
@@ -80,17 +81,11 @@ If both are present, the cookie takes priority. The token is verified and can pr
       "_id": "ObjectId",
       "name": "John Doe",
       "email": "john@example.com",
-      "profilePicture": {
-        "url": "https://example.com/avatar.jpg"
-      }
+      "profilePicture": "https://example.com/avatar.jpg"
     },
     "price": 49.99,
-    "thumbnail": {
-      "url": "https://res.cloudinary.com/example/thumbnail.jpg"
-    },
-    "isPublished": false,
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-03T10:30:00Z"
+    "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
+    "isPublished": false
   }
 }
 ```
@@ -139,21 +134,10 @@ limit: number (optional, default: 10, min: 1, max: 50)
         "_id": "ObjectId",
         "title": "Introduction to JavaScript",
         "description": "Learn JavaScript from basics to advanced",
-        "instructor": {
-          "_id": "ObjectId",
-          "name": "John Doe",
-          "email": "john@example.com",
-          "profilePicture": {
-            "url": "https://example.com/avatar.jpg"
-          }
-        },
+        "instructor": "ObjectId",
         "price": 49.99,
-        "thumbnail": {
-          "url": "https://res.cloudinary.com/example/thumbnail.jpg"
-        },
-        "isPublished": true,
-        "createdAt": "2026-05-03T10:30:00Z",
-        "updatedAt": "2026-05-03T10:30:00Z"
+        "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
+        "isPublished": true
       }
     ],
     "pagination": {
@@ -179,7 +163,13 @@ limit: number (optional, default: 10, min: 1, max: 50)
 
 **Authorization:** INSTRUCTOR or ADMIN role
 
-**Description:** Retrieves all courses created by the authenticated instructor or admin, including unpublished ones. Results are sorted by most recently created.
+**Description:** Retrieves all courses created by the authenticated instructor or admin, including unpublished ones. Supports pagination. Results are sorted by most recently created.
+
+**Query Parameters:**
+```
+page:  number (optional, default: 1, min: 1)
+limit: number (optional, default: 10, min: 1, max: 50)
+```
 
 **Success Response:**
 - **Status:** `200 OK`
@@ -188,28 +178,27 @@ limit: number (optional, default: 10, min: 1, max: 50)
 ```json
 {
   "message": "Courses fetched successfully",
-  "data": [
-    {
-      "_id": "ObjectId",
-      "title": "Introduction to JavaScript",
-      "description": "Learn JavaScript from basics to advanced",
-      "instructor": {
+  "data": {
+    "data": [
+      {
         "_id": "ObjectId",
-        "name": "John Doe",
-        "email": "john@example.com",
-        "profilePicture": {
-          "url": "https://example.com/avatar.jpg"
-        }
-      },
-      "price": 49.99,
-      "thumbnail": {
-        "url": "https://res.cloudinary.com/example/thumbnail.jpg"
-      },
-      "isPublished": false,
-      "createdAt": "2026-05-03T10:30:00Z",
-      "updatedAt": "2026-05-03T10:30:00Z"
+        "title": "Introduction to JavaScript",
+        "description": "Learn JavaScript from basics to advanced",
+        "instructor": "ObjectId",
+        "price": 49.99,
+        "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
+        "isPublished": false
+      }
+    ],
+    "pagination": {
+      "total": 5,
+      "page": 1,
+      "limit": 10,
+      "pages": 1,
+      "hasNext": false,
+      "hasPrev": false
     }
-  ]
+  }
 }
 ```
 
@@ -254,17 +243,11 @@ id: string (required) - Course ID
         "_id": "ObjectId",
         "name": "John Doe",
         "email": "john@example.com",
-        "profilePicture": {
-          "url": "https://example.com/avatar.jpg"
-        }
+        "profilePicture": "https://example.com/avatar.jpg"
       },
       "price": 49.99,
-      "thumbnail": {
-        "url": "https://res.cloudinary.com/example/thumbnail.jpg"
-      },
-      "isPublished": true,
-      "createdAt": "2026-05-03T10:30:00Z",
-      "updatedAt": "2026-05-03T10:30:00Z"
+      "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
+      "isPublished": true
     },
     "modules": [
       {
@@ -277,9 +260,7 @@ id: string (required) - Course ID
             "_id": "ObjectId",
             "module": "ObjectId",
             "title": "What is JavaScript?",
-            "video": {
-              "url": "https://res.cloudinary.com/example/intro.mp4"
-            },
+            "video": "https://res.cloudinary.com/example/intro.mp4",
             "content": "Introduction to JavaScript.",
             "order": 1,
             "completed": true
@@ -308,17 +289,11 @@ id: string (required) - Course ID
         "_id": "ObjectId",
         "name": "John Doe",
         "email": "john@example.com",
-        "profilePicture": {
-          "url": "https://example.com/avatar.jpg"
-        }
+        "profilePicture": "https://example.com/avatar.jpg"
       },
       "price": 49.99,
-      "thumbnail": {
-        "url": "https://res.cloudinary.com/example/thumbnail.jpg"
-      },
-      "isPublished": true,
-      "createdAt": "2026-05-03T10:30:00Z",
-      "updatedAt": "2026-05-03T10:30:00Z"
+      "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
+      "isPublished": true
     },
     "modules": [
       {
@@ -331,9 +306,7 @@ id: string (required) - Course ID
             "_id": "ObjectId",
             "module": "ObjectId",
             "title": "What is JavaScript?",
-            "video": {
-              "url": "https://res.cloudinary.com/example/intro.mp4"
-            },
+            "video": "https://res.cloudinary.com/example/intro.mp4",
             "content": "Introduction to JavaScript.",
             "order": 1
           }
@@ -385,17 +358,11 @@ id: string (required) - Course ID
       "_id": "ObjectId",
       "name": "John Doe",
       "email": "john@example.com",
-      "profilePicture": {
-        "url": "https://example.com/avatar.jpg"
-      }
+      "profilePicture": "https://example.com/avatar.jpg"
     },
     "price": 49.99,
-    "thumbnail": {
-      "url": "https://res.cloudinary.com/example/thumbnail.jpg"
-    },
-    "isPublished": true,
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-03T10:30:00Z"
+    "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
+    "isPublished": true
   }
 }
 ```
@@ -449,17 +416,11 @@ id: string (required) - Course ID
       "_id": "ObjectId",
       "name": "John Doe",
       "email": "john@example.com",
-      "profilePicture": {
-        "url": "https://example.com/avatar.jpg"
-      }
+      "profilePicture": "https://example.com/avatar.jpg"
     },
     "price": 49.99,
-    "thumbnail": {
-      "url": "https://res.cloudinary.com/example/thumbnail.jpg"
-    },
-    "isPublished": true,
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-03T12:00:00Z"
+    "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
+    "isPublished": true
   }
 }
 ```
@@ -475,17 +436,11 @@ id: string (required) - Course ID
       "_id": "ObjectId",
       "name": "John Doe",
       "email": "john@example.com",
-      "profilePicture": {
-        "url": "https://example.com/avatar.jpg"
-      }
+      "profilePicture": "https://example.com/avatar.jpg"
     },
     "price": 49.99,
-    "thumbnail": {
-      "url": "https://res.cloudinary.com/example/thumbnail.jpg"
-    },
-    "isPublished": false,
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-03T12:00:00Z"
+    "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
+    "isPublished": false
   }
 }
 ```

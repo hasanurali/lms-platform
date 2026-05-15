@@ -42,7 +42,7 @@ If both are present, the cookie takes priority.
 
 - Any authenticated user can enroll in a course regardless of role.
 - A user can only enroll in the same course once.
-- Enrolled courses are returned with full course details populated.
+- `course.thumbnail` is returned as a plain string URL.
 - `GET /enrollments/my` always returns an array; empty array if the user has no enrollments.
 
 ---
@@ -79,15 +79,11 @@ id: string (required) - Course ID
       "_id": "ObjectId",
       "title": "Introduction to JavaScript",
       "description": "Learn JavaScript from basics to advanced",
+      "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
       "instructor": "ObjectId",
       "price": 49.99,
-      "thumbnail": "https://example.com/thumbnail.jpg",
-      "isPublished": true,
-      "createdAt": "2026-05-03T10:30:00Z",
-      "updatedAt": "2026-05-03T10:30:00Z"
-    },
-    "createdAt": "2026-05-04T09:00:00Z",
-    "updatedAt": "2026-05-04T09:00:00Z"
+      "isPublished": true
+    }
   }
 }
 ```
@@ -131,15 +127,11 @@ id: string (required) - Course ID
         "_id": "ObjectId",
         "title": "Introduction to JavaScript",
         "description": "Learn JavaScript from basics to advanced",
+        "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
         "instructor": "ObjectId",
         "price": 49.99,
-        "thumbnail": "https://example.com/thumbnail.jpg",
-        "isPublished": true,
-        "createdAt": "2026-05-03T10:30:00Z",
-        "updatedAt": "2026-05-03T10:30:00Z"
-      },
-      "createdAt": "2026-05-04T09:00:00Z",
-      "updatedAt": "2026-05-04T09:00:00Z"
+        "isPublished": true
+      }
     }
   ]
 }

@@ -53,7 +53,7 @@ If both are present, the cookie takes priority.
 - `description` in `POST /doubts` is stored as the first reply, not on the doubt document itself. The response returns both the created doubt and the first reply.
 - Doubts are sorted by `lastReplyAt` descending — most recently active first.
 - Replies are sorted by `createdAt` ascending — oldest first.
-- `profilePicture` on reply authors is returned as `{ "url": "..." }` — `publicId` and `hash` are stripped by `toJSON()`.
+- `profilePicture` on reply authors is returned as a plain string URL.
 - Once a doubt is closed, no further replies or status changes are allowed.
 
 ---
@@ -103,9 +103,7 @@ If both are present, the cookie takes priority.
       },
       "title": "What is a closure?",
       "status": "open",
-      "lastReplyAt": "2026-05-03T10:30:00Z",
-      "createdAt": "2026-05-03T10:30:00Z",
-      "updatedAt": "2026-05-03T10:30:00Z"
+      "lastReplyAt": "2026-05-03T10:30:00Z"
     },
     "reply": {
       "_id": "ObjectId",
@@ -113,14 +111,11 @@ If both are present, the cookie takes priority.
       "author": {
         "_id": "ObjectId",
         "name": "John Doe",
-        "profilePicture": {
-          "url": "https://api.dicebear.com/9.x/identicon/svg?seed=..."
-        },
+        "profilePicture": "https://api.dicebear.com/9.x/identicon/svg?seed=...",
         "role": "student"
       },
       "message": "I don't understand how closures work in JavaScript.",
-      "createdAt": "2026-05-03T10:30:00Z",
-      "updatedAt": "2026-05-03T10:30:00Z"
+      "createdAt": "2026-05-03T10:30:00Z"
     }
   }
 }
@@ -172,17 +167,13 @@ id: string (required) - Lesson ID
   "data": [
     {
       "_id": "ObjectId",
-      "course": "ObjectId",
-      "lesson": "ObjectId",
+      "title": "What is a closure?",
+      "status": "open",
       "student": {
         "_id": "ObjectId",
         "name": "John Doe"
       },
-      "title": "What is a closure?",
-      "status": "open",
-      "lastReplyAt": "2026-05-03T10:30:00Z",
-      "createdAt": "2026-05-03T10:30:00Z",
-      "updatedAt": "2026-05-03T10:30:00Z"
+      "lastReplyAt": "2026-05-03T10:30:00Z"
     }
   ]
 }
@@ -221,12 +212,9 @@ id: string (required) - Lesson ID
       "_id": "ObjectId",
       "course": "ObjectId",
       "lesson": "ObjectId",
-      "student": "ObjectId",
       "title": "What is a closure?",
       "status": "answered",
-      "lastReplyAt": "2026-05-04T09:00:00Z",
-      "createdAt": "2026-05-03T10:30:00Z",
-      "updatedAt": "2026-05-04T09:00:00Z"
+      "lastReplyAt": "2026-05-04T09:00:00Z"
     }
   ]
 }
@@ -273,17 +261,13 @@ limit: number (optional, default: 10, min: 1, max: 50)
     "data": [
       {
         "_id": "ObjectId",
-        "course": "ObjectId",
-        "lesson": "ObjectId",
+        "title": "What is a closure?",
+        "status": "open",
         "student": {
           "_id": "ObjectId",
           "name": "John Doe"
         },
-        "title": "What is a closure?",
-        "status": "open",
-        "lastReplyAt": "2026-05-03T10:30:00Z",
-        "createdAt": "2026-05-03T10:30:00Z",
-        "updatedAt": "2026-05-03T10:30:00Z"
+        "lastReplyAt": "2026-05-03T10:30:00Z"
       }
     ],
     "pagination": {
@@ -350,9 +334,7 @@ id: string (required) - Doubt ID
       },
       "title": "What is a closure?",
       "status": "open",
-      "lastReplyAt": "2026-05-03T10:30:00Z",
-      "createdAt": "2026-05-03T10:30:00Z",
-      "updatedAt": "2026-05-03T10:30:00Z"
+      "lastReplyAt": "2026-05-03T10:30:00Z"
     },
     "replies": [
       {
@@ -361,14 +343,11 @@ id: string (required) - Doubt ID
         "author": {
           "_id": "ObjectId",
           "name": "John Doe",
-          "profilePicture": {
-            "url": "https://api.dicebear.com/9.x/identicon/svg?seed=..."
-          },
+          "profilePicture": "https://api.dicebear.com/9.x/identicon/svg?seed=...",
           "role": "student"
         },
         "message": "I don't understand how closures work in JavaScript.",
-        "createdAt": "2026-05-03T10:30:00Z",
-        "updatedAt": "2026-05-03T10:30:00Z"
+        "createdAt": "2026-05-03T10:30:00Z"
       }
     ]
   }
@@ -421,14 +400,11 @@ id: string (required) - Doubt ID
     "author": {
       "_id": "ObjectId",
       "name": "Jane Smith",
-      "profilePicture": {
-        "url": "https://example.com/avatar.jpg"
-      },
+      "profilePicture": "https://example.com/avatar.jpg",
       "role": "instructor"
     },
     "message": "A closure is a function that retains access to its outer scope.",
-    "createdAt": "2026-05-03T11:00:00Z",
-    "updatedAt": "2026-05-03T11:00:00Z"
+    "createdAt": "2026-05-03T11:00:00Z"
   }
 }
 ```
@@ -488,9 +464,7 @@ id: string (required) - Doubt ID
     },
     "title": "What is a closure?",
     "status": "answered",
-    "lastReplyAt": "2026-05-03T11:00:00Z",
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-03T11:30:00Z"
+    "lastReplyAt": "2026-05-03T11:00:00Z"
   }
 }
 ```
@@ -550,9 +524,7 @@ id: string (required) - Doubt ID
     },
     "title": "What is a closure?",
     "status": "closed",
-    "lastReplyAt": "2026-05-03T11:00:00Z",
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-03T12:00:00Z"
+    "lastReplyAt": "2026-05-03T11:00:00Z"
   }
 }
 ```
