@@ -2,12 +2,19 @@ import courseModel from "../course/course.model.js"
 import moduleModel from "./module.model.js"
 import lessonModel from "../lesson/lesson.model.js"
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES, CLOUDINARY } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, CLOUDINARY, REDIS_TTL } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
 import { deleteFromCloudinary } from "../../utils/cloudinary.js"
+import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
 
 
 export const createModuleService = async (title, instructorId, courseId) => {
+
+    // Delete module releted cache keys
+    await Promise.all([
+        deleteCacheByPattern(`modules:course:${courseId}`),
+        deleteCacheByPattern(`course-full:${courseId}:*`)
+    ]);
 
     // Check valid id
     validateObjectId(courseId);
@@ -49,6 +56,13 @@ export const createModuleService = async (title, instructorId, courseId) => {
 
 export const getModulesService = async (courseId) => {
 
+    // Check chche available 
+    const cacheKey = `modules:course:${courseId}`;
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+        return cachedData;
+    };
+
     // Check valid id
     validateObjectId(courseId);
 
@@ -62,6 +76,9 @@ export const getModulesService = async (courseId) => {
     if (!course) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
     };
+
+    // Set cache
+    await setCache(cacheKey, modules, REDIS_TTL._10M);
 
     // Return data
     return modules;
@@ -79,21 +96,30 @@ export const updateModuleService = async (title, moduleId, instructorId) => {
     };
 
     // Check instructor owned this module
-    const course = await courseModel.exists({ _id: module.course, instructor: instructorId })
+    const course = await courseModel.findOne({ _id: module.course, instructor: instructorId }).select("_id").lean();
     if (!course) {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.MODULE.UNAUTHORIZED)
-    }
+    };
 
     // Update module
     const updatedModule = await moduleModel.findByIdAndUpdate(moduleId, { title }, { returnDocument: "after" })
         .select("_id title course order")
         .lean();
 
+    // Delete module releted cache keys
+    await Promise.all([
+        deleteCacheByPattern(`modules:course:${course._id}`),
+        deleteCacheByPattern(`course-full:${course._id}:*`)
+    ]);
+
     // Return data
     return updatedModule;
 };
 
 export const deleteModuleService = async (moduleId, instructorId) => {
+
+    // Delete module releted cache keys
+    await deleteCacheByPattern(`modules:*`)
 
     // Check valid id
     validateObjectId(moduleId);
@@ -105,7 +131,7 @@ export const deleteModuleService = async (moduleId, instructorId) => {
     };
 
     // Check instructor owned this module
-    const course = await courseModel.exists({ _id: module.course, instructor: instructorId })
+    const course = await courseModel.findOne({ _id: module.course, instructor: instructorId }).select("_id").lean()
     if (!course) {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.MODULE.UNAUTHORIZED)
     };
@@ -115,6 +141,9 @@ export const deleteModuleService = async (moduleId, instructorId) => {
 
     // parallelize independent deletes
     await Promise.all([
+        deleteCacheByPattern(`modules:course:${course._id}`),
+        deleteCacheByPattern(`course-full:${course._id}:*`),
+        deleteCacheByPattern(`progress:*:${course._id}`),
         lessonModel.deleteMany({ module: moduleId }),
         moduleModel.deleteOne({ _id: moduleId }),
         ...lessons.map(({ video }) => deleteFromCloudinary(video.publicId, CLOUDINARY.TYPE.VIDEO))

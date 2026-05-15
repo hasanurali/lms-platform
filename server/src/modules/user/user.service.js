@@ -1,9 +1,10 @@
 import userModel from "./user.model.js";
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES, CLOUDINARY } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, CLOUDINARY, REDIS_TTL } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js"
 import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/cloudinary.js"
 import crypto from "crypto"
+import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
 
 // Common selection for user
 const commonSelection = "_id name email profilePicture bio role"
@@ -60,6 +61,13 @@ export const getUsersService = async (page = 1, limit = 10) => {
 
 export const getUserService = async (userId) => {
 
+    // Check chche available 
+    const cacheKey = `user:${userId}`;
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+        return cachedData;
+    };
+
     // Check valid id
     validateObjectId(userId);
 
@@ -69,14 +77,23 @@ export const getUserService = async (userId) => {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.USER.NOT_FOUND)
     };
 
-    // Return data
-    return {
+    // Make result data for return and caching
+    const resultData = {
         ...user,
         profilePicture: user.profilePicture?.url
     };
+
+    // Set cache
+    await setCache(cacheKey, resultData, REDIS_TTL._10M);
+
+    // Return data
+    return resultData;
 };
 
 export const updateProfileService = async (user, data) => {
+
+    // Delete user releted cache keys
+    deleteCacheByPattern(`user:${user._id}`);
 
     let { imageFile } = data;
 

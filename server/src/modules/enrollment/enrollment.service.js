@@ -1,11 +1,15 @@
 import enrollmentModel from "./enrollment.model.js"
 import courseModel from "../course/course.model.js";
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, REDIS_TTL } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
+import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
 
 
 export const createEnrollmentService = async (courseId, userId) => {
+
+    // Delete enrollment releted cache keys
+    deleteCacheByPattern(`enrollments:${userId}`)
 
     // Check valid id
     validateObjectId(courseId);
@@ -64,6 +68,13 @@ export const createEnrollmentService = async (courseId, userId) => {
 
 export const getEnrollmentsService = async (userId) => {
 
+    // Check chche available 
+    const cacheKey = `enrollments:${userId}`;
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+        return cachedData;
+    };
+
     // Fetch user enrolled courses
     let enrollCourses = await enrollmentModel.aggregate([
         { $match: { user: userId } },
@@ -96,7 +107,11 @@ export const getEnrollmentsService = async (userId) => {
                 }
             }
         }
-    ])
+    ]);
 
-    return enrollCourses
+    // Set cache
+    await setCache(cacheKey, enrollCourses, REDIS_TTL._5M)
+
+    // Return data
+    return enrollCourses;
 };

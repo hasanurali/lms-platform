@@ -4,15 +4,22 @@ import progressModel from "./progress.model.js"
 import lessonModel from "../lesson/lesson.model.js";
 import enrollmentModel from "../enrollment/enrollment.model.js";
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, REDIS_TTL } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
+import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
 
 
 export const getProgressService = async (courseId, userId) => {
 
+    // Check chche available 
+    const cacheKey = `progress:${userId}:${courseId}`;
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+        return cachedData;
+    };
+
     // Validate ID
     validateObjectId(courseId);
-
 
     // Parallelize course and enrollment existance check
     const [course, enrolled] = await Promise.all([
@@ -57,14 +64,23 @@ export const getProgressService = async (courseId, userId) => {
     // Calculate percentage
     const progressPercentage = totalLessons === 0 ? 0 : Math.round((progress.completedLessons.length / totalLessons) * 100);
 
-    // Return data
-    return {
+    // Make result data for return and caching
+    const resultData = {
         progress,
         progressPercentage
     };
+
+    // Set cache
+    await setCache(cacheKey, resultData, REDIS_TTL._2M)
+
+    // Return data
+    return resultData;
 };
 
 export const completeLessonService = async ({ courseId, lessonId, userId }) => {
+
+    // Delete progress releted cache keys
+    deleteCacheByPattern(`progress:${userId}:${courseId}`)
 
     // Validate ids
     validateObjectId(courseId);
@@ -132,6 +148,9 @@ export const completeLessonService = async ({ courseId, lessonId, userId }) => {
 };
 
 export const setLastAccessedLessonService = async ({ courseId, lessonId, userId }) => {
+
+    // Delete progress releted cache keys
+    deleteCacheByPattern(`progress:${userId}:${courseId}`)
 
     // Validate ids
     validateObjectId(courseId);

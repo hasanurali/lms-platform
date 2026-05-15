@@ -7,10 +7,11 @@ import enrollmentModel from "../enrollment/enrollment.model.js"
 import doubtModel from "../doubt/doubt.model.js"
 import replyModel from "../doubt/reply.model.js"
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES, CLOUDINARY } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, CLOUDINARY, REDIS_TTL } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
 import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/Cloudinary.js"
 import crypto from "crypto";
+import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
 
 
 // Common population for instructor
@@ -74,6 +75,14 @@ export const getCoursesService = async (page = 1, limit = 10) => {
     // Calculate skip
     const skip = (safePage - 1) * safeLimit;
 
+    // Check chche available 
+    const cacheKey = `courses:page:${safePage}:limit:${safeLimit}`;
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+        return cachedData;
+    }
+
+
     // Fetch courses
     const result = await courseModel.aggregate([
         { $match: { isPublished: true } },
@@ -103,8 +112,8 @@ export const getCoursesService = async (page = 1, limit = 10) => {
     const courses = result[0].data;
     const total = result[0].total[0]?.count || 0;
 
-    // Return data
-    return {
+    // Make result data for return and caching
+    const resultData = {
         data: courses,
         pagination: {
             total,
@@ -115,6 +124,13 @@ export const getCoursesService = async (page = 1, limit = 10) => {
             hasPrev: safePage > 1,
         }
     };
+
+    // Set cache
+    await setCache(cacheKey, resultData, REDIS_TTL._5M);
+
+    // Return data
+    return resultData;
+
 };
 
 export const getMyCoursesService = async (instructorId, page = 1, limit = 10) => {
@@ -170,6 +186,13 @@ export const getMyCoursesService = async (instructorId, page = 1, limit = 10) =>
 };
 
 export const getFullCourseService = async (courseId, userId) => {
+
+    // Check chche available 
+    const cacheKey = userId ? `course-full:${courseId}:user:${userId}` : `course-full:${courseId}:guest`
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+        return cachedData;
+    };
 
     // Validate ID
     validateObjectId(courseId);
@@ -240,8 +263,8 @@ export const getFullCourseService = async (courseId, userId) => {
         progressPercentage = Math.round((progress.completedLessons.length / lessons.length) * 100);
     };
 
-    // Return data
-    return {
+    // Make result data for return and caching
+    const resultData = {
         course: {
             ...course,
             thumbnail: course.thumbnail?.url,
@@ -259,9 +282,22 @@ export const getFullCourseService = async (courseId, userId) => {
             lastAccessLesson: progress?.lastAccessLesson || null
         }
     };
+
+    // Set cache
+    await setCache(cacheKey, resultData, REDIS_TTL._5M);
+
+    // Return data
+    return resultData;
 };
 
 export const getCourseService = async (courseId) => {
+
+    // Check chche available 
+    const cacheKey = `course:${courseId}`;
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+        return cachedData;
+    };
 
     // Check valid id
     validateObjectId(courseId);
@@ -276,8 +312,8 @@ export const getCourseService = async (courseId) => {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
     };
 
-    // Return data
-    return {
+    // Make result data for return and caching
+    const resultData = {
         ...course,
         thumbnail: course.thumbnail?.url,
         instructor: {
@@ -287,9 +323,23 @@ export const getCourseService = async (courseId) => {
             profilePicture: course.instructor.profilePicture?.url
         }
     }
+
+    // Set cache
+    await setCache(cacheKey, resultData, REDIS_TTL._10M);
+
+    // Return data
+    return resultData
 };
 
 export const updateCourseService = async (data, instructorId, courseId) => {
+
+    // Delete course releted cache keys
+    await Promise.all([
+        deleteCacheByPattern(`courses:*`),
+        deleteCacheByPattern(`course:${courseId}`),
+        deleteCacheByPattern(`courses-full:${courseId}:*`),
+        deleteCacheByPattern(`modules:course:${courseId}`)
+    ]);
 
     const { thumbnailFile } = data;
 
@@ -376,6 +426,11 @@ export const deleteCourseService = async (instructorId, courseId) => {
 
     // parallelize independent deletes
     await Promise.all([
+        deleteCacheByPattern(`courses:*`),
+        deleteCacheByPattern(`course:${courseId}`),
+        deleteCacheByPattern(`courses-full:${courseId}:*`),
+        deleteCacheByPattern(`modules:course:${courseId}`),
+        deleteCacheByPattern(`progress:*:${courseId}`),
         progressModel.deleteMany({ course: courseId }),
         enrollmentModel.deleteMany({ course: courseId }),
         lessonModel.deleteMany({ module: { $in: moduleIds } }),

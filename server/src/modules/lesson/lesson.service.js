@@ -5,10 +5,11 @@ import enrollmentModel from "../enrollment/enrollment.model.js"
 import doubtModel from "../doubt/doubt.model.js";
 import replyModel from "../doubt/reply.model.js";
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES, ROLES, CLOUDINARY } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, ROLES, CLOUDINARY, REDIS_TTL } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
 import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/cloudinary.js";
 import crypto from "crypto"
+import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
 
 
 // Get instructor aggregation function
@@ -39,7 +40,8 @@ const getInstructorId = async (lessonId) => {
                 _id: 0,
                 video: 1,
                 instructorId: "$course.instructor",
-                courseId: "$course._id"
+                courseId: "$course._id",
+                moduleId: "$module._id"
             }
         }
     ]);
@@ -58,7 +60,7 @@ export const createLessonService = async (title, videoFile, content, moduleId, i
 
     // Fetch module by id
     const module = await moduleModel.findById(moduleId)
-        .populate({ path: "course", select: "instructor -_id" })
+        .populate({ path: "course", select: "instructor" })
         .select("course -_id").lean();
 
     if (!module) {
@@ -92,6 +94,13 @@ export const createLessonService = async (title, videoFile, content, moduleId, i
         order
     });
 
+    // Delete lesson releted cache keys
+    await Promise.all([
+        deleteCacheByPattern(`lessons:module:${moduleId}`),
+        deleteCacheByPattern(`course-full:${module.course._id}:*`),
+        deleteCacheByPattern(`progress:*:${module.course._id}`)
+    ]);
+
     // Return data
     return {
         _id: lesson._id,
@@ -104,6 +113,13 @@ export const createLessonService = async (title, videoFile, content, moduleId, i
 };
 
 export const getLessonsService = async (moduleId) => {
+
+    // Check chche available 
+    const cacheKey = `lessons:module:${moduleId}`;
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+        return cachedData;
+    };
 
     // Check valid id
     validateObjectId(moduleId);
@@ -131,6 +147,9 @@ export const getLessonsService = async (moduleId) => {
     if (!module) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.MODULE.NOT_FOUND);
     };
+
+    // Set cache
+    await setCache(cacheKey, lessons, REDIS_TTL._10M);
 
     // Return data
     return lessons;
@@ -227,6 +246,12 @@ export const updateLessonService = async (data, lessonId, instructorId) => {
     const updatedLesson = await lessonModel.findByIdAndUpdate(lessonId, data, { returnDocument: "after" })
         .select("_id module title video content order").lean();
 
+    // Delete lesson releted cache keys
+    await Promise.all([
+        deleteCacheByPattern(`lessons:module:${lesson.moduleId}`),
+        deleteCacheByPattern(`course-full:${lesson.courseId}:*`)
+    ]);
+
     // Return data
     return {
         ...updatedLesson,
@@ -257,6 +282,9 @@ export const deleteLessonService = async (lessonId, instructorId) => {
 
     // parallelize independent deletes
     await Promise.all([
+        deleteCacheByPattern(`lessons:module:${lesson.moduleId}`),
+        deleteCacheByPattern(`course-full:${lesson.courseId}:*`),
+        deleteCacheByPattern(`progress:*:${lesson.courseId}`),
         replyModel.deleteMany({ doubt: { $in: doubtIds } }),
         doubtModel.deleteMany({ lesson: lessonId }),
         deleteFromCloudinary(lesson.video?.publicId, CLOUDINARY.TYPE.VIDEO),
