@@ -2,11 +2,14 @@ import app from "./app.js";
 import { config } from "./config/index.js";
 import connectToDb from "./config/db.config.js";
 import { connectToCloudinary } from "./config/cloudinary.config.js";
+import { connectToRedis } from "./config/redis.js"
 
 (async () => {
     try {
 
         await connectToDb();
+
+        await connectToRedis()
 
         await connectToCloudinary();
 
