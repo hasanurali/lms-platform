@@ -39,11 +39,14 @@ export const getCourses = asyncHandler(async (req, res) => {
 
 export const getMyCourses = asyncHandler(async (req, res) => {
 
+    // Get page and limit from request
+    const { page, limit } = req.cleanQuery;
+
     // Get Instructor id from request
     const instructorId = req.user._id
 
     // Get my courses
-    const myCourses = await getMyCoursesService(instructorId);
+    const myCourses = await getMyCoursesService(instructorId, page, limit);
 
     // Send response
     return res
@@ -69,7 +72,7 @@ export const getFullCourse = asyncHandler(async (req, res) => {
 
 export const getCourse = asyncHandler(async (req, res) => {
 
-    // Get course id from req
+    // Get course id from request
     const courseId = req.params.id;
 
     // Get course

@@ -7,26 +7,27 @@ import { config } from "../../config/index.js"
 
 export const createUser = async (data) => {
 
-    // Check user exists
-    const isUserExist = await userModel.exists({ email: data.email });
-    if (isUserExist) {
-        throw new ApiError(HTTP_STATUS.CONFLICT, MESSAGES.AUTH.EMAIL_EXISTS);
-    };
-
     // Create new user
-    const user = await userModel.create(data);
+    const user = new userModel(data);
 
-    // Generate token
+    // Generate tokens
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
 
     // Set hashed refresh token in db
-    await user.setRefreshToken(refreshToken);
+    user.setRefreshToken(refreshToken);
     await user.save();
 
     // Return data
     return {
-        newUser: user,
+        newUser: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            bio: user.bio,
+            profilePicture: user.profilePicture?.url,
+            role: user.role,
+        },
         accessToken,
         refreshToken
     };
@@ -51,12 +52,20 @@ export const loginUser = async (email, password) => {
     const refreshToken = user.generateRefreshToken();
 
     // Set hashed refresh token in db
-    await user.setRefreshToken(refreshToken);
-    await user.save();
+    userModel.findByIdAndUpdate(user._id, {
+        refreshToken: user.hashToken(refreshToken)
+    }).exec();
 
     // Return data
     return {
-        user,
+        user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            bio: user.bio,
+            profilePicture: user.profilePicture?.url,
+            role: user.role,
+        },
         accessToken,
         refreshToken
     };
@@ -98,7 +107,7 @@ export const refreshAccessToken = async (token) => {
     };
 
     // Verify token 
-    const isValid = await user.compareRefreshToken(token);
+    const isValid = user.compareRefreshToken(token);
     if (!isValid) {
         throw new ApiError(HTTP_STATUS.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
     };
@@ -108,12 +117,10 @@ export const refreshAccessToken = async (token) => {
     const refreshToken = user.generateRefreshToken();
 
     // Set hashed refresh token in db
-    await user.setRefreshToken(refreshToken);
-    await user.save();
+    userModel.findByIdAndUpdate(user._id, {
+        refreshToken: user.hashToken(refreshToken)
+    }).exec();
 
     // Return data
-    return {
-        accessToken,
-        refreshToken
-    };
+    return { accessToken, refreshToken };
 };

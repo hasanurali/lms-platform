@@ -1,7 +1,7 @@
 # Module API Documentation
 
 ## Overview
-The Module API allows instructors and admins to create, update, and delete modules within a course. Any authenticated user can retrieve modules. Modules are ordered automatically based on creation sequence.
+The Module API allows instructors and admins to create, update, and delete modules within a course. Any user can retrieve modules without authentication.
 
 ---
 
@@ -77,11 +77,9 @@ id: string (required) - Course ID
   "message": "Module created successfully",
   "data": {
     "_id": "ObjectId",
-    "course": "ObjectId",
     "title": "Introduction to Variables",
-    "order": 1,
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-03T10:30:00Z"
+    "course": "ObjectId",
+    "order": 1
   }
 }
 ```
@@ -126,19 +124,15 @@ id: string (required) - Course ID
   "data": [
     {
       "_id": "ObjectId",
-      "course": "ObjectId",
       "title": "Introduction to Variables",
-      "order": 1,
-      "createdAt": "2026-05-03T10:30:00Z",
-      "updatedAt": "2026-05-03T10:30:00Z"
+      "course": "ObjectId",
+      "order": 1
     },
     {
       "_id": "ObjectId",
-      "course": "ObjectId",
       "title": "Functions and Scope",
-      "order": 2,
-      "createdAt": "2026-05-03T11:00:00Z",
-      "updatedAt": "2026-05-03T11:00:00Z"
+      "course": "ObjectId",
+      "order": 2
     }
   ]
 }
@@ -183,11 +177,9 @@ id: string (required) - Module ID
   "message": "Module updated successfully",
   "data": {
     "_id": "ObjectId",
-    "course": "ObjectId",
     "title": "Updated Module Title",
-    "order": 1,
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-03T12:00:00Z"
+    "course": "ObjectId",
+    "order": 1
   }
 }
 ```

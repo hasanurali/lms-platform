@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import doubtModel from "./doubt.model.js";
 import courseModel from "../course/course.model.js"
 import lessonModel from "../lesson/lesson.model.js"
@@ -8,16 +9,46 @@ import { HTTP_STATUS, MESSAGES, ROLES, DOUBT_STATUS } from "../../constants/inde
 import validateObjectId from "../../utils/validateObjectId.js"
 
 
+// fetch doubt with instructor function
+const getDoubtWithInstructor = async (doubtId) => {
+    const doubt = await doubtModel.aggregate([
+        { $match: { _id: new mongoose.Types.ObjectId(doubtId) } },
+        {
+            $lookup: {
+                from: "courses",
+                localField: "course",
+                foreignField: "_id",
+                pipeline: [{ $project: { instructor: 1 } }],
+                as: "course"
+            }
+        },
+        { $unwind: "$course" },
+        {
+            $project: {
+                _id: 1,
+                status: 1,
+                student: 1,
+                course: { instructor: "$course.instructor" }
+            }
+        }
+    ]);
+
+    return doubt[0]
+}
+
 export const createDoubtService = async (courseId, lessonId, title, description, user) => {
 
-    // Check course exist
-    const course = await courseModel.findById(courseId);
+    // parallelize course, lesson and enrollment checks
+    const [course, lesson, enroll] = await Promise.all([
+        courseModel.findById(courseId).select("instructor").lean(),
+        lessonModel.findById(lessonId).populate({ path: "module", select: "course" }).select("module").lean(),
+        enrollmentModel.exists({ course: courseId, user: user._id })
+    ]);
+
+    // Check course exists
     if (!course) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND)
     };
-
-    // Fetch lesson with all details
-    const lesson = await lessonModel.findById(lessonId).populate("module", "course");
 
     // Check lesson exist
     if (!lesson) {
@@ -29,56 +60,61 @@ export const createDoubtService = async (courseId, lessonId, title, description,
         throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.LESSON.NOT_IN_COURSE)
     };
 
-    // Check enrollment
-    const isEnroll = await enrollmentModel.exists({ course: courseId, user: user._id })
-
     // Check valid authorization
-    if (user.role !== ROLES.ADMIN && course.instructor.toString() !== user._id.toString() && !isEnroll) {
+    if (user.role !== ROLES.ADMIN && course.instructor.toString() !== user._id.toString() && !enroll) {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.DOUBT.NOT_ENROLLED);
     };
 
     // Create doubt
-    const doubt = await doubtModel.create({
-        course: courseId,
-        lesson: lessonId,
-        student: user._id,
-        title
-    });
+    const doubt = await doubtModel.create({ course: courseId, lesson: lessonId, student: user._id, title });
 
-    // Populate doubt
-    await doubt.populate([
+    // parallelize reply creation and doubt population
+    const [reply] = await Promise.all([
+        replyModel.create({ doubt: doubt._id, author: user._id, message: description }),
+        doubt.populate([
+            { path: "course", select: "title" },
+            { path: "lesson", select: "title" },
+            { path: "student", select: "name" }
+        ])
+    ]);
+
+    // Get populated reply
+    const populatedReply = await replyModel.aggregate([
+        { $match: { _id: reply._id } },
         {
-            path: "course",
-            select: "title"
+            $lookup: {
+                from: "users",
+                localField: "author",
+                foreignField: "_id",
+                pipeline: [{ $project: { name: 1, profilePicture: "$profilePicture.url", role: 1 } }],
+                as: "author"
+            }
         },
+        { $unwind: "$author" },
         {
-            path: "lesson",
-            select: "title"
-        },
-        {
-            path: "student",
-            select: "name"
+            $project: {
+                _id: 1,
+                doubt: 1,
+                author: 1,
+                message: 1,
+                createdAt: 1
+            }
         }
     ]);
 
-    // Create reply
-    const reply = await replyModel.create({
-        doubt: doubt._id,
-        author: user._id,
-        message: description
-    });
-
-    // Populate reply
-    await reply.populate(
-        "author",
-        "name profilePicture role"
-    );
-
     // Return data
     return {
-        doubt,
-        reply
-    };
+        doubt: {
+            _id: doubt._id,
+            title: doubt.title,
+            course: doubt.course,
+            lesson: doubt.lesson,
+            student: doubt.student,
+            status: doubt.status,
+            lastReplyAt: doubt.lastReplyAt
+        },
+        reply: populatedReply[0]
+    }
 };
 
 export const getLessonDoubtsService = async (lessonId) => {
@@ -86,15 +122,38 @@ export const getLessonDoubtsService = async (lessonId) => {
     // Check valid id
     validateObjectId(lessonId)
 
-    // Check lesson exist
-    const lesson = await lessonModel.exists({ _id: lessonId });
+    // parallelize check lesson and fetch doubts
+    const [lesson, doubts] = await Promise.all([
+        lessonModel.exists({ _id: lessonId }),
+        doubtModel.aggregate([
+            { $match: { lesson: new mongoose.Types.ObjectId(lessonId) } },
+            { $sort: { lastReplyAt: -1 } },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "student",
+                    foreignField: "_id",
+                    pipeline: [{ $project: { name: 1 } }],
+                    as: "student"
+                }
+            },
+            { $unwind: "$student" },
+            {
+                $project: {
+                    _id: 1,
+                    title: 1,
+                    status: 1,
+                    student: 1,
+                    lastReplyAt: 1
+                }
+            }
+        ])
+    ]);
+
+    // Check lesson exists
     if (!lesson) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.LESSON.NOT_FOUND)
     };
-
-    const doubts = await doubtModel.find({ lesson: lessonId })
-        .populate("student", "name")
-        .sort({ lastReplyAt: -1 });
 
     // Return data
     return doubts
@@ -104,7 +163,9 @@ export const getMyDoubtsService = async (userId) => {
 
     // Get user all doubts
     const doubts = await doubtModel.find({ student: userId })
-        .sort({ lastReplyAt: -1 });
+        .select("_id course lesson title status lastReplyAt")
+        .sort({ lastReplyAt: -1 })
+        .lean();
 
     // Return data
     return doubts
@@ -116,7 +177,7 @@ export const getCourseDoubtsService = async (courseId, user, page = 1, limit = 1
     validateObjectId(courseId);
 
     // Check course exist
-    const course = await courseModel.findById(courseId);
+    const course = await courseModel.findById(courseId).select("instructor").lean();
     if (!course) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
     };
@@ -133,16 +194,42 @@ export const getCourseDoubtsService = async (courseId, user, page = 1, limit = 1
     // Calculate skip
     const skip = (safePage - 1) * safeLimit;
 
+    // Fetch doubts
+    const result = await doubtModel.aggregate([
+        { $match: { course: new mongoose.Types.ObjectId(courseId) } },
+        {
+            $facet: {
+                data: [
+                    { $sort: { lastReplyAt: -1 } },
+                    { $skip: skip },
+                    { $limit: safeLimit },
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "student",
+                            foreignField: "_id",
+                            pipeline: [{ $project: { name: 1 } }],
+                            as: "student"
+                        }
+                    },
+                    { $unwind: "$student" },
+                    {
+                        $project: {
+                            _id: 1,
+                            title: 1,
+                            status: 1,
+                            student: 1,
+                            lastReplyAt: 1
+                        }
+                    }
+                ],
+                total: [{ $count: "count" }]
+            }
+        }
+    ]);
 
-    // Fetch course doubts
-    const doubts = await doubtModel.find({ course: courseId })
-        .skip(skip)
-        .limit(safeLimit)
-        .sort({ lastReplyAt: -1 })
-        .populate("student", "name");
-
-    // Total count for pagination
-    const total = await doubtModel.countDocuments({ course: courseId });
+    const doubts = result[0].data;
+    const total = result[0].total[0]?.count || 0;
 
     // Return data
     return {
@@ -177,7 +264,7 @@ export const getDoubtDetailsService = async (doubtId) => {
             path: "student",
             select: "name"
         }
-    ]);
+    ]).select("_id title course lesson student status lastReplyAt").lean();
 
     // Check doubt exists
     if (!doubt) {
@@ -185,16 +272,32 @@ export const getDoubtDetailsService = async (doubtId) => {
     };
 
     // Fetch replies
-    const replies = await replyModel.find({ doubt: doubtId }).populate(
-        "author",
-        "name profilePicture role"
-    ).sort({ createdAt: 1 })
+    const replies = await replyModel.aggregate([
+        { $match: { doubt: new mongoose.Types.ObjectId(doubtId) } },
+        { $sort: { createdAt: 1 } },
+        {
+            $lookup: {
+                from: "users",
+                localField: "author",
+                foreignField: "_id",
+                pipeline: [{ $project: { name: 1, profilePicture: "$profilePicture.url", role: 1 } }],
+                as: "author"
+            }
+        },
+        { $unwind: "$author" },
+        {
+            $project: {
+                _id: 1,
+                doubt: 1,
+                author: 1,
+                message: 1,
+                createdAt: 1
+            }
+        }
+    ]);
 
     // Return data
-    return {
-        doubt,
-        replies
-    }
+    return { doubt, replies }
 };
 
 export const replyToDoubtService = async (message, doubtId, user) => {
@@ -202,8 +305,10 @@ export const replyToDoubtService = async (message, doubtId, user) => {
     // Check valid id
     validateObjectId(doubtId);
 
+    // Fetch doubt details
+    const doubt = await getDoubtWithInstructor(doubtId);
+
     // Check doubt exists
-    const doubt = await doubtModel.findById(doubtId).populate("course", "instructor");
     if (!doubt) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.DOUBT.NOT_FOUND);
     };
@@ -228,17 +333,34 @@ export const replyToDoubtService = async (message, doubtId, user) => {
     });
 
     // Update last reply timestamp
-    doubt.lastReplyAt = new Date();
-    await doubt.save();
+    doubtModel.findByIdAndUpdate(doubtId, { lastReplyAt: new Date() }).exec();
 
     // Populate reply
-    await reply.populate(
-        "author",
-        "name profilePicture role"
-    );
+    const populatedReply = await replyModel.aggregate([
+        { $match: { _id: reply._id } },
+        {
+            $lookup: {
+                from: "users",
+                localField: "author",
+                foreignField: "_id",
+                pipeline: [{ $project: { name: 1, profilePicture: "$profilePicture.url", role: 1 } }],
+                as: "author"
+            }
+        },
+        { $unwind: "$author" },
+        {
+            $project: {
+                _id: 1,
+                doubt: 1,
+                author: 1,
+                message: 1,
+                createdAt: 1
+            }
+        }
+    ]);
 
     // Return data
-    return reply;
+    return populatedReply[0];
 };
 
 export const markDoubtAnsweredService = async (doubtId, user) => {
@@ -246,8 +368,10 @@ export const markDoubtAnsweredService = async (doubtId, user) => {
     // Check valid id
     validateObjectId(doubtId);
 
+    // Fetch doubt details
+    const doubt = await getDoubtWithInstructor(doubtId);
+
     // Check doubt exists
-    const doubt = await doubtModel.findById(doubtId).populate("course", "instructor");
     if (!doubt) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.DOUBT.NOT_FOUND);
     };
@@ -262,34 +386,24 @@ export const markDoubtAnsweredService = async (doubtId, user) => {
         throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.DOUBT.ALREADY_ANSWERED);
     };
 
-
     // Check valid authorization
     if (user.role !== ROLES.ADMIN && doubt.course.instructor.toString() !== user._id.toString()) {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.DOUBT.ONLY_INSTRUCTOR_CAN_ANSWER);
     };
 
-    // Marked the doubt as answered
-    doubt.status = DOUBT_STATUS.ANSWERED;
-    await doubt.save();
-
-    // Populate doubt
-    await doubt.populate([
-        {
-            path: "course",
-            select: "title"
-        },
-        {
-            path: "lesson",
-            select: "title"
-        },
-        {
-            path: "student",
-            select: "name"
-        }
-    ]);
+    // Marked the doubt as answered and get populated data
+    const answeredDoubt = await doubtModel.findByIdAndUpdate(
+        doubtId,
+        { status: DOUBT_STATUS.ANSWERED },
+        { returnDocument: "after" }
+    ).populate([
+        { path: "course", select: "title" },
+        { path: "lesson", select: "title" },
+        { path: "student", select: "name" }
+    ]).select("_id title course lesson student status lastReplyAt").lean();
 
     // Return data
-    return doubt;
+    return answeredDoubt;
 };
 
 export const closeDoubtService = async (doubtId, userId) => {
@@ -298,7 +412,7 @@ export const closeDoubtService = async (doubtId, userId) => {
     validateObjectId(doubtId);
 
     // Check doubt exists
-    const doubt = await doubtModel.findById(doubtId);
+    const doubt = await doubtModel.findById(doubtId).select("status student").lean();
     if (!doubt) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.DOUBT.NOT_FOUND);
     };
@@ -313,26 +427,17 @@ export const closeDoubtService = async (doubtId, userId) => {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.DOUBT.ONLY_OWNER_CAN_CLOSE);
     };
 
-    // Close the doubt
-    doubt.status = DOUBT_STATUS.CLOSED;
-    await doubt.save();
-
-    // Populate doubt
-    await doubt.populate([
-        {
-            path: "course",
-            select: "title"
-        },
-        {
-            path: "lesson",
-            select: "title"
-        },
-        {
-            path: "student",
-            select: "name"
-        }
-    ]);
+    // Marked the doubt as close and get populated data
+    const closedDoubt = await doubtModel.findByIdAndUpdate(
+        doubtId,
+        { status: DOUBT_STATUS.CLOSED },
+        { returnDocument: "after" }
+    ).populate([
+        { path: "course", select: "title" },
+        { path: "lesson", select: "title" },
+        { path: "student", select: "name" }
+    ]).select("_id title course lesson student status lastReplyAt").lean();
 
     // Return data
-    return doubt;
+    return closedDoubt;
 };

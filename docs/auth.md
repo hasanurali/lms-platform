@@ -64,12 +64,8 @@ Cookies are cleared on logout.
     "name": "John Doe",
     "email": "john@example.com",
     "bio": "",
-    "profilePicture": {
-      "url": "https://api.dicebear.com/9.x/identicon/svg?seed=..."
-    },
-    "role": "student",
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-03T10:30:00Z"
+    "profilePicture": "https://api.dicebear.com/9.x/identicon/svg?seed=...",
+    "role": "student"
   }
 }
 ```
@@ -122,12 +118,8 @@ Cookies are cleared on logout.
     "name": "John Doe",
     "email": "john@example.com",
     "bio": "",
-    "profilePicture": {
-      "url": "https://api.dicebear.com/9.x/identicon/svg?seed=..."
-    },
-    "role": "student",
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-03T10:30:00Z"
+    "profilePicture": "https://api.dicebear.com/9.x/identicon/svg?seed=...",
+    "role": "student"
   }
 }
 ```

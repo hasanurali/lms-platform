@@ -40,8 +40,8 @@ If both are present, the cookie takes priority.
 
 ## Notes
 
-- `password`, `refreshToken`, `profilePicture.publicId`, and `profilePicture.hash` are never returned in any response — they are stripped by the model's `toJSON()` method. Only `profilePicture.url` is exposed.
-- `profilePicture.url` defaults to an auto-generated dicebear avatar URL if not set.
+- `password`, `refreshToken`, `profilePicture.publicId`, and `profilePicture.hash` are never returned in any response. Only `profilePicture.url` is exposed, returned as a plain string.
+- `profilePicture` defaults to an auto-generated dicebear avatar URL if not set.
 - `bio` defaults to an empty string `""`.
 - `GET /users/` excludes admin accounts from results.
 - If a new profile picture is uploaded and it matches the existing one (checked by MD5 hash), the existing image is kept and no Cloudinary upload occurs.
@@ -71,9 +71,7 @@ If both are present, the cookie takes priority.
     "name": "John Doe",
     "email": "john@example.com",
     "bio": "",
-    "profilePicture": {
-      "url": "https://api.dicebear.com/9.x/identicon/svg?seed=..."
-    },
+    "profilePicture": "https://api.dicebear.com/9.x/identicon/svg?seed=...",
     "role": "student",
     "createdAt": "2026-05-03T10:30:00Z",
     "updatedAt": "2026-05-03T10:30:00Z"
@@ -98,7 +96,13 @@ If both are present, the cookie takes priority.
 
 **Authorization:** ADMIN role only
 
-**Description:** Retrieves all users excluding admin accounts.
+**Description:** Retrieves all users excluding admin accounts, with pagination support.
+
+**Query Parameters:**
+```
+page:  number (optional, default: 1, min: 1)
+limit: number (optional, default: 10, min: 1, max: 50)
+```
 
 **Success Response:**
 - **Status:** `200 OK`
@@ -107,20 +111,26 @@ If both are present, the cookie takes priority.
 ```json
 {
   "message": "Users fetched successfully",
-  "data": [
-    {
-      "_id": "ObjectId",
-      "name": "John Doe",
-      "email": "john@example.com",
-      "bio": "",
-      "profilePicture": {
-        "url": "https://api.dicebear.com/9.x/identicon/svg?seed=..."
-      },
-      "role": "student",
-      "createdAt": "2026-05-03T10:30:00Z",
-      "updatedAt": "2026-05-03T10:30:00Z"
+  "data": {
+    "data": [
+      {
+        "_id": "ObjectId",
+        "name": "John Doe",
+        "email": "john@example.com",
+        "bio": "",
+        "profilePicture": "https://api.dicebear.com/9.x/identicon/svg?seed=...",
+        "role": "student"
+      }
+    ],
+    "pagination": {
+      "total": 25,
+      "page": 1,
+      "limit": 10,
+      "pages": 3,
+      "hasNext": true,
+      "hasPrev": false
     }
-  ]
+  }
 }
 ```
 
@@ -161,12 +171,8 @@ id: string (required) - User ID
     "name": "John Doe",
     "email": "john@example.com",
     "bio": "",
-    "profilePicture": {
-      "url": "https://api.dicebear.com/9.x/identicon/svg?seed=..."
-    },
-    "role": "student",
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-03T10:30:00Z"
+    "profilePicture": "https://api.dicebear.com/9.x/identicon/svg?seed=...",
+    "role": "student"
   }
 }
 ```
@@ -212,12 +218,8 @@ id: string (required) - User ID
     "name": "John Doe",
     "email": "john@example.com",
     "bio": "Updated bio here.",
-    "profilePicture": {
-      "url": "https://res.cloudinary.com/example/avatar.jpg"
-    },
-    "role": "student",
-    "createdAt": "2026-05-03T10:30:00Z",
-    "updatedAt": "2026-05-04T09:00:00Z"
+    "profilePicture": "https://res.cloudinary.com/example/avatar.jpg",
+    "role": "student"
   }
 }
 ```

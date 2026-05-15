@@ -6,7 +6,13 @@ const connectToDb = async () => {
 
         await mongoose.connect(config.mongoUri, {
             maxPoolSize: 10,
-        })
+            minPoolSize: 2,
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+            connectTimeoutMS: 10000,
+            retryWrites: true,
+            readPreference: "secondaryPreferred",
+        });
 
         console.log("MongoDb connected")
 
