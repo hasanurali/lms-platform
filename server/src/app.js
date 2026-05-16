@@ -17,6 +17,7 @@ import lessonRoute from "./modules/lesson/lesson.route.js";
 import enrollmentRoute from "./modules/enrollment/enrollment.route.js";
 import progressRoute from "./modules/progress/progress.route.js";
 import doubtRoute from "./modules/doubt/doubt.route.js";
+import reviewRoute from "./modules/review/review.route.js";
 
 const app = express();
 
@@ -51,6 +52,7 @@ app.use("/api/v1", lessonRoute);
 app.use("/api/v1", enrollmentRoute);
 app.use("/api/v1/progress", progressRoute);
 app.use("/api/v1", doubtRoute);
+app.use("/api/v1", reviewRoute);
 
 
 // Not Found Route
