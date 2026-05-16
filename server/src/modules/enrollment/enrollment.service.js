@@ -9,7 +9,7 @@ import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
 export const createEnrollmentService = async (courseId, userId) => {
 
     // Delete enrollment releted cache keys
-    deleteCacheByPattern(`enrollments:${userId}`)
+    await deleteCacheByPattern(`enrollments:${userId}`)
 
     // Check valid id
     validateObjectId(courseId);
@@ -35,7 +35,7 @@ export const createEnrollmentService = async (courseId, userId) => {
 
     // Get populated course with enrollment
     const populatedEnrollment = await enrollmentModel.aggregate([
-        { $match: { _id: enrollment._id } },
+        { $match: { _id: enrollCourse._id } },
         {
             $lookup: {
                 from: "courses",
@@ -56,7 +56,10 @@ export const createEnrollmentService = async (courseId, userId) => {
                     thumbnail: "$course.thumbnail.url",
                     instructor: "$course.instructor",
                     price: "$course.price",
-                    isPublished: "$course.isPublished"
+                    isPublished: "$course.isPublished",
+                    averageRating: "$course.averageRating",
+                    totalReviews: "$course.totalReviews",
+                    ratingDistribution: "$course.ratingDistribution"
                 }
             }
         }
@@ -103,7 +106,10 @@ export const getEnrollmentsService = async (userId) => {
                     thumbnail: "$course.thumbnail.url",
                     instructor: "$course.instructor",
                     price: "$course.price",
-                    isPublished: "$course.isPublished"
+                    isPublished: "$course.isPublished",
+                    averageRating: "$course.averageRating",
+                    totalReviews: "$course.totalReviews",
+                    ratingDistribution: "$course.ratingDistribution"
                 }
             }
         }

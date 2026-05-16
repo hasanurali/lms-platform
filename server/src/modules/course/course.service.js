@@ -21,7 +21,7 @@ const commonPopulate = {
 };
 
 // Common course selection fields
-const commonCourseSelection = "_id title description thumbnail instructor price isPublished"
+const commonCourseSelection = "_id title description thumbnail instructor price isPublished averageRating totalReviews ratingDistribution"
 
 export const createCourseService = async (data) => {
 
@@ -43,27 +43,39 @@ export const createCourseService = async (data) => {
     delete data.thumbnailFile;
 
     // Create course
-    const course = new courseModel(data);
-    await course.save();
+    const course = await courseModel.create(data);
 
-    // Get populated instructor data with course
-    const populatedData = await course.populate(commonPopulate);
+    // Get populated data with aggregate
+    const [populatedData] = await courseModel.aggregate([
+        { $match: { _id: course._id } },
+        {
+            $lookup: {
+                from: "users",
+                localField: "instructor",
+                foreignField: "_id",
+                pipeline: [{ $project: { name: 1, email: 1, profilePicture: "$profilePicture.url" } }],
+                as: "instructor"
+            }
+        },
+        { $unwind: "$instructor" },
+        {
+            $project: {
+                _id: 1,
+                title: 1,
+                description: 1,
+                thumbnail: "$thumbnail.url",
+                instructor: 1,
+                price: 1,
+                isPublished: 1,
+                averageRating: 1,
+                totalReviews: 1,
+                ratingDistribution: 1
+            }
+        }
+    ]);
 
     // Return data
-    return {
-        _id: populatedData._id,
-        title: populatedData.title,
-        description: populatedData.description,
-        instructor: {
-            _id: populatedData.instructor._id,
-            name: populatedData.instructor.name,
-            email: populatedData.instructor.email,
-            profilePicture: populatedData.instructor.profilePicture?.url,
-        },
-        price: populatedData.price,
-        thumbnail: populatedData.thumbnail?.url,
-        isPublished: populatedData.isPublished,
-    };
+    return populatedData;
 };
 
 export const getCoursesService = async (page = 1, limit = 10) => {
@@ -100,7 +112,10 @@ export const getCoursesService = async (page = 1, limit = 10) => {
                             thumbnail: "$thumbnail.url",
                             instructor: 1,
                             price: 1,
-                            isPublished: 1
+                            isPublished: 1,
+                            averageRating: 1,
+                            totalReviews: 1,
+                            ratingDistribution: 1
                         }
                     }
                 ],
@@ -159,7 +174,10 @@ export const getMyCoursesService = async (instructorId, page = 1, limit = 10) =>
                             thumbnail: "$thumbnail.url",
                             instructor: 1,
                             price: 1,
-                            isPublished: 1
+                            isPublished: 1,
+                            averageRating: 1,
+                            totalReviews: 1,
+                            ratingDistribution: 1
                         }
                     }
                 ],
@@ -337,7 +355,7 @@ export const updateCourseService = async (data, instructorId, courseId) => {
     await Promise.all([
         deleteCacheByPattern(`courses:*`),
         deleteCacheByPattern(`course:${courseId}`),
-        deleteCacheByPattern(`courses-full:${courseId}:*`),
+        deleteCacheByPattern(`course-full:${courseId}:*`),
         deleteCacheByPattern(`modules:course:${courseId}`)
     ]);
 
@@ -428,7 +446,7 @@ export const deleteCourseService = async (instructorId, courseId) => {
     await Promise.all([
         deleteCacheByPattern(`courses:*`),
         deleteCacheByPattern(`course:${courseId}`),
-        deleteCacheByPattern(`courses-full:${courseId}:*`),
+        deleteCacheByPattern(`course-full:${courseId}:*`),
         deleteCacheByPattern(`modules:course:${courseId}`),
         deleteCacheByPattern(`progress:*:${courseId}`),
         progressModel.deleteMany({ course: courseId }),
