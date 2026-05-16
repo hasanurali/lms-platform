@@ -27,5 +27,6 @@ const reviewSchema = new mongoose.Schema({
 
 // Add index for faster query
 reviewSchema.index({ course: 1, student: 1 }, { unique: true });
+reviewSchema.index({ course: 1, rating: -1 });
 
 export default mongoose.model("Review", reviewSchema);

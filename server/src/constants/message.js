@@ -100,11 +100,11 @@ const MESSAGES = Object.freeze({
         UPDATED: "Review updated successfully",
         DELETED: "Review deleted successfully",
         FETCHED_ALL: "Reviews fetched successfully",
-
         NOT_FOUND: "Review not found",
         ALREADY_EXISTS: "You have already reviewed this course",
         NOT_ENROLLED: "You must be enrolled in this course to submit a review",
-        UNAUTHORIZED: "You are not authorized to modify this review"
+        UNAUTHORIZED: "You are not authorized to modify this review",
+        CANNOT_REVIEW_OWN: "Instructor cannot review their own course"
     })
 
 });
