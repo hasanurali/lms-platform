@@ -147,3 +147,51 @@ export const getReviewsService = async (courseId, page, limit) => {
         }
     };
 };
+
+export const updateReviewService = async (data, reviewId, studentId) => {
+
+    // Check valid id
+    validateObjectId(reviewId);
+
+    // Check review exists
+    const review = await reviewModel.findById(reviewId).select("student").lean();
+    if (!review) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.REVIEW.NOT_FOUND)
+    };
+
+    // Check authorization
+    if (review.student.toString() !== studentId.toString()) {
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.REVIEW.UNAUTHORIZED)
+    };
+
+    // Update review 
+    const updatedReview = await reviewModel.findByIdAndUpdate(reviewId, data, { returnDocument: "after" }).lean();
+
+    // Get populated data
+    const [populatedReview] = await reviewModel.aggregate([
+        { $match: { _id: updatedReview._id } },
+        {
+            $lookup: {
+                from: "users",
+                localField: "student",
+                foreignField: "_id",
+                pipeline: [{ $project: { _id: 1, name: 1, profilePicture: "$profilePicture.url" } }],
+                as: "student"
+            }
+        },
+        { $unwind: "$student" },
+        {
+            $project: {
+                _id: 1,
+                course: 1,
+                student: 1,
+                rating: 1,
+                message: 1,
+                createdAt: 1
+            }
+        }
+    ]);
+
+    // Return data
+    return populatedReview;
+};
