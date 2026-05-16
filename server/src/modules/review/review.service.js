@@ -5,6 +5,7 @@ import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
 import mongoose from "mongoose";
+import { updateCourseRating } from "./review.helper.js";
 
 
 export const createReviewService = async (rating, message, courseId, studentId) => {
@@ -46,6 +47,9 @@ export const createReviewService = async (rating, message, courseId, studentId) 
         rating,
         message
     });
+
+    // Update rating
+    await updateCourseRating(courseId);
 
     // Get populated data
     const populatedReview = await reviewModel.aggregate([
@@ -154,7 +158,7 @@ export const updateReviewService = async (data, reviewId, studentId) => {
     validateObjectId(reviewId);
 
     // Check review exists
-    const review = await reviewModel.findById(reviewId).select("student").lean();
+    const review = await reviewModel.findById(reviewId).select("student course").lean();
     if (!review) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.REVIEW.NOT_FOUND)
     };
@@ -166,6 +170,9 @@ export const updateReviewService = async (data, reviewId, studentId) => {
 
     // Update review 
     const updatedReview = await reviewModel.findByIdAndUpdate(reviewId, data, { returnDocument: "after" }).lean();
+
+    // Update rating
+    await updateCourseRating(review.course);
 
     // Get populated data
     const [populatedReview] = await reviewModel.aggregate([
@@ -202,7 +209,7 @@ export const deleteReviewService = async (reviewId, studentId) => {
     validateObjectId(reviewId);
 
     // Check review exists
-    const review = await reviewModel.findById(reviewId).select("student").lean();
+    const review = await reviewModel.findById(reviewId).select("student course").lean();
     if (!review) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.REVIEW.NOT_FOUND)
     };
@@ -214,4 +221,7 @@ export const deleteReviewService = async (reviewId, studentId) => {
 
     // Delete review 
     await reviewModel.deleteOne({ _id: reviewId });
+
+    // Update rating
+    await updateCourseRating(review.course);
 };

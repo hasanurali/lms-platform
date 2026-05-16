@@ -37,6 +37,21 @@ const courseSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    averageRating: {
+        type: Number,
+        default: 0
+    },
+    totalReviews: {
+        type: Number,
+        default: 0
+    },
+    ratingDistribution: {
+        1: { type: Number, default: 0 },
+        2: { type: Number, default: 0 },
+        3: { type: Number, default: 0 },
+        4: { type: Number, default: 0 },
+        5: { type: Number, default: 0 }
+    }
 }, { timestamps: true });
 
 // Add index for faster query
