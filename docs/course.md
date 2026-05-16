@@ -43,6 +43,7 @@ If both are present, the cookie takes priority.
 - `thumbnail` is returned as a plain string URL in all responses.
 - `instructor.profilePicture` is returned as a plain string URL in all responses.
 - `GET /courses/` only returns published courses.
+- `averageRating`, `totalReviews`, and `ratingDistribution` are automatically updated whenever a review is created, updated, or deleted.
 
 ---
 
@@ -85,7 +86,10 @@ If both are present, the cookie takes priority.
     },
     "price": 49.99,
     "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
-    "isPublished": false
+    "isPublished": false,
+    "averageRating": 0,
+    "totalReviews": 0,
+    "ratingDistribution": { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 }
   }
 }
 ```
@@ -137,7 +141,10 @@ limit: number (optional, default: 10, min: 1, max: 50)
         "instructor": "ObjectId",
         "price": 49.99,
         "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
-        "isPublished": true
+        "isPublished": true,
+        "averageRating": 4.5,
+        "totalReviews": 120,
+        "ratingDistribution": { "1": 2, "2": 3, "3": 10, "4": 35, "5": 70 }
       }
     ],
     "pagination": {
@@ -187,7 +194,10 @@ limit: number (optional, default: 10, min: 1, max: 50)
         "instructor": "ObjectId",
         "price": 49.99,
         "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
-        "isPublished": false
+        "isPublished": false,
+        "averageRating": 0,
+        "totalReviews": 0,
+        "ratingDistribution": { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 }
       }
     ],
     "pagination": {
@@ -247,7 +257,10 @@ id: string (required) - Course ID
       },
       "price": 49.99,
       "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
-      "isPublished": true
+      "isPublished": true,
+      "averageRating": 4.5,
+      "totalReviews": 120,
+      "ratingDistribution": { "1": 2, "2": 3, "3": 10, "4": 35, "5": 70 }
     },
     "modules": [
       {
@@ -293,7 +306,10 @@ id: string (required) - Course ID
       },
       "price": 49.99,
       "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
-      "isPublished": true
+      "isPublished": true,
+      "averageRating": 4.5,
+      "totalReviews": 120,
+      "ratingDistribution": { "1": 2, "2": 3, "3": 10, "4": 35, "5": 70 }
     },
     "modules": [
       {
@@ -362,7 +378,10 @@ id: string (required) - Course ID
     },
     "price": 49.99,
     "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
-    "isPublished": true
+    "isPublished": true,
+    "averageRating": 4.5,
+    "totalReviews": 120,
+    "ratingDistribution": { "1": 2, "2": 3, "3": 10, "4": 35, "5": 70 }
   }
 }
 ```
@@ -420,7 +439,10 @@ id: string (required) - Course ID
     },
     "price": 49.99,
     "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
-    "isPublished": true
+    "isPublished": true,
+    "averageRating": 4.5,
+    "totalReviews": 120,
+    "ratingDistribution": { "1": 2, "2": 3, "3": 10, "4": 35, "5": 70 }
   }
 }
 ```
@@ -440,7 +462,10 @@ id: string (required) - Course ID
     },
     "price": 49.99,
     "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
-    "isPublished": false
+    "isPublished": false,
+    "averageRating": 0,
+    "totalReviews": 0,
+    "ratingDistribution": { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 }
   }
 }
 ```

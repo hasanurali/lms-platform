@@ -44,6 +44,7 @@ If both are present, the cookie takes priority.
 - A user can only enroll in the same course once.
 - `course.thumbnail` is returned as a plain string URL.
 - `GET /enrollments/my` always returns an array; empty array if the user has no enrollments.
+- `averageRating`, `totalReviews`, and `ratingDistribution` are automatically updated whenever a review is created, updated, or deleted.
 
 ---
 
@@ -82,7 +83,10 @@ id: string (required) - Course ID
       "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
       "instructor": "ObjectId",
       "price": 49.99,
-      "isPublished": true
+      "isPublished": true,
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 }
     }
   }
 }
@@ -130,7 +134,10 @@ id: string (required) - Course ID
         "thumbnail": "https://res.cloudinary.com/example/thumbnail.jpg",
         "instructor": "ObjectId",
         "price": 49.99,
-        "isPublished": true
+        "isPublished": true,
+        "averageRating": 0,
+        "totalReviews": 0,
+        "ratingDistribution": { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 }
       }
     }
   ]
