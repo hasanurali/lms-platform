@@ -195,3 +195,23 @@ export const updateReviewService = async (data, reviewId, studentId) => {
     // Return data
     return populatedReview;
 };
+
+export const deleteReviewService = async (reviewId, studentId) => {
+
+    // Check valid id
+    validateObjectId(reviewId);
+
+    // Check review exists
+    const review = await reviewModel.findById(reviewId).select("student").lean();
+    if (!review) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.REVIEW.NOT_FOUND)
+    };
+
+    // Check authorization
+    if (review.student.toString() !== studentId.toString()) {
+        throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.REVIEW.UNAUTHORIZED)
+    };
+
+    // Delete review 
+    await reviewModel.deleteOne({ _id: reviewId });
+};

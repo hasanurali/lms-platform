@@ -3,7 +3,7 @@ const reviewRoute = express.Router()
 import authMiddleware from "../../middlewares/auth.middleware.js"
 import { createReviewValidation, updateReviewValidation } from "./review.validation.js"
 import validate from "../../middlewares/validation.result.middleware.js"
-import { createReview, getReviews, updateReview } from "./review.controller.js"
+import { createReview, getReviews, updateReview, deleteReview } from "./review.controller.js"
 
 
 reviewRoute.post("/courses/:id/reviews",
@@ -22,6 +22,11 @@ reviewRoute.put("/reviews/:id",
     updateReviewValidation,
     validate,
     updateReview
+);
+
+reviewRoute.delete("/reviews/:id",
+    authMiddleware,
+    deleteReview
 );
 
 export default reviewRoute;

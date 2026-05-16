@@ -1,5 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createReviewService, getReviewsService, updateReviewService } from "./review.service.js"
+import { createReviewService, getReviewsService, updateReviewService, deleteReviewService } from "./review.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 
@@ -63,4 +63,21 @@ export const updateReview = asyncHandler(async (req, res) => {
     return res
         .status(HTTP_STATUS.OK)
         .json(new ApiResponse(MESSAGES.REVIEW.UPDATED, review));
+});
+
+export const deleteReview = asyncHandler(async (req, res) => {
+
+    // Get review id from request
+    const reviewId = req.params.id;
+
+    // Get student id from request
+    const studentId = req.user._id
+
+    // Delete review
+    await deleteReviewService(reviewId, studentId);
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .json(new ApiResponse(MESSAGES.REVIEW.DELETED));
 });
