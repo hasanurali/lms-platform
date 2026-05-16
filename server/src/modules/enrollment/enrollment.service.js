@@ -35,7 +35,7 @@ export const createEnrollmentService = async (courseId, userId) => {
 
     // Get populated course with enrollment
     const populatedEnrollment = await enrollmentModel.aggregate([
-        { $match: { _id: enrollment._id } },
+        { $match: { _id: enrollCourse._id } },
         {
             $lookup: {
                 from: "courses",
