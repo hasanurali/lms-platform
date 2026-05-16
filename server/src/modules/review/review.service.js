@@ -2,16 +2,20 @@ import reviewModel from "./review.model.js";
 import enrollmentModel from "../enrollment/enrollment.model.js";
 import courseModel from "../course/course.model.js";
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, REDIS_TTL } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
 import mongoose from "mongoose";
 import { updateCourseRating } from "./review.helper.js";
+import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
 
 
 export const createReviewService = async (rating, message, courseId, studentId) => {
 
     // Check valid id
     validateObjectId(courseId);
+
+    // Delete review releted cache keys
+    await deleteCacheByPattern(`reviews:course:${courseId}:*`)
 
     // Parallelize review existence and enrollment
     const [course, review, enroll] = await Promise.all([
@@ -92,6 +96,13 @@ export const getReviewsService = async (courseId, page, limit) => {
     // Calculate skip
     const skip = (safePage - 1) * safeLimit;
 
+    // Check chche available 
+    const cacheKey = `reviews:course:${courseId}:page:${safePage}:limit:${safeLimit}`;
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+        return cachedData;
+    };
+
     // parallelize check course and fetch reviews
     const [course, result] = await Promise.all([
         courseModel.exists({ _id: courseId }),
@@ -138,8 +149,8 @@ export const getReviewsService = async (courseId, page, limit) => {
     const reviews = result[0].data;
     const total = result[0].total[0]?.count || 0;
 
-    // Return data
-    return {
+    // Make result data for return and caching
+    const resultData = {
         data: reviews,
         pagination: {
             total,
@@ -150,9 +161,16 @@ export const getReviewsService = async (courseId, page, limit) => {
             hasPrev: safePage > 1,
         }
     };
+
+    // Set cache
+    await setCache(cacheKey, resultData, REDIS_TTL._5M);
+
+    // Return data
+    return resultData;
 };
 
 export const updateReviewService = async (data, reviewId, studentId) => {
+
 
     // Check valid id
     validateObjectId(reviewId);
@@ -167,6 +185,9 @@ export const updateReviewService = async (data, reviewId, studentId) => {
     if (review.student.toString() !== studentId.toString()) {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.REVIEW.UNAUTHORIZED)
     };
+
+    // Delete review releted cache keys
+    await deleteCacheByPattern(`reviews:course:${review.course}:*`)
 
     // Update review 
     const updatedReview = await reviewModel.findByIdAndUpdate(reviewId, data, { returnDocument: "after" }).lean();
@@ -205,6 +226,7 @@ export const updateReviewService = async (data, reviewId, studentId) => {
 
 export const deleteReviewService = async (reviewId, studentId) => {
 
+
     // Check valid id
     validateObjectId(reviewId);
 
@@ -218,6 +240,9 @@ export const deleteReviewService = async (reviewId, studentId) => {
     if (review.student.toString() !== studentId.toString()) {
         throw new ApiError(HTTP_STATUS.FORBIDDEN, MESSAGES.REVIEW.UNAUTHORIZED)
     };
+
+    // Delete review releted cache keys
+    await deleteCacheByPattern(`reviews:course:${review.course}:*`)
 
     // Delete review 
     await reviewModel.deleteOne({ _id: reviewId });
