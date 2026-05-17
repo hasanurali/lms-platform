@@ -7,7 +7,7 @@ import enrollmentModel from "../enrollment/enrollment.model.js"
 import doubtModel from "../doubt/doubt.model.js"
 import replyModel from "../doubt/reply.model.js"
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES, CLOUDINARY, REDIS_TTL } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, CLOUDINARY, REDIS_TTL, NOTIFICATION_TYPE } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
 import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/Cloudinary.js"
 import crypto from "crypto";
@@ -408,10 +408,10 @@ export const updateCourseService = async (data, instructorId, courseId) => {
 
     if (!course.isPublished && updatedCourse.isPublished) {
         createNotificationService({
-            user: course.instructor,
+            user: "global",
             title: "A New Course Published Successfully",
             message: `Course "${course.title}" is now published and available to students.`,
-            type: "course",
+            type: NOTIFICATION_TYPE.course,
             metadata: {
                 course: course._id
             }

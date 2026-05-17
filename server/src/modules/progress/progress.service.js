@@ -4,7 +4,7 @@ import progressModel from "./progress.model.js"
 import lessonModel from "../lesson/lesson.model.js";
 import enrollmentModel from "../enrollment/enrollment.model.js";
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES, REDIS_TTL } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, REDIS_TTL, NOTIFICATION_TYPE } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
 import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
 import { createNotificationService } from "../notification/notification.service.js"
@@ -149,7 +149,7 @@ export const completeLessonService = async ({ courseId, lessonId, userId }) => {
             user: userId,
             title: "Course Completed",
             message: "Congratulations! You completed this course.",
-            type: "progress",
+            type: NOTIFICATION_TYPE.progress,
             metadata: {
                 course: courseId
             }

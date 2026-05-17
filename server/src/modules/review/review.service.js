@@ -2,7 +2,7 @@ import reviewModel from "./review.model.js";
 import enrollmentModel from "../enrollment/enrollment.model.js";
 import courseModel from "../course/course.model.js";
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES, REDIS_TTL } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, REDIS_TTL, NOTIFICATION_TYPE } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
 import mongoose from "mongoose";
 import { updateCourseRating } from "./review.helper.js";
@@ -87,7 +87,7 @@ export const createReviewService = async (rating, message, courseId, studentId) 
         user: course.instructor,
         title: "New Course Review",
         message: "A student submitted a new review for your course.",
-        type: "review",
+        type: NOTIFICATION_TYPE.review,
         metadata: {
             course: course._id,
             review: newReview._id

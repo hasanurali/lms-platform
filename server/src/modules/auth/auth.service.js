@@ -1,6 +1,6 @@
 import userModel from "../user/user.model.js"
 import ApiError from "../../utils/apiError.js"
-import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
+import { HTTP_STATUS, MESSAGES, NOTIFICATION_TYPE } from "../../constants/index.js"
 import jwt from "jsonwebtoken"
 import { config } from "../../config/index.js"
 import { createNotificationService } from "../notification/notification.service.js"
@@ -25,7 +25,7 @@ export const createUser = async (data) => {
         user: user._id,
         title: "Welcome to LMS Platform",
         message: "Your account has been created successfully.",
-        type: "system"
+        type: NOTIFICATION_TYPE.system
     }).catch(err => log(err, "ERROR"));
 
     // Return data

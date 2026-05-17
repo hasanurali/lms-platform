@@ -1,7 +1,7 @@
 import enrollmentModel from "./enrollment.model.js"
 import courseModel from "../course/course.model.js";
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES, REDIS_TTL } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, REDIS_TTL, NOTIFICATION_TYPE } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
 import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
 import { createNotificationService } from "../notification/notification.service.js"
@@ -73,7 +73,7 @@ export const createEnrollmentService = async (courseId, userId) => {
             user: userId,
             title: "Enrollment Successful",
             message: `You enrolled in ${course.title}.`,
-            type: "enrollment",
+            type: NOTIFICATION_TYPE.enrollment,
             metadata: {
                 course: course._id,
                 enrollment: enrollCourse._id

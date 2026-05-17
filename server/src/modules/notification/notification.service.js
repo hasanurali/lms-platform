@@ -5,7 +5,9 @@ import validateObjectId from "../../utils/validateObjectId.js";
 
 
 export const createNotificationService = async (data) => {
-    return await notificationModel.create(data);
+
+    const notification = await notificationModel.create(data);
+    return notification
 };
 
 export const getNotificationsService = async (userId, page, limit) => {

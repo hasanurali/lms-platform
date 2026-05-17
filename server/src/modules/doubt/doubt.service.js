@@ -5,7 +5,7 @@ import lessonModel from "../lesson/lesson.model.js"
 import enrollmentModel from "../enrollment/enrollment.model.js"
 import replyModel from "./reply.model.js"
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES, ROLES, DOUBT_STATUS } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, ROLES, DOUBT_STATUS, NOTIFICATION_TYPE } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js"
 import { createNotificationService } from "../notification/notification.service.js"
 import log from "../../utils/logger.js";
@@ -110,7 +110,7 @@ export const createDoubtService = async (courseId, lessonId, title, description,
         user: course.instructor,
         title: "New Doubt Posted",
         message: "A student asked a new doubt in your course.",
-        type: "doubt",
+        type: NOTIFICATION_TYPE.doubt,
         metadata: {
             course: course._id,
             lesson: lessonId,
@@ -381,7 +381,7 @@ export const replyToDoubtService = async (message, doubtId, user) => {
             user: doubt.student,
             title: "New Reply to Your Doubt",
             message: "Your doubt received a new reply.",
-            type: "doubt",
+            type: NOTIFICATION_TYPE.doubt,
             metadata: {
                 course: doubt.course._id,
                 lesson: doubt.lesson,
