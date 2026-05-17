@@ -18,6 +18,7 @@ import enrollmentRoute from "./modules/enrollment/enrollment.route.js";
 import progressRoute from "./modules/progress/progress.route.js";
 import doubtRoute from "./modules/doubt/doubt.route.js";
 import reviewRoute from "./modules/review/review.route.js";
+import notificationRoute from "./modules/notification/notification.route.js";
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.use("/api/v1", enrollmentRoute);
 app.use("/api/v1/progress", progressRoute);
 app.use("/api/v1", doubtRoute);
 app.use("/api/v1", reviewRoute);
+app.use("/api/v1/notifications", notificationRoute);
 
 
 // Not Found Route
