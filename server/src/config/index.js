@@ -13,7 +13,8 @@ const required = [
     "JWT_REFRESH_EXPIRY",
     "CLOUDINARY_CLOUD_NAME",
     "CLOUDINARY_API_KEY",
-    "CLOUDINARY_API_SECRET"
+    "CLOUDINARY_API_SECRET",
+    "CLIENT_URL"
 ];
 
 required.forEach((key) => {
@@ -47,4 +48,6 @@ export const config = Object.freeze({
     cloudinary,
 
     corsOptions,
+
+    clientUrl: process.env.CLIENT_URL
 });
