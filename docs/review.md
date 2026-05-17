@@ -77,6 +77,7 @@ id: string (required) - Course ID
 **Success Response:**
 - **Status:** `201 Created`
 - **Message:** `Review created successfully`
+- **Notification sent:** A notification is sent to the course instructor when a new review is submitted.
 - **Response:**
 ```json
 {
