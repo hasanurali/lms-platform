@@ -95,6 +95,7 @@ const MESSAGES = Object.freeze({
         ONLY_INSTRUCTOR_CAN_ANSWER: "Only the course instructor or admin can mark this doubt as answered"
     }),
 
+    // Review
     REVIEW: Object.freeze({
         CREATED: "Review created successfully",
         UPDATED: "Review updated successfully",
@@ -105,6 +106,15 @@ const MESSAGES = Object.freeze({
         NOT_ENROLLED: "You must be enrolled in this course to submit a review",
         UNAUTHORIZED: "You are not authorized to modify this review",
         CANNOT_REVIEW_OWN: "Instructor cannot review their own course"
+    }),
+
+    // Notification
+    NOTIFICATION: Object.freeze({
+        FETCHED_ALL: "Notifications fetched successfully",
+        NOT_FOUND: "Notification not found",
+        MARKED_AS_READ: "Notification marked as read successfully",
+        ALL_MARKED_AS_READ: "All notifications marked as read successfully",
+        UNAUTHORIZED: "You are not authorized to modify this notification"
     })
 
 });
