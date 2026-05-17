@@ -6,7 +6,7 @@ import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 export const getNotifications = asyncHandler(async (req, res) => {
 
     // Get page and limit from request
-    const { page, limit } = req.query;
+    const { page, limit } = req.cleanQuery;
 
     // Get user id from request
     const userId = req.user._id;

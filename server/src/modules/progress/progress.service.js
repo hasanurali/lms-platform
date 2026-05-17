@@ -7,6 +7,8 @@ import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES, REDIS_TTL } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
 import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
+import { createNotificationService } from "../notification/notification.service.js"
+import log from "../../utils/logger.js";
 
 
 export const getProgressService = async (courseId, userId) => {
@@ -141,6 +143,17 @@ export const completeLessonService = async ({ courseId, lessonId, userId }) => {
     if (isComplete && !updatedProgress.completed) {
         progressModel.findByIdAndUpdate(updatedProgress._id, { completed: true }).exec();
         updatedProgress.completed = true;
+
+        // Send notification to user
+        createNotificationService({
+            user: userId,
+            title: "Course Completed",
+            message: "Congratulations! You completed this course.",
+            type: "progress",
+            metadata: {
+                course: courseId
+            }
+        }).catch(err => log(err, "ERROR"));
     }
 
     // Return data

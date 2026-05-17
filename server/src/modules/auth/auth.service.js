@@ -3,6 +3,8 @@ import ApiError from "../../utils/apiError.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
 import jwt from "jsonwebtoken"
 import { config } from "../../config/index.js"
+import { createNotificationService } from "../notification/notification.service.js"
+import log from "../../utils/logger.js"
 
 
 export const createUser = async (data) => {
@@ -17,6 +19,14 @@ export const createUser = async (data) => {
     // Set hashed refresh token in db
     user.setRefreshToken(refreshToken);
     await user.save();
+
+    // Send notification to user
+    createNotificationService({
+        user: user._id,
+        title: "Welcome to LMS Platform",
+        message: "Your account has been created successfully.",
+        type: "system"
+    }).catch(err => log(err, "ERROR"));
 
     // Return data
     return {
