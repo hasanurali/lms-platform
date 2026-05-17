@@ -7,6 +7,8 @@ import replyModel from "./reply.model.js"
 import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES, ROLES, DOUBT_STATUS } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js"
+import { createNotificationService } from "../notification/notification.service.js"
+import log from "../../utils/logger.js";
 
 
 // fetch doubt with instructor function
@@ -28,7 +30,8 @@ const getDoubtWithInstructor = async (doubtId) => {
                 _id: 1,
                 status: 1,
                 student: 1,
-                course: { instructor: "$course.instructor" }
+                course: { _id: 1, instructor: "$course.instructor" },
+                lesson: 1
             }
         }
     ]);
@@ -101,6 +104,19 @@ export const createDoubtService = async (courseId, lessonId, title, description,
             }
         }
     ]);
+
+    // Send notification to instructor
+    createNotificationService({
+        user: course.instructor,
+        title: "New Doubt Posted",
+        message: "A student asked a new doubt in your course.",
+        type: "doubt",
+        metadata: {
+            course: course._id,
+            lesson: lessonId,
+            doubt: doubt._id
+        }
+    }).catch(err => log(err, "ERROR"));
 
     // Return data
     return {
@@ -358,6 +374,21 @@ export const replyToDoubtService = async (message, doubtId, user) => {
             }
         }
     ]);
+
+    // Send notification to user
+    if (doubt.student.toString() !== user._id.toString()) {
+        createNotificationService({
+            user: doubt.student,
+            title: "New Reply to Your Doubt",
+            message: "Your doubt received a new reply.",
+            type: "doubt",
+            metadata: {
+                course: doubt.course._id,
+                lesson: doubt.lesson,
+                doubt: doubt._id
+            }
+        }).catch(err => log(err, "ERROR"));
+    };
 
     // Return data
     return populatedReply[0];

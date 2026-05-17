@@ -136,6 +136,7 @@ courseId: string (required) - Course ID
 - **Status:** `200 OK`
 - **Message:** `Course completed successfully` — if all lessons are now completed
 - **Message:** `Progress updated successfully` — otherwise
+- **Notification sent:** A course completion notification is sent to the user when all lessons are completed.
 - **Response (course completed):**
 ```json
 {

@@ -4,6 +4,8 @@ import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES, REDIS_TTL } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
 import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
+import { createNotificationService } from "../notification/notification.service.js"
+import log from "../../utils/logger.js";
 
 
 export const createEnrollmentService = async (courseId, userId) => {
@@ -16,7 +18,7 @@ export const createEnrollmentService = async (courseId, userId) => {
 
     // parallelize fetch course and check enrollment
     const [course, enroll] = await Promise.all([
-        courseModel.exists({ _id: courseId }),
+        courseModel.findById(courseId).select("_id instructor title").lean(),
         enrollmentModel.exists({ user: userId, course: courseId })
     ]);
 
@@ -64,6 +66,20 @@ export const createEnrollmentService = async (courseId, userId) => {
             }
         }
     ]);
+
+    // Send notification to user
+    if (userId.toString() !== course.instructor.toString()) {
+        createNotificationService({
+            user: userId,
+            title: "Enrollment Successful",
+            message: `You enrolled in ${course.title}.`,
+            type: "enrollment",
+            metadata: {
+                course: course._id,
+                enrollment: enrollCourse._id
+            }
+        }).catch(err => log(err, "ERROR"));
+    };
 
     // Return data
     return populatedEnrollment[0];

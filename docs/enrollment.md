@@ -44,7 +44,7 @@ If both are present, the cookie takes priority.
 - A user can only enroll in the same course once.
 - `course.thumbnail` is returned as a plain string URL.
 - `GET /enrollments/my` always returns an array; empty array if the user has no enrollments.
-- `averageRating`, `totalReviews`, and `ratingDistribution` are automatically updated whenever a review is created, updated, or deleted.
+- A welcome notification is sent to the user upon successful enrollment.
 
 ---
 
@@ -84,9 +84,9 @@ id: string (required) - Course ID
       "instructor": "ObjectId",
       "price": 49.99,
       "isPublished": true,
-      "averageRating": 0,
-      "totalReviews": 0,
-      "ratingDistribution": { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 }
+      "averageRating": 4.5,
+      "totalReviews": 120,
+      "ratingDistribution": { "1": 2, "2": 3, "3": 10, "4": 35, "5": 70 }
     }
   }
 }
@@ -135,9 +135,9 @@ id: string (required) - Course ID
         "instructor": "ObjectId",
         "price": 49.99,
         "isPublished": true,
-        "averageRating": 0,
-        "totalReviews": 0,
-        "ratingDistribution": { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 }
+        "averageRating": 4.5,
+        "totalReviews": 120,
+        "ratingDistribution": { "1": 2, "2": 3, "3": 10, "4": 35, "5": 70 }
       }
     }
   ]

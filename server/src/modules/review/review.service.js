@@ -7,6 +7,8 @@ import validateObjectId from "../../utils/validateObjectId.js";
 import mongoose from "mongoose";
 import { updateCourseRating } from "./review.helper.js";
 import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
+import { createNotificationService } from "../notification/notification.service.js"
+import log from "../../utils/logger.js";
 
 
 export const createReviewService = async (rating, message, courseId, studentId) => {
@@ -79,6 +81,18 @@ export const createReviewService = async (rating, message, courseId, studentId) 
             }
         }
     ]);
+
+    // Send notification to instructor
+    createNotificationService({
+        user: course.instructor,
+        title: "New Course Review",
+        message: "A student submitted a new review for your course.",
+        type: "review",
+        metadata: {
+            course: course._id,
+            review: newReview._id
+        }
+    }).catch(err => log(err, "ERROR"));
 
     // Return data
     return populatedReview[0];

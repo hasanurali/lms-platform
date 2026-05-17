@@ -82,6 +82,7 @@ If both are present, the cookie takes priority.
 **Success Response:**
 - **Status:** `201 Created`
 - **Message:** `Doubt created successfully`
+- **Notification sent:** A notification is sent to the course instructor when a new doubt is posted.
 - **Response:**
 ```json
 {
@@ -390,6 +391,7 @@ id: string (required) - Doubt ID
 **Success Response:**
 - **Status:** `201 Created`
 - **Message:** `Reply added successfully`
+- **Notification sent:** A notification is sent to the doubt's student when a reply is added by someone other than themselves.
 - **Response:**
 ```json
 {

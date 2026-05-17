@@ -12,6 +12,8 @@ import validateObjectId from "../../utils/validateObjectId.js";
 import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/Cloudinary.js"
 import crypto from "crypto";
 import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
+import { createNotificationService } from "../notification/notification.service.js"
+import log from "../../utils/logger.js"
 
 
 // Common population for instructor
@@ -365,7 +367,7 @@ export const updateCourseService = async (data, instructorId, courseId) => {
     validateObjectId(courseId);
 
     // Fetch course by id
-    const course = await courseModel.findById(courseId).select("instructor thumbnail").lean();
+    const course = await courseModel.findById(courseId).select("instructor thumbnail isPublished").lean();
     if (!course) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
     };
@@ -403,6 +405,18 @@ export const updateCourseService = async (data, instructorId, courseId) => {
         .populate(commonPopulate)
         .select(commonCourseSelection)
         .lean();
+
+    if (!course.isPublished && updatedCourse.isPublished) {
+        createNotificationService({
+            user: course.instructor,
+            title: "A New Course Published Successfully",
+            message: `Course "${course.title}" is now published and available to students.`,
+            type: "course",
+            metadata: {
+                course: course._id
+            }
+        }).catch(err => log(err, "ERROR"));
+    }
 
     // Return data
     return {

@@ -55,6 +55,7 @@ Cookies are cleared on logout.
 - **Status:** `201 Created`
 - **Message:** `Account created successfully`
 - **Cookies set:** `accessToken`, `refreshToken`
+- **Notification sent:** A welcome system notification is sent to the new user.
 - **Response:**
 ```json
 {
