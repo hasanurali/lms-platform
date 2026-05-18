@@ -12,7 +12,7 @@ import validateObjectId from "../../utils/validateObjectId.js";
 import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/Cloudinary.js"
 import crypto from "crypto";
 import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
-import { createNotificationService } from "../notification/notification.service.js"
+import { createGlobalNotificationService } from "../notification/notification.service.js"
 import log from "../../utils/logger.js"
 
 
@@ -407,14 +407,14 @@ export const updateCourseService = async (data, instructorId, courseId) => {
         .lean();
 
     if (!course.isPublished && updatedCourse.isPublished) {
-        createNotificationService({
-            user: "global",
+        createGlobalNotificationService({
             title: "A New Course Published Successfully",
             message: `Course "${course.title}" is now published and available to students.`,
             type: NOTIFICATION_TYPE.course,
             metadata: {
                 course: course._id
-            }
+            },
+            exceptUser: course.instructor,
         }).catch(err => log(err, "ERROR"));
     }
 

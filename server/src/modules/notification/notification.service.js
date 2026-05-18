@@ -1,13 +1,64 @@
 import notificationModel from "./notification.model.js";
+import userModel from "../user/user.model.js"
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, SOCKET_EVENTS } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
+import { getIO } from "../../socket/socket.js"
 
 
 export const createNotificationService = async (data) => {
 
+    // Create notification
     const notification = await notificationModel.create(data);
-    return notification
+
+    // Send notification to user
+    const io = getIO();
+    io.to(`user:${notification.user.toString()}`).emit(SOCKET_EVENTS.NEW_NOTIFICATION, {
+        _id: notification._id,
+        title: notification.title,
+        message: notification.message,
+        type: notification.type,
+        isRead: notification.isRead,
+        metadata: notification.metadata,
+        createdAt: notification.createdAt
+    });
+
+    return notification;
+};
+
+export const createGlobalNotificationService = async (data) => {
+
+    const { exceptUser, title, message, type, metadata = {} } = data;
+
+    const users = await userModel.find(exceptUser ? { _id: { $ne: exceptUser } } : {}).select("_id").lean();
+
+    const notifications = users.map((user) => ({
+        user: user._id,
+        title,
+        message,
+        type,
+        metadata
+    }));
+
+    // Insert all notifications
+    const insertedNotifications = await notificationModel.insertMany(notifications);
+
+    // Use the first inserted notification as the payload template(all are same except user field)
+    const notification = insertedNotifications[0]
+
+    // Send notification to user
+    const io = getIO();
+    io.to("global").except(`user:${exceptUser.toString()}`).emit(SOCKET_EVENTS.NEW_NOTIFICATION, {
+        _id: notification._id,
+        title: notification.title,
+        message: notification.message,
+        type: notification.type,
+        isRead: notification.isRead,
+        metadata: notification.metadata,
+        createdAt: notification.createdAt
+    });
+
+    return insertedNotifications;
 };
 
 export const getNotificationsService = async (userId, page, limit) => {

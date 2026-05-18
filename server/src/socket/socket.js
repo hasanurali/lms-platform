@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import { config } from "../config/index.js"
 import { parse } from "cookie"
 import jwt from "jsonwebtoken";
+import { SOCKET_EVENTS } from "../constants/index.js"
 
 let io;
 
@@ -36,15 +37,26 @@ export const initializeSocket = (server) => {
     });
 
     // Handle connections
-    io.on("connection", (socket) => {
+    io.on(SOCKET_EVENTS.CONNECT, (socket) => {
 
         const userId = socket.user.id.toString();
 
         // Join private room
-        socket.join(userId);
+        socket.join(`user:${userId}`);
 
         // Join globle room
         socket.join("global");
+
+
+        // Join room 
+        socket.on(SOCKET_EVENTS.JOIN_DOUBT_ROOM, (doubtId) => {
+            socket.join(`doubt:${doubtId}`);
+        });
+
+        // Leave room
+        socket.on(SOCKET_EVENTS.LEAVE_DOUBT_ROOM, (doubtId) => {
+            socket.leave(`doubt:${doubtId}`);
+        });
 
     });
 
