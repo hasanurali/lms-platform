@@ -9,6 +9,10 @@ const MESSAGES = Object.freeze({
         UNAUTHORIZED: 'You are not authorized',
         TOKEN_EXPIRED: 'Session expired, please login again',
         EMAIL_EXISTS: 'Email already registered',
+        TOKEN_REFRESHED: "Token refreshed successfully",
+        EMAIL_VERIFIED: 'Email verified successfully',
+        INVALID_OTP: "Invalid OTP",
+        EMAIL_NOT_VERIFY: "Please verify your email to login"
     }),
 
     // User
@@ -68,6 +72,7 @@ const MESSAGES = Object.freeze({
     // General 
     GENERAL: Object.freeze({
         VALIDATION_ERROR: 'Validation failed',
+        SOMETHING_WENT_WRONG: "Something went wrong"
     }),
 
     // Progress

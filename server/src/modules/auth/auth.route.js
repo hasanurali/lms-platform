@@ -1,8 +1,8 @@
 import express from "express"
 const authRoute = express.Router()
-import { registerValidation, loginValidation } from "./auth.validation.js"
+import { registerValidation, loginValidation, verifyEmailValidation } from "./auth.validation.js"
 import validate from "../../middlewares/validation.result.middleware.js"
-import { register, login, logout, refresh } from "./auth.controller.js"
+import { register, login, logout, refresh, verifyEmail } from "./auth.controller.js"
 import authMiddleware from "../../middlewares/auth.middleware.js"
 import { authLimiter } from "../../middlewares/rateLimit.middleware.js"
 
@@ -11,6 +11,13 @@ authRoute.post("/register",
     registerValidation,
     validate,
     register
+);
+
+authRoute.post("/verify-email",
+    authLimiter,
+    verifyEmailValidation,
+    validate,
+    verifyEmail,
 );
 
 authRoute.post("/login",
@@ -28,6 +35,6 @@ authRoute.post("/logout",
 authRoute.post("/refresh",
     authLimiter,
     refresh
-)
+);
 
 export default authRoute;
