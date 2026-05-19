@@ -3,6 +3,7 @@ import JWT_CONFIG from "./jwt.config.js"
 import COOKIE_CONFIGURATION from "./cookie.config.js";
 import { cloudinary } from "./cloudinary.config.js";
 import corsOptions from "./cors.config.js";
+import transporter from "./email.config.js"
 
 // Validate required env
 const required = [
@@ -14,7 +15,11 @@ const required = [
     "CLOUDINARY_CLOUD_NAME",
     "CLOUDINARY_API_KEY",
     "CLOUDINARY_API_SECRET",
-    "CLIENT_URL"
+    "CLIENT_URL",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_REFRESH_TOKEN",
+    "GOOGLE_USER"
 ];
 
 required.forEach((key) => {
@@ -49,5 +54,7 @@ export const config = Object.freeze({
 
     corsOptions,
 
-    clientUrl: process.env.CLIENT_URL
+    clientUrl: process.env.CLIENT_URL,
+
+    transporter
 });
