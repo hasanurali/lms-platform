@@ -5,15 +5,16 @@ import lessonModel from "../lesson/lesson.model.js"
 import enrollmentModel from "../enrollment/enrollment.model.js"
 import replyModel from "./reply.model.js"
 import ApiError from "../../utils/apiError.js";
-import { HTTP_STATUS, MESSAGES, ROLES, DOUBT_STATUS } from "../../constants/index.js";
+import { HTTP_STATUS, MESSAGES, ROLES, DOUBT_STATUS, NOTIFICATION_TYPE, SOCKET_EVENTS } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js"
 import { createNotificationService } from "../notification/notification.service.js"
 import log from "../../utils/logger.js";
+import { getIO } from "../../socket/socket.js"
 
 
 // fetch doubt with instructor function
 const getDoubtWithInstructor = async (doubtId) => {
-    const doubt = await doubtModel.aggregate([
+    const [doubt] = await doubtModel.aggregate([
         { $match: { _id: new mongoose.Types.ObjectId(doubtId) } },
         {
             $lookup: {
@@ -28,6 +29,7 @@ const getDoubtWithInstructor = async (doubtId) => {
         {
             $project: {
                 _id: 1,
+                title: 1,
                 status: 1,
                 student: 1,
                 course: { _id: 1, instructor: "$course.instructor" },
@@ -36,7 +38,7 @@ const getDoubtWithInstructor = async (doubtId) => {
         }
     ]);
 
-    return doubt[0]
+    return doubt;
 }
 
 export const createDoubtService = async (courseId, lessonId, title, description, user) => {
@@ -82,7 +84,7 @@ export const createDoubtService = async (courseId, lessonId, title, description,
     ]);
 
     // Get populated reply
-    const populatedReply = await replyModel.aggregate([
+    const [populatedReply] = await replyModel.aggregate([
         { $match: { _id: reply._id } },
         {
             $lookup: {
@@ -106,17 +108,32 @@ export const createDoubtService = async (courseId, lessonId, title, description,
     ]);
 
     // Send notification to instructor
-    createNotificationService({
-        user: course.instructor,
-        title: "New Doubt Posted",
-        message: "A student asked a new doubt in your course.",
-        type: "doubt",
-        metadata: {
-            course: course._id,
-            lesson: lessonId,
-            doubt: doubt._id
+    if (course.instructor.toString() !== user._id.toString()) {
+        createNotificationService({
+            user: course.instructor,
+            title: "New Doubt Posted",
+            message: "A student asked a new doubt in your course.",
+            type: NOTIFICATION_TYPE.doubt,
+            metadata: {
+                course: course._id,
+                lesson: lessonId,
+                doubt: doubt._id
+            }
+        }).catch(err => log(err, "ERROR"));
+    };
+
+    // Send doubt to the instructor
+    let io = getIO()
+    io.to(`user:${course.instructor.toString()}`).emit(
+        SOCKET_EVENTS.NEW_DOUBT,
+        {
+            _id: doubt._id,
+            title: doubt.title,
+            status: doubt.status,
+            student: doubt.student,
+            lastReplyAt: doubt.lastReplyAt
         }
-    }).catch(err => log(err, "ERROR"));
+    );
 
     // Return data
     return {
@@ -129,7 +146,7 @@ export const createDoubtService = async (courseId, lessonId, title, description,
             status: doubt.status,
             lastReplyAt: doubt.lastReplyAt
         },
-        reply: populatedReply[0]
+        reply: populatedReply
     }
 };
 
@@ -352,7 +369,7 @@ export const replyToDoubtService = async (message, doubtId, user) => {
     doubtModel.findByIdAndUpdate(doubtId, { lastReplyAt: new Date() }).exec();
 
     // Populate reply
-    const populatedReply = await replyModel.aggregate([
+    const [populatedReply] = await replyModel.aggregate([
         { $match: { _id: reply._id } },
         {
             $lookup: {
@@ -381,7 +398,7 @@ export const replyToDoubtService = async (message, doubtId, user) => {
             user: doubt.student,
             title: "New Reply to Your Doubt",
             message: "Your doubt received a new reply.",
-            type: "doubt",
+            type: NOTIFICATION_TYPE.doubt,
             metadata: {
                 course: doubt.course._id,
                 lesson: doubt.lesson,
@@ -390,8 +407,15 @@ export const replyToDoubtService = async (message, doubtId, user) => {
         }).catch(err => log(err, "ERROR"));
     };
 
+    // Send reply to doubt room
+    let io = getIO()
+    io.to(`doubt:${doubtId.toString()}`).except(`user:${user._id.toString()}`).emit(
+        SOCKET_EVENTS.NEW_DOUBT_REPLY,
+        populatedReply
+    );
+
     // Return data
-    return populatedReply[0];
+    return populatedReply;
 };
 
 export const markDoubtAnsweredService = async (doubtId, user) => {
@@ -433,6 +457,28 @@ export const markDoubtAnsweredService = async (doubtId, user) => {
         { path: "student", select: "name" }
     ]).select("_id title course lesson student status lastReplyAt").lean();
 
+    // Send notification to instructor
+    if (doubt.student.toString() !== user._id.toString()) {
+        createNotificationService({
+            user: doubt.student,
+            title: "Doubt Answered",
+            message: `Your doubt "${doubt.title}" has been marked as answered.`,
+            type: NOTIFICATION_TYPE.doubt,
+            metadata: {
+                course: doubt.course._id,
+                lesson: doubt.lesson,
+                doubt: doubt._id
+            }
+        }).catch(err => log(err, "ERROR"));
+    }
+
+    // Send marked doubt to the user
+    let io = getIO()
+    io.to(`doubt:${doubtId.toString()}`).except(`user:${user._id.toString()}`).emit(
+        SOCKET_EVENTS.DOUBT_STATUS_UPDATED,
+        answeredDoubt
+    );
+
     // Return data
     return answeredDoubt;
 };
@@ -468,6 +514,13 @@ export const closeDoubtService = async (doubtId, userId) => {
         { path: "lesson", select: "title" },
         { path: "student", select: "name" }
     ]).select("_id title course lesson student status lastReplyAt").lean();
+
+    // Send closed doubt to the room
+    let io = getIO()
+    io.to(`doubt:${doubtId.toString()}`).except(`user:${userId.toString()}`).emit(
+        SOCKET_EVENTS.DOUBT_STATUS_UPDATED,
+        closedDoubt
+    );
 
     // Return data
     return closedDoubt;
