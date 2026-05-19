@@ -12,7 +12,9 @@ const MESSAGES = Object.freeze({
         TOKEN_REFRESHED: "Token refreshed successfully",
         EMAIL_VERIFIED: 'Email verified successfully',
         INVALID_OTP: "Invalid OTP",
-        EMAIL_NOT_VERIFY: "Please verify your email to login"
+        EMAIL_NOT_VERIFY: "Please verify your email to login",
+        OTP_RESENT: "A new OTP has been sent to your email address.",
+        VERIFICATION_SESSION_EXPIRED: "Verification session expired. Please login again.",
     }),
 
     // User

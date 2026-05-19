@@ -21,11 +21,11 @@ export const createUser = async (data) => {
     const html = getOtpHtml(otp);
     const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
 
-    // Parallelize OTP save and email send
-    await Promise.all([
-        otpModel.create({ email: user.email, user: user._id, otp: otpHash }),
-        sendEmail(user.email, "OTP Verification", `Your OTP is: ${otp}`, html)
-    ]);
+    // Save otp in db
+    await otpModel.create({ email: user.email, user: user._id, otp: otpHash });
+
+    // Sending email
+    void sendEmail(user.email, "OTP Verification", `Your OTP is: ${otp}`, html).catch(err => log(err, "ERROR"));
 
     // Return data
     return {
@@ -43,7 +43,7 @@ export const verifyEmailService = async (email, otp) => {
 
     // Check email provided
     if (!email) {
-        throw new ApiError(HTTP_STATUS.INTERNAL_SERVER_ERROR, MESSAGES.GENERAL.SOMETHING_WENT_WRONG);
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.AUTH.VERIFICATION_SESSION_EXPIRED);
     };
 
     const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
@@ -93,6 +93,34 @@ export const verifyEmailService = async (email, otp) => {
     }
 };
 
+export const resendOtpService = async (email) => {
+
+    // Check email provided
+    if (!email) {
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.AUTH.VERIFICATION_SESSION_EXPIRED);
+    };
+
+    // Find user 
+    const user = await userModel.findOne({ email, isVerified: false }).select("_id email").lean()
+    if (!user) {
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.AUTH.VERIFICATION_SESSION_EXPIRED);
+    };
+
+    // Generate otp and otp ui template
+    const otp = generateOtp();
+    const html = getOtpHtml(otp);
+    const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+
+    // Delete user releted otp
+    await otpModel.deleteOne({ email: user.email });
+
+    // Save otp in db
+    await otpModel.create({ email: user.email, user: user._id, otp: otpHash });
+
+    // Sending email
+    void sendEmail(user.email, "OTP Verification", `Your OTP is: ${otp}`, html).catch(err => log(err, "ERROR"));
+};
+
 export const loginUser = async (email, password) => {
 
     // Check user exists
@@ -108,14 +136,14 @@ export const loginUser = async (email, password) => {
         const html = getOtpHtml(otp);
         const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
 
-        // Delete user releted all otp
+        // Delete user releted otp
         await otpModel.deleteOne({ email: user.email });
 
-        // Parallelize OTP save and email send
-        await Promise.all([
-            otpModel.create({ email: user.email, user: user._id, otp: otpHash }),
-            sendEmail(user.email, "OTP Verification", `Your OTP is: ${otp}`, html)
-        ]);
+        // Save otp in db
+        await otpModel.create({ email: user.email, user: user._id, otp: otpHash });
+
+        // Sending email
+        void sendEmail(user.email, "OTP Verification", `Your OTP is: ${otp}`, html).catch(err => log(err, "ERROR"));
 
         // Throw error with email
         throw new ApiError(HTTP_STATUS.UNAUTHORIZED, MESSAGES.AUTH.EMAIL_NOT_VERIFY, [{ email: user.email }]);
