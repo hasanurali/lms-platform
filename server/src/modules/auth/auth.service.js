@@ -61,6 +61,10 @@ export const verifyEmailService = async (email, otp) => {
         otpModel.findByIdAndDelete(otpRecord._id)
     ]);
 
+    if (!user) {
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.AUTH.INVALID_OTP)
+    }
+
     // Generate tokens
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
