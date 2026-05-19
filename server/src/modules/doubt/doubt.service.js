@@ -366,7 +366,7 @@ export const replyToDoubtService = async (message, doubtId, user) => {
     });
 
     // Update last reply timestamp
-    doubtModel.findByIdAndUpdate(doubtId, { lastReplyAt: new Date() }).exec();
+    await doubtModel.findByIdAndUpdate(doubtId, { lastReplyAt: new Date() });
 
     // Populate reply
     const [populatedReply] = await replyModel.aggregate([

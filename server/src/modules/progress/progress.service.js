@@ -141,7 +141,7 @@ export const completeLessonService = async ({ courseId, lessonId, userId }) => {
     // Mark complete if finished
     const isComplete = totalLessons > 0 && updatedProgress.completedLessons.length === totalLessons;
     if (isComplete && !updatedProgress.completed) {
-        progressModel.findByIdAndUpdate(updatedProgress._id, { completed: true }).exec();
+        await progressModel.findByIdAndUpdate(updatedProgress._id, { completed: true });
         updatedProgress.completed = true;
 
         // Send notification to user

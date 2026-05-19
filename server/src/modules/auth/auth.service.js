@@ -128,9 +128,9 @@ export const loginUser = async (email, password) => {
     const refreshToken = user.generateRefreshToken();
 
     // Set hashed refresh token in db
-    userModel.findByIdAndUpdate(user._id, {
+    await userModel.findByIdAndUpdate(user._id, {
         refreshToken: user.hashToken(refreshToken)
-    }).exec();
+    });
 
     // Return data
     return {
@@ -194,9 +194,9 @@ export const refreshAccessToken = async (token) => {
     const refreshToken = user.generateRefreshToken();
 
     // Set hashed refresh token in db
-    userModel.findByIdAndUpdate(user._id, {
+    await userModel.findByIdAndUpdate(user._id, {
         refreshToken: user.hashToken(refreshToken)
-    }).exec();
+    });
 
     // Return data
     return { accessToken, refreshToken };
