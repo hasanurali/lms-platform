@@ -423,7 +423,7 @@ id: string (required) - Course ID
 - **Status:** `200 OK`
 - **Message:** `Course published successfully` — if `isPublished` is `true` after update
 - **Message:** `Course updated successfully` — otherwise
-- **Notification sent:** A notification is sent to the instructor when a course is published for the first time.
+- **Notification sent:** A global notification is sent to all users (except the instructor) when a course is published for the first time.
 - **Response (course published):**
 ```json
 {

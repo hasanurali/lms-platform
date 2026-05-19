@@ -446,6 +446,7 @@ id: string (required) - Doubt ID
 **Success Response:**
 - **Status:** `200 OK`
 - **Message:** `Doubt marked as answered successfully`
+- **Notification sent:** A notification is sent to the student when their doubt is marked as answered.
 - **Response:**
 ```json
 {
