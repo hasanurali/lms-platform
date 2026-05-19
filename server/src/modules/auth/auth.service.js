@@ -66,7 +66,7 @@ export const verifyEmailService = async (email, otp) => {
     const refreshToken = user.generateRefreshToken();
 
     // Send notification to user
-    createNotificationService({
+    void createNotificationService({
         user: user._id,
         title: "Welcome to LMS Platform",
         message: "Your account has been created successfully.",

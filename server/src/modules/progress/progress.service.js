@@ -145,7 +145,7 @@ export const completeLessonService = async ({ courseId, lessonId, userId }) => {
         updatedProgress.completed = true;
 
         // Send notification to user
-        createNotificationService({
+        void createNotificationService({
             user: userId,
             title: "Course Completed",
             message: "Congratulations! You completed this course.",

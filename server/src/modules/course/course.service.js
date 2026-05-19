@@ -407,7 +407,7 @@ export const updateCourseService = async (data, instructorId, courseId) => {
         .lean();
 
     if (!course.isPublished && updatedCourse.isPublished) {
-        createGlobalNotificationService({
+       void createGlobalNotificationService({
             title: "A New Course Published Successfully",
             message: `Course "${course.title}" is now published and available to students.`,
             type: NOTIFICATION_TYPE.course,

@@ -83,7 +83,7 @@ export const createReviewService = async (rating, message, courseId, studentId) 
     ]);
 
     // Send notification to instructor
-    createNotificationService({
+    void createNotificationService({
         user: course.instructor,
         title: "New Course Review",
         message: "A student submitted a new review for your course.",
