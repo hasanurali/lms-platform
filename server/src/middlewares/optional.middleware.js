@@ -16,7 +16,7 @@ const optionalMiddleware = asyncHandler(async (req, res, next) => {
 
     try {
         let decoded = jwt.verify(token, config.jwt.ACCESS.SECRET);
-        const user = await userModel.findById(decoded?.id);
+        const user = await userModel.findOne({ _id: decoded?.id, isVerified: true });
         if (user) {
             req.user = user;
         }

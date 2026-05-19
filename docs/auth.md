@@ -1,7 +1,7 @@
 # Auth API Documentation
 
 ## Overview
-The Auth API handles user registration, login, logout, and access token refresh. On successful authentication, both an `accessToken` and a `refreshToken` are issued as HTTP-only cookies.
+The Auth API handles user registration, email verification, login, logout, and access token refresh. Registration creates an account and sends a 6-digit OTP to the user's email. Tokens are issued only after email verification is complete.
 
 ---
 
@@ -21,7 +21,7 @@ https://your-domain.com/api/v1
 
 ## Cookies
 
-All auth endpoints that issue tokens set the following cookies automatically:
+Endpoints that issue tokens set the following cookies automatically:
 
 | Cookie | Description |
 |--------|-------------|
@@ -32,6 +32,24 @@ Cookies are cleared on logout.
 
 ---
 
+## Rate Limiting
+
+The following endpoints are rate limited to prevent abuse:
+
+- `POST /auth/register`
+- `POST /auth/login`
+- `POST /auth/verify-email`
+- `POST /auth/refresh`
+
+---
+
+## Registration Flow
+
+1. `POST /auth/register` — creates the account and sends a 6-digit OTP to the provided email. No tokens are issued yet.
+2. `POST /auth/verify-email` — verifies the OTP, marks the account as verified, and issues both tokens as cookies.
+
+---
+
 ## Endpoints
 
 ### 1. Register
@@ -39,7 +57,7 @@ Cookies are cleared on logout.
 
 **Authentication:** Not required
 
-**Description:** Creates a new user account and returns the user along with both tokens set as cookies. Default role is `student` if not provided.
+**Description:** Creates a new unverified user account and sends a 6-digit OTP to the provided email address. Tokens are not issued at this stage — the user must verify their email first via `POST /auth/verify-email`.
 
 **Request Body:**
 ```json
@@ -54,8 +72,6 @@ Cookies are cleared on logout.
 **Success Response:**
 - **Status:** `201 Created`
 - **Message:** `Account created successfully`
-- **Cookies set:** `accessToken`, `refreshToken`
-- **Notification sent:** A welcome system notification is sent to the new user.
 - **Response:**
 ```json
 {
@@ -66,7 +82,8 @@ Cookies are cleared on logout.
     "email": "john@example.com",
     "bio": "",
     "profilePicture": "https://api.dicebear.com/9.x/identicon/svg?seed=...",
-    "role": "student"
+    "role": "student",
+    "isVerified": false
   }
 }
 ```
@@ -91,12 +108,59 @@ Cookies are cleared on logout.
 
 ---
 
-### 2. Login
+### 2. Verify Email
+**Endpoint:** `POST /auth/verify-email`
+
+**Authentication:** Not required
+
+**Description:** Verifies the user's email using the 6-digit OTP sent during registration. On success, the account is marked as verified, both tokens are set as cookies, and a welcome notification is sent. The OTP expires after 10 minutes and is deleted after use.
+
+**Request Body:**
+```json
+{
+  "email": "string (required)",
+  "otp": "string (required, 6 digits)"
+}
+```
+
+**Success Response:**
+- **Status:** `200 OK`
+- **Message:** `Email verified successfully`
+- **Cookies set:** `accessToken`, `refreshToken`
+- **Notification sent:** A welcome system notification is sent to the user.
+- **Response:**
+```json
+{
+  "message": "Email verified successfully",
+  "data": {
+    "_id": "ObjectId",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "bio": "",
+    "profilePicture": "https://api.dicebear.com/9.x/identicon/svg?seed=...",
+    "role": "student",
+    "isVerified": true
+  }
+}
+```
+
+**Error Responses:**
+
+| Status | Message | Reason |
+|--------|---------|--------|
+| `400 Bad Request` | `OTP is required` | `otp` is missing or empty |
+| `400 Bad Request` | `OTP must be 6 digits` | `otp` is not exactly 6 characters |
+| `400 Bad Request` | `OTP must be numbers only` | `otp` contains non-numeric characters |
+| `400 Bad Request` | `Invalid OTP` | OTP does not match or has expired |
+
+---
+
+### 3. Login
 **Endpoint:** `POST /auth/login`
 
 **Authentication:** Not required
 
-**Description:** Authenticates a user with email and password. Returns the user and sets both tokens as cookies.
+**Description:** Authenticates a verified user with email and password. If the account exists but is not verified, a new OTP is sent to the email and an error is returned. Returns the user and sets both tokens as cookies on success.
 
 **Request Body:**
 ```json
@@ -120,7 +184,8 @@ Cookies are cleared on logout.
     "email": "john@example.com",
     "bio": "",
     "profilePicture": "https://api.dicebear.com/9.x/identicon/svg?seed=...",
-    "role": "student"
+    "role": "student",
+    "isVerified": true
   }
 }
 ```
@@ -132,10 +197,11 @@ Cookies are cleared on logout.
 | `400 Bad Request` | `Invalid email` | `email` is not a valid email format |
 | `400 Bad Request` | `Password is required` | `password` is missing or empty |
 | `401 Unauthorized` | `Invalid email or password` | No user found with this email, or password does not match |
+| `401 Unauthorized` | `Please verify your email to login` | Account exists but email is not verified — a new OTP has been sent |
 
 ---
 
-### 3. Logout
+### 4. Logout
 **Endpoint:** `POST /auth/logout`
 
 **Authentication:** Required (cookie `accessToken` or `Authorization: Bearer <token>`)
@@ -159,13 +225,13 @@ Cookies are cleared on logout.
 
 | Status | Message | Reason |
 |--------|---------|--------|
-| `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |
+| `401 Unauthorized` | `You are not authorized` | No token provided, user not found, or user is not verified |
 | `401 Unauthorized` | `Token expired` | Access token has expired — use `/auth/refresh` first |
 | `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
 
 ---
 
-### 4. Refresh Token
+### 5. Refresh Token
 **Endpoint:** `POST /auth/refresh`
 
 **Authentication:** Not required (reads `refreshToken` cookie directly)
@@ -190,4 +256,4 @@ Cookies are cleared on logout.
 | Status | Message | Reason |
 |--------|---------|--------|
 | `401 Unauthorized` | `Session expired, please login again` | No refresh token cookie provided, or token has expired |
-| `401 Unauthorized` | `You are not authorized` | Token is malformed, user not found, refresh token not in DB, or token does not match stored hash |
+| `401 Unauthorized` | `You are not authorized` | Token is malformed, user not found, not verified, or token does not match stored hash |

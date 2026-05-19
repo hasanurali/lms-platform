@@ -1,8 +1,9 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createUser, loginUser, logoutUser, refreshAccessToken } from "./auth.service.js"
+import { createUser, loginUser, logoutUser, refreshAccessToken, verifyEmailService } from "./auth.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { config } from "../../config/index.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
+
 
 export const register = asyncHandler(async (req, res) => {
 
@@ -10,14 +11,27 @@ export const register = asyncHandler(async (req, res) => {
     const { name, email, password, role = "student" } = req.body;
 
     // Create user
-    const { newUser, accessToken, refreshToken } = await createUser({ name, email, password, role });
+    const user = await createUser({ name, email, password, role });
 
     // Send response
     return res
         .status(HTTP_STATUS.CREATED)
+        .json(new ApiResponse(MESSAGES.AUTH.REGISTER_SUCCESS, user));
+});
+
+export const verifyEmail = asyncHandler(async (req, res) => {
+
+    const { email, otp } = req.body;
+
+    // Verify email
+    const { userData, accessToken, refreshToken } = await verifyEmailService(email, otp);
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
         .cookie("accessToken", accessToken, config.cookie.ACCESS)
         .cookie("refreshToken", refreshToken, config.cookie.REFRESH)
-        .json(new ApiResponse(MESSAGES.AUTH.REGISTER_SUCCESS, newUser));
+        .json(new ApiResponse(MESSAGES.AUTH.EMAIL_VERIFIED, userData));
 });
 
 export const login = asyncHandler(async (req, res) => {
@@ -65,5 +79,5 @@ export const refresh = asyncHandler(async (req, res) => {
         .status(HTTP_STATUS.OK)
         .cookie("accessToken", accessToken, config.cookie.ACCESS)
         .cookie("refreshToken", refreshToken, config.cookie.REFRESH)
-        .json(new ApiResponse("Token refreshed successfully"));
+        .json(new ApiResponse(MESSAGES.AUTH.TOKEN_REFRESHED));
 });

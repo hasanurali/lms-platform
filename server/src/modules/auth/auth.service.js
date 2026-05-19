@@ -5,20 +5,65 @@ import jwt from "jsonwebtoken"
 import { config } from "../../config/index.js"
 import { createNotificationService } from "../notification/notification.service.js"
 import log from "../../utils/logger.js"
+import { generateOtp, getOtpHtml } from "../../utils/otpGenerator.js"
+import otpModel from "./otp.model.js"
+import crypto from "crypto";
+import sendEmail from "../../utils/sendEmail.js"
 
 
 export const createUser = async (data) => {
 
     // Create new user
-    const user = new userModel(data);
+    const user = await userModel.create(data);
+
+    // Generate otp and otp ui template
+    const otp = generateOtp();
+    const html = getOtpHtml(otp);
+    const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+
+    // Parallelize OTP save and email send
+    await Promise.all([
+        otpModel.create({ email: user.email, user: user._id, otp: otpHash }),
+        sendEmail(user.email, "OTP Verification", `Your OTP is: ${otp}`, html)
+    ]);
+
+    // Return data
+    return {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        bio: user.bio,
+        profilePicture: user.profilePicture?.url,
+        role: user.role,
+        isVerified: user.isVerified
+    }
+};
+
+export const verifyEmailService = async (email, otp) => {
+
+    // Check email provided
+    if (!email) {
+        throw new ApiError(HTTP_STATUS.INTERNAL_SERVER_ERROR, MESSAGES.GENERAL.SOMETHING_WENT_WRONG);
+    };
+
+    const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+
+    // Check user otp is valid
+    const otpRecord = await otpModel.findOne({ email, otp: otpHash })
+    if (!otpRecord) {
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, MESSAGES.AUTH.INVALID_OTP);
+    };
+
+    // parallelize fetch user and delete otp
+    const [user] = await Promise.all([
+        userModel.findByIdAndUpdate(otpRecord.user, { isVerified: true }, { returnDocument: "after" })
+            .select("_id name email bio profilePicture role isVerified"),
+        otpModel.findByIdAndDelete(otpRecord._id)
+    ]);
 
     // Generate tokens
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
-
-    // Set hashed refresh token in db
-    user.setRefreshToken(refreshToken);
-    await user.save();
 
     // Send notification to user
     createNotificationService({
@@ -30,17 +75,18 @@ export const createUser = async (data) => {
 
     // Return data
     return {
-        newUser: {
+        userData: {
             _id: user._id,
             name: user.name,
             email: user.email,
             bio: user.bio,
             profilePicture: user.profilePicture?.url,
             role: user.role,
+            isVerified: user.isVerified
         },
         accessToken,
         refreshToken
-    };
+    }
 };
 
 export const loginUser = async (email, password) => {
@@ -49,6 +95,26 @@ export const loginUser = async (email, password) => {
     const user = await userModel.findOne({ email }).select("+password");
     if (!user) {
         throw new ApiError(HTTP_STATUS.UNAUTHORIZED, MESSAGES.AUTH.INVALID_CREDENTIALS);
+    };
+
+    if (!user.isVerified) {
+
+        // Generate otp and otp ui template
+        const otp = generateOtp();
+        const html = getOtpHtml(otp);
+        const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+
+        // Delete user releted all otp
+        await otpModel.deleteOne({ email: user.email });
+
+        // Parallelize OTP save and email send
+        await Promise.all([
+            otpModel.create({ email: user.email, user: user._id, otp: otpHash }),
+            sendEmail(user.email, "OTP Verification", `Your OTP is: ${otp}`, html)
+        ]);
+
+        // Throw error with email
+        throw new ApiError(HTTP_STATUS.UNAUTHORIZED, MESSAGES.AUTH.EMAIL_NOT_VERIFY, [{ email: user.email }]);
     };
 
     // Compare password
@@ -75,6 +141,7 @@ export const loginUser = async (email, password) => {
             bio: user.bio,
             profilePicture: user.profilePicture?.url,
             role: user.role,
+            isVerified: user.isVerified
         },
         accessToken,
         refreshToken

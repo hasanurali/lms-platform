@@ -42,3 +42,12 @@ export const loginValidation = [
     body("password")
         .notEmpty().withMessage("Password is required")
 ];
+
+export const verifyEmailValidation = [
+    //Otp
+    body("otp")
+        .trim()
+        .notEmpty().withMessage("OTP is required")
+        .isLength({ min: 6, max: 6 }).withMessage("OTP must be 6 digits")
+        .isNumeric().withMessage("OTP must be numbers only")
+];
