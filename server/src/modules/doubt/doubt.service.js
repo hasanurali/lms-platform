@@ -109,7 +109,7 @@ export const createDoubtService = async (courseId, lessonId, title, description,
 
     // Send notification to instructor
     if (course.instructor.toString() !== user._id.toString()) {
-        createNotificationService({
+        void createNotificationService({
             user: course.instructor,
             title: "New Doubt Posted",
             message: "A student asked a new doubt in your course.",
@@ -366,7 +366,7 @@ export const replyToDoubtService = async (message, doubtId, user) => {
     });
 
     // Update last reply timestamp
-    doubtModel.findByIdAndUpdate(doubtId, { lastReplyAt: new Date() }).exec();
+    await doubtModel.findByIdAndUpdate(doubtId, { lastReplyAt: new Date() });
 
     // Populate reply
     const [populatedReply] = await replyModel.aggregate([
@@ -394,7 +394,7 @@ export const replyToDoubtService = async (message, doubtId, user) => {
 
     // Send notification to user
     if (doubt.student.toString() !== user._id.toString()) {
-        createNotificationService({
+        void createNotificationService({
             user: doubt.student,
             title: "New Reply to Your Doubt",
             message: "Your doubt received a new reply.",
@@ -459,7 +459,7 @@ export const markDoubtAnsweredService = async (doubtId, user) => {
 
     // Send notification to instructor
     if (doubt.student.toString() !== user._id.toString()) {
-        createNotificationService({
+        void createNotificationService({
             user: doubt.student,
             title: "Doubt Answered",
             message: `Your doubt "${doubt.title}" has been marked as answered.`,

@@ -1,5 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js"
-import { createUser, loginUser, logoutUser, refreshAccessToken, verifyEmailService } from "./auth.service.js"
+import { createUser, loginUser, logoutUser, refreshAccessToken, verifyEmailService, resendOtpService } from "./auth.service.js"
 import ApiResponse from "../../utils/apiResponse.js"
 import { config } from "../../config/index.js"
 import { HTTP_STATUS, MESSAGES } from "../../constants/index.js"
@@ -32,6 +32,19 @@ export const verifyEmail = asyncHandler(async (req, res) => {
         .cookie("accessToken", accessToken, config.cookie.ACCESS)
         .cookie("refreshToken", refreshToken, config.cookie.REFRESH)
         .json(new ApiResponse(MESSAGES.AUTH.EMAIL_VERIFIED, userData));
+});
+
+export const resendOtp = asyncHandler(async (req, res) => {
+
+    const { email } = req.body;
+
+    // Resend otp
+    await resendOtpService(email);
+
+    // Send response
+    return res
+        .status(HTTP_STATUS.OK)
+        .json(new ApiResponse(MESSAGES.AUTH.OTP_RESENT));
 });
 
 export const login = asyncHandler(async (req, res) => {

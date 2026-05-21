@@ -39,6 +39,7 @@ The following endpoints are rate limited to prevent abuse:
 - `POST /auth/register`
 - `POST /auth/login`
 - `POST /auth/verify-email`
+- `POST /auth/resend-otp` **(NEW)**
 - `POST /auth/refresh`
 
 ---
@@ -148,14 +149,49 @@ The following endpoints are rate limited to prevent abuse:
 
 | Status | Message | Reason |
 |--------|---------|--------|
+| `400 Bad Request` | `Email is required` | `email` is missing or empty |
 | `400 Bad Request` | `OTP is required` | `otp` is missing or empty |
 | `400 Bad Request` | `OTP must be 6 digits` | `otp` is not exactly 6 characters |
 | `400 Bad Request` | `OTP must be numbers only` | `otp` contains non-numeric characters |
+| `400 Bad Request` | `Verification session expired. Please login again.` | Email not found or user already verified |
 | `400 Bad Request` | `Invalid OTP` | OTP does not match or has expired |
 
 ---
 
-### 3. Login
+### 3. Resend OTP
+**Endpoint:** `POST /auth/resend-otp`
+
+**Authentication:** Not required
+
+**Description:** Sends a new 6-digit OTP to the unverified user's email. The previous OTP is invalidated and replaced. Use this endpoint if the user did not receive the original OTP or it has expired. No validation middleware is applied beyond rate limiting.
+
+**Request Body:**
+```json
+{
+  "email": "string (required)"
+}
+```
+
+**Success Response:**
+- **Status:** `200 OK`
+- **Message:** `A new OTP has been sent to your email address.`
+- **Response:**
+```json
+{
+  "message": "A new OTP has been sent to your email address."
+}
+```
+
+**Error Responses:**
+
+| Status | Message | Reason |
+|--------|---------|--------|
+| `400 Bad Request` | `Email is required` | `email` is missing or empty |
+| `400 Bad Request` | `Verification session expired. Please login again.` | Email not found or user is already verified |
+
+---
+
+### 4. Login
 **Endpoint:** `POST /auth/login`
 
 **Authentication:** Not required
@@ -201,7 +237,7 @@ The following endpoints are rate limited to prevent abuse:
 
 ---
 
-### 4. Logout
+### 5. Logout
 **Endpoint:** `POST /auth/logout`
 
 **Authentication:** Required (cookie `accessToken` or `Authorization: Bearer <token>`)
@@ -226,12 +262,12 @@ The following endpoints are rate limited to prevent abuse:
 | Status | Message | Reason |
 |--------|---------|--------|
 | `401 Unauthorized` | `You are not authorized` | No token provided, user not found, or user is not verified |
-| `401 Unauthorized` | `Token expired` | Access token has expired — use `/auth/refresh` first |
-| `401 Unauthorized` | `Invalid token` | Token is malformed or signature is invalid |
+| `401 Unauthorized` | `Session expired, please login again` | Access token has expired — use `/auth/refresh` first |
+| `401 Unauthorized` | `You are not authorized` | Token is malformed or signature is invalid |
 
 ---
 
-### 5. Refresh Token
+### 6. Refresh Token
 **Endpoint:** `POST /auth/refresh`
 
 **Authentication:** Not required (reads `refreshToken` cookie directly)

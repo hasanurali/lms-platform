@@ -69,7 +69,7 @@ export const createEnrollmentService = async (courseId, userId) => {
 
     // Send notification to user
     if (userId.toString() !== course.instructor.toString()) {
-        createNotificationService({
+        void createNotificationService({
             user: userId,
             title: "Enrollment Successful",
             message: `You enrolled in ${course.title}.`,
