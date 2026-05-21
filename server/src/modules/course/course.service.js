@@ -9,7 +9,7 @@ import replyModel from "../doubt/reply.model.js"
 import ApiError from "../../utils/apiError.js";
 import { HTTP_STATUS, MESSAGES, CLOUDINARY, REDIS_TTL, NOTIFICATION_TYPE } from "../../constants/index.js";
 import validateObjectId from "../../utils/validateObjectId.js";
-import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/Cloudinary.js"
+import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/cloudinary.js"
 import crypto from "crypto";
 import { getCache, setCache, deleteCacheByPattern } from "../../utils/cache.js";
 import { createGlobalNotificationService } from "../notification/notification.service.js"
