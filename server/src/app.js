@@ -3,11 +3,13 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import hpp from "hpp";
+import swaggerUi from "swagger-ui-express";
 
 import { apiLimiter } from "./middlewares/rateLimit.middleware.js";
 import errorHandler from "./middlewares/error.middleware.js";
 import mongoSanitizeMiddleware from "./middlewares/mongoSanitize.middleware.js"
 import { config } from "./config/index.js";
+import swaggerSpec from "./config/swagger.config.js";
 
 import authRoute from "./modules/auth/auth.route.js";
 import userRoute from "./modules/user/user.route.js";
@@ -56,6 +58,12 @@ app.use("/api/v1", doubtRoute);
 app.use("/api/v1", reviewRoute);
 app.use("/api/v1/notifications", notificationRoute);
 
+// Swagger api endpoint
+app.use(
+    "/api/v1/docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec)
+);
 
 // Not Found Route
 app.use((req, res) => {
