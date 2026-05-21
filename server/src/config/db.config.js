@@ -11,7 +11,6 @@ const connectToDb = async () => {
             socketTimeoutMS: 45000,
             connectTimeoutMS: 10000,
             retryWrites: true,
-            readPreference: "secondaryPreferred",
         });
 
         console.log("MongoDb connected")
