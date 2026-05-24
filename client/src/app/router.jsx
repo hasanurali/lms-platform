@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 
+import AuthLayout from "../components/layouts/AuthLayout";
 import PublicLayout from "@/components/layouts/PublicLayout";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 
@@ -11,13 +12,9 @@ import NotFoundPage from "@/features/error/pages/NotFoundPage";
 
 const router = createBrowserRouter([
     {
-        path: "/",
-        element: <PublicLayout />,
+        path: "/auth",
+        element: <AuthLayout />,
         children: [
-            {
-                index: true,
-                element: <HomePage />,
-            },
             {
                 path: "login",
                 element: <LoginPage />,
@@ -29,8 +26,18 @@ const router = createBrowserRouter([
             {
                 path: "verify-otp",
                 element: <VerifyOtpPage />,
-            },
-        ],
+            }
+        ]
+    },
+    {
+        path: "/",
+        element: <PublicLayout />,
+        children: [
+            {
+                index: true,
+                element: <HomePage />,
+            }
+        ]
     },
 
     {
