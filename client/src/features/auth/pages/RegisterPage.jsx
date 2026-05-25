@@ -1,17 +1,64 @@
 import React, { useState, useEffect, useRef } from "react";
-import { TextField, Select, MenuItem, FormControl, InputLabel, Button, Typography, Box } from "@mui/material";
+import { TextField, Select, MenuItem, FormControl, InputLabel, Button, Typography, Box, CircularProgress } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Link as RouterLink } from "react-router-dom"
 import AuthShowcase from "../components/AuthShowcase";
 import PasswordInput from "../components/PasswordInput";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import registerSchema from "../schemas/registerSchema";
+import { useRegister } from "../hooks/useRegister";
 
 
 const RegisterPage = () => {
 
-  const [role, setRole] = useState("student");
-
   const formRef = useRef(null);
 
+  // Setup react hook form
+  const { control, handleSubmit, formState: { errors, isDirty }, setError } = useForm({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      role: "student",
+      password: "",
+      confirmPassword: "",
+    }
+  });
+
+
+  const { mutate, isPending } = useRegister();
+  const onSubmit = (data) => {
+
+    // Destructure needed field
+    const { confirmPassword, ...rest } = data;
+
+    // Call the mutate function with required data
+    mutate(rest, {
+      onError: (error) => {
+
+        // Check is error available
+        const apiErrors = error?.response?.data?.errors;
+        if (Array.isArray(apiErrors)) {
+
+          // Group errors by field so only first error show
+          const grouped = apiErrors.reduce((acc, { path, msg }) => {
+            if (!acc[path]) acc[path] = msg;
+            return acc;
+          }, {});
+
+          // Set error by field
+          Object.entries(grouped).forEach(([field, message]) => {
+            setError(field, { type: "server", message });
+          });
+
+        }
+      },
+    });
+  };
+
+  // Give transition effect on page load
   useEffect(() => {
     const el = formRef.current;
     if (!el) return;
@@ -67,84 +114,139 @@ const RegisterPage = () => {
           {/* Form */}
           <Box
             component="form"
-            onSubmit={e => e.preventDefault()}
-            className="flex flex-col gap-5"
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-8"
           >
 
             {/* Full Name */}
-            <TextField
-              id="full_name"
-              label="Full Name"
-              placeholder="E.g. Jhon doe"
-              variant="outlined"
-              fullWidth
-
+            <Controller
+              name="name"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  id="name"
+                  label="Full Name"
+                  placeholder="E.g. John Doe"
+                  variant="outlined"
+                  fullWidth
+                  error={!!errors.name}
+                  helperText={errors.name?.message}
+                  sx={{
+                    "& .MuiFormHelperText-root": {
+                      position: "absolute",
+                      bottom: -18
+                    },
+                  }}
+                  inputlabelprops={{ inputLabel: { shrink: true } }}
+                />
+              )}
             />
 
             {/* Email */}
-            <TextField
-              id="email"
-              label="Email Address"
-              type="email"
-              placeholder="example@gmail.com"
-              variant="outlined"
-              fullWidth
-
-            />
-
-            {/* Phone and Role */}
-            <Box className="grid grid-cols-2 gap-4">
-              <TextField
-                id="phone"
-                label="Phone"
-                type="tel"
-                placeholder="+1 (555) 000-0000"
-                variant="outlined"
-                fullWidth
-
-              />
-              <FormControl fullWidth variant="outlined">
-                <InputLabel
-                  id="role-label"
-                  shrink
+            <Controller
+              name="email"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  id="email"
+                  label="Email Address"
+                  type="email"
+                  placeholder="example@gmail.com"
+                  variant="outlined"
+                  fullWidth
+                  error={!!errors.email}
+                  helperText={errors.email?.message}
                   sx={{
-                    fontSize: 11, fontWeight: 700,
-                    letterSpacing: "0.12em", textTransform: "uppercase",
-                  }}
-                >
-                  Account Type
-                </InputLabel>
-                <Select
-                  labelId="role-label"
-                  id="role"
-                  label="Account Type"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  sx={{
-                    borderRadius: 2.5,
-                    backgroundColor: "#eceef0",
-                    "& fieldset": { border: "2px solid transparent" },
-                    "&.Mui-focused": {
-                      backgroundColor: "#ffffff",
-                      "& fieldset": { borderColor: "#1a146b !important" },
+                    "& .MuiFormHelperText-root": {
+                      position: "absolute",
+                      bottom: -18
                     },
                   }}
-                >
-                  <MenuItem value="student">Student</MenuItem>
-                  <MenuItem value="instructor">Instructor</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
+                  inputlabelprops={{ inputLabel: { shrink: true } }}
+                />
+              )}
+            />
+
+            {/* Role */}
+            <Controller
+              name="role"
+              control={control}
+              render={({ field }) => (
+                <FormControl fullWidth variant="outlined" error={!!errors.role}>
+                  <InputLabel
+                    id="role-label"
+                    shrink
+                    sx={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}
+                  >
+                    Account Type
+                  </InputLabel>
+                  <Select
+                    {...field}
+                    labelId="role-label"
+                    label="Account Type"
+                    sx={{
+                      borderRadius: 2.5,
+                      backgroundColor: "#eceef0",
+                      "& fieldset": { border: "2px solid transparent" },
+                      "&.Mui-focused": {
+                        backgroundColor: "#ffffff",
+                        "& fieldset": { borderColor: "#1a146b !important" },
+                      },
+                    }}
+                  >
+                    <MenuItem value="student">Student</MenuItem>
+                    <MenuItem value="instructor">Instructor</MenuItem>
+                  </Select>
+                  {errors.role && (
+                    <Typography sx={{ fontSize: 11, color: "#ba1a1a", mt: 0.5, ml: 1.5 }}>
+                      {errors.role.message}
+                    </Typography>
+                  )}
+                </FormControl>
+              )}
+            />
 
             {/* Password */}
-            <PasswordInput
-              id="password"
+            <Controller
+              name="password"
+              control={control}
+              render={({ field }) => (
+                <PasswordInput
+                  id="password"
+                  {...field}
+                  error={!!errors.password}
+                  helperText={errors.password?.message}
+                  sx={{
+                    "& .MuiFormHelperText-root": {
+                      position: "absolute",
+                      bottom: -18
+                    },
+                  }}
+                />
+              )}
             />
 
             {/* Confirm Password */}
-            <PasswordInput
-              id="confirm_password"
-              label="Confirm Password"
+            <Controller
+              name="confirmPassword"
+              control={control}
+              render={({ field }) => (
+                <PasswordInput
+                  id="confirm-password"
+                  label="Confirm Password"
+                  {...field}
+                  error={!!errors.confirmPassword}
+                  helperText={errors.confirmPassword?.message}
+                  sx={{
+                    "& .MuiFormHelperText-root": {
+                      position: "absolute",
+                      bottom: -18
+                    },
+                  }}
+                />
+              )}
             />
 
             {/* CTA */}
@@ -152,7 +254,8 @@ const RegisterPage = () => {
               <Button
                 type="submit"
                 fullWidth
-                endIcon={<ArrowForwardIcon sx={{ fontSize: "18px !important" }} />}
+                disabled={!isDirty || isPending}
+                endIcon={isPending ? null : <ArrowForwardIcon sx={{ fontSize: "18px !important" }} />}
                 sx={{
                   py: 2,
                   borderRadius: 2.5,
@@ -174,7 +277,12 @@ const RegisterPage = () => {
                   transition: "all 0.2s",
                 }}
               >
-                Join the Fellowship
+                {isPending ? (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <CircularProgress size={16} sx={{ color: "white" }} />
+                    <span>Creating Account...</span>
+                  </Box>
+                ) : "Join the Fellowship"}
               </Button>
 
               <Typography sx={{ textAlign: "center", fontSize: 13, color: "#505f76" }}>
