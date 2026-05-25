@@ -1,8 +1,8 @@
-import resend from "../config/resend.js";
+import { config } from "../config/index.js";
 
 const sendEmail = async (to, subject, text, html) => {
     try {
-        await resend.emails.send({
+        await config.resend.emails.send({
             from: `LMS Platform <${process.env.EMAIL_FROM}>`,
             to,
             subject,
