@@ -1,23 +1,15 @@
-import nodemailer from 'nodemailer';
+import { Resend } from "resend";
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        type: 'OAuth2',
-        user: process.env.GOOGLE_USER,
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-    },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Verify the connection configuration
-transporter.verify((error, success) => {
-    if (error) {
-        console.error('Error connecting to email server:', error);
-    } else {
-        console.log('Email server is ready to send messages');
+// Verify API key connection
+(async () => {
+    try {
+        await resend.domains.list();
+        console.log("Resend server is ready to send emails");
+    } catch (error) {
+        console.error("Error connecting to Resend:", error);
     }
-});
+})();
 
-export default transporter;
+export default resend;
