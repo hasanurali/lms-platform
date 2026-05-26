@@ -8,6 +8,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import registerSchema from "../schemas/registerSchema";
 import { useRegister } from "../hooks/useRegister";
+import handleFieldApiErrors from "@/utils/handleFieldApiErrors";
 
 
 const RegisterPage = () => {
@@ -37,23 +38,7 @@ const RegisterPage = () => {
     // Call the mutate function with required data
     mutate(rest, {
       onError: (error) => {
-
-        // Check is error available
-        const apiErrors = error?.response?.data?.errors;
-        if (Array.isArray(apiErrors)) {
-
-          // Group errors by field so only first error show
-          const grouped = apiErrors.reduce((acc, { path, msg }) => {
-            if (!acc[path]) acc[path] = msg;
-            return acc;
-          }, {});
-
-          // Set error by field
-          Object.entries(grouped).forEach(([field, message]) => {
-            setError(field, { type: "server", message });
-          });
-
-        }
+        handleFieldApiErrors(error, setError)
       },
     });
   };
