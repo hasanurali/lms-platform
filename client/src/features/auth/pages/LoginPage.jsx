@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link as RouterLink } from "react-router-dom"
-import { TextField, Button, Typography, Box, Checkbox, FormControlLabel, IconButton, InputAdornment } from "@mui/material";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom"
+import { TextField, Button, Typography, Box, Checkbox, FormControlLabel, IconButton, InputAdornment, CircularProgress } from "@mui/material";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "react-hot-toast"
 
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -8,11 +11,55 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 import PasswordInput from "../components/PasswordInput"
 
+import loginSchema from "../schemas/loginSchema";
+import useLogin from "../hooks/useLogin";
+import handleFieldApiErrors from "@/utils/handleFieldApiErrors";
 
 const LoginPage = () => {
 
   const cardRef = useRef(null);
+  const location = useLocation();
+  const navigate = useNavigate()
 
+  // Setup react hook form
+  const { control, handleSubmit, formState: { errors, isDirty }, setError } = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: ""
+    }
+  });
+
+  const { mutate, isPending } = useLogin();
+  const onSubmit = (data) => {
+
+    // Call the mutate function with required data
+    mutate(data, {
+      onError: (error) => {
+
+        handleFieldApiErrors(error, setError);
+
+        const isUnauthorized = error.response?.status === 401;
+        const message = error.response?.data?.message || "";
+        const isUnverified = message.includes("verify your email");
+
+        if (isUnauthorized) {
+          toast.error(message)
+        };
+
+        if (isUnauthorized && isUnverified) {
+          localStorage.setItem("verify-email", data?.email)
+          navigate("/auth/verify-otp", {
+            state: { from: location.pathname },
+            replace: true
+          });
+        };
+
+      },
+    });
+  };
+
+  // Give transition effect on page load
   useEffect(() => {
     const el = cardRef.current;
     if (!el) return;
@@ -134,30 +181,62 @@ const LoginPage = () => {
           >
             <Box
               component="form"
-              onSubmit={e => e.preventDefault()}
+              onSubmit={handleSubmit(onSubmit)}
               className="flex flex-col gap-8"
             >
+
               {/* Email */}
-              <TextField
-                id="email"
-                label="Email Address"
-                type="email"
-                placeholder="example@gmail.com"
-                variant="outlined"
-                fullWidth
-                inputlabelprops={{ shrink: true }}
+              <Controller
+                name="email"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    id="email"
+                    label="Email Address"
+                    type="email"
+                    placeholder="example@gmail.com"
+                    variant="outlined"
+                    fullWidth
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
+                    sx={{
+                      "& .MuiFormHelperText-root": {
+                        position: "absolute",
+                        bottom: -18
+                      },
+                    }}
+                    inputlabelprops={{ inputLabel: { shrink: true } }}
+                  />
+                )}
               />
 
               {/* Password */}
-              <PasswordInput
-                id="password"
+              <Controller
+                name="password"
+                control={control}
+                render={({ field }) => (
+                  <PasswordInput
+                    id="password"
+                    {...field}
+                    error={!!errors.password}
+                    helperText={errors.password?.message}
+                    sx={{
+                      "& .MuiFormHelperText-root": {
+                        position: "absolute",
+                        bottom: -18
+                      },
+                    }}
+                  />
+                )}
               />
 
               {/* Submit */}
               <Button
                 type="submit"
                 fullWidth
-                endIcon={<ArrowForwardIcon sx={{ fontSize: "18px !important" }} />}
+                disabled={!isDirty || isPending}
+                endIcon={isPending ? null : <ArrowForwardIcon sx={{ fontSize: "18px !important" }} />}
                 sx={{
                   py: 1.9,
                   borderRadius: 2.5,
@@ -179,7 +258,11 @@ const LoginPage = () => {
                   transition: "all 0.25s",
                 }}
               >
-                Sign In
+                {isPending ? (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <CircularProgress size={16} sx={{ color: "white" }} />
+                  </Box>
+                ) : "Sign In"}
               </Button>
             </Box>
 

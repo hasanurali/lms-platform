@@ -27,3 +27,12 @@ export const resendOtp = async (data) => {
 
     return response.data;
 };
+
+export const loginUser = async (data) => {
+    const response = await api.post(
+        ENDPOINTS.AUTH.LOGIN,
+        data
+    );
+
+    return response.data;
+};
