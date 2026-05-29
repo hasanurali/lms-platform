@@ -69,6 +69,11 @@ export const verifyEmailService = async (email, otp) => {
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
 
+    // Set hashed refresh token in db
+    await userModel.findByIdAndUpdate(user._id, {
+        refreshToken: user.hashToken(refreshToken)
+    });
+
     // Send notification to user
     void createNotificationService({
         user: user._id,
