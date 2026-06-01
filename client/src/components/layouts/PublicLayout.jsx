@@ -1,10 +1,16 @@
 import { Outlet } from "react-router-dom";
+import Navbar from "../navigation/Navbar";
+import Footer from "../navigation/Footer";
 
 const PublicLayout = () => {
     return (
-        <div>
-            <Outlet />
-        </div>
+        <>
+            <Navbar />
+            <main>
+                <Outlet />
+            </main>
+            <Footer />
+        </>
     );
 };
 

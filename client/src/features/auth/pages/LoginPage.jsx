@@ -39,15 +39,15 @@ const LoginPage = () => {
 
         handleFieldApiErrors(error, setError);
 
-        const isUnauthorized = error.response?.status === 401;
+        const status = error.response?.status;
         const message = error.response?.data?.message || "";
         const isUnverified = message.includes("verify your email");
 
-        if (isUnauthorized) {
+        if (status === 401 || status === 409) {
           toast.error(message)
         };
 
-        if (isUnauthorized && isUnverified) {
+        if (status === 401 && isUnverified) {
           localStorage.setItem("verify-email", data?.email)
           navigate("/auth/verify-otp", {
             state: { from: location.pathname },
