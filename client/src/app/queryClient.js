@@ -8,17 +8,15 @@ const handleError = (error, query) => {
         const serverMessage = error.response?.data?.message;
         const requestUrl = error.config?.url || "";
 
-        // Check if login or refresh url
-        const isLoginOrRefreshRoute = requestUrl.includes(ENDPOINTS.AUTH.LOGIN)
-            || requestUrl.includes(ENDPOINTS.AUTH.REFRESH);
+        // Check if login, refresh or current user url
+        const isSilentAuthRoute = requestUrl.includes(ENDPOINTS.AUTH.LOGIN)
+            || requestUrl.includes(ENDPOINTS.AUTH.REFRESH)
+            || requestUrl.includes(ENDPOINTS.AUTH.ME);
 
-        // Silently ignore errors from login or refresh endpoints and reset query cache
-        if (isLoginOrRefreshRoute) {
-            if (query) {
-                setTimeout(() => queryClient.resetQueries({ queryKey: query.queryKey }), 0);
-            };
+        // Silently ignore errors from auth endpoints
+        if (isSilentAuthRoute) {
             return;
-        }
+        };
 
         // Handle all other API errors
         toast.error(serverMessage || "Something went wrong");
@@ -27,11 +25,6 @@ const handleError = (error, query) => {
 
         // Handle non-axios / system errors
         toast.error(error?.message || "System error occurred");
-    };
-
-    // Reset query cache
-    if (query) {
-        setTimeout(() => queryClient.resetQueries({ queryKey: query.queryKey }), 0);
     };
 };
 

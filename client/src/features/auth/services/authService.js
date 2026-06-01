@@ -36,3 +36,19 @@ export const loginUser = async (data) => {
 
     return response.data;
 };
+
+export const getCurrentUser = async () => {
+    const response = await api.get(
+        ENDPOINTS.USER.ME
+    );
+
+    return response.data?.data;
+};
+
+export const refreshToken = async () => {
+    const response = await api.post(
+        ENDPOINTS.AUTH.REFRESH
+    );
+
+    return;
+};

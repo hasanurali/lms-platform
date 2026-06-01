@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 
-import AuthLayout from "../components/layouts/AuthLayout";
+import AuthLayout from "@/components/layouts/AuthLayout";
 import PublicLayout from "@/components/layouts/PublicLayout";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 
@@ -9,23 +9,30 @@ import LoginPage from "@/features/auth/pages/LoginPage";
 import RegisterPage from "@/features/auth/pages/RegisterPage";
 import VerifyOtpPage from "@/features/auth/pages/VerifyOtpPage";
 import NotFoundPage from "@/features/error/pages/NotFoundPage";
+import GuestRoute from "@/routes/GuestRoute";
+import ProtectedRoute from "@/routes/ProtectedRoute";
 
 const router = createBrowserRouter([
     {
-        path: "/auth",
-        element: <AuthLayout />,
+        element: <GuestRoute />,
         children: [
             {
-                path: "login",
-                element: <LoginPage />,
-            },
-            {
-                path: "register",
-                element: <RegisterPage />,
-            },
-            {
-                path: "verify-otp",
-                element: <VerifyOtpPage />,
+                path: "auth",
+                element: <AuthLayout />,
+                children: [
+                    {
+                        path: "login",
+                        element: <LoginPage />,
+                    },
+                    {
+                        path: "register",
+                        element: <RegisterPage />,
+                    },
+                    {
+                        path: "verify-otp",
+                        element: <VerifyOtpPage />,
+                    }
+                ]
             }
         ]
     },
@@ -41,9 +48,19 @@ const router = createBrowserRouter([
     },
 
     {
-        path: "/dashboard",
-        element: <DashboardLayout />,
-        children: [],
+        element: <ProtectedRoute />,
+        children: [
+            {
+                path: "dashboard",
+                element: <DashboardLayout />,
+                children: [
+                    {
+                        index: true,
+                        element: <div>Dashboard page</div>
+                    }
+                ],
+            },
+        ]
     },
 
     {

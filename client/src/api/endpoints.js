@@ -8,6 +8,6 @@ export const ENDPOINTS = {
         REFRESH: "/auth/refresh"
     },
     USER: {
-        ME: "/user/me"
+        ME: "/users/me"
     }
 };
