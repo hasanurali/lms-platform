@@ -53,16 +53,31 @@ const CourseCard = ({ course }) => {
     }}>
 
       {/* Thumbnail */}
-      <Box sx={{ position: "relative", height: 180, overflow: "hidden", flexShrink: 0 }}>
+      <Box
+        sx={{
+          position: "relative",
+          width: "100%",
+          aspectRatio: "16/9",
+          overflow: "hidden",
+          flexShrink: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.04)"
+        }}
+      >
         <Box
           component="img"
           src={thumbnail}
           alt={title}
           sx={{
-            width: "100%", height: "100%", objectFit: "cover",
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center",
             transition: "transform 0.5s cubic-bezier(0.16,1,0.3,1)",
+            "&:hover": {
+              transform: "scale(1.05)",
+            }
           }}
-          onError={e => { e.target.src = "https://via.placeholder.com/400x200?text=No+Thumbnail"; }}
+          onError={e => { e.currentTarget.src = "https://placeholder.com"; }}
         />
 
         {/* Price badge */}
@@ -71,12 +86,14 @@ const CourseCard = ({ course }) => {
           background: isFree ? "rgba(0,66,60,0.9)" : "rgba(26,20,107,0.9)",
           backdropFilter: "blur(8px)",
           px: 1.5, py: 0.5, borderRadius: "8px",
+          zIndex: 1
         }}>
           <Typography sx={{ fontSize: 13, fontWeight: 900, color: "white", fontFamily: "'DM Sans', sans-serif" }}>
             {isFree ? "Free" : `$${price}`}
           </Typography>
         </Box>
       </Box>
+
 
       {/* Body */}
       <Box sx={{ p: "16px 18px", display: "flex", flexDirection: "column", flex: 1, gap: 1.25 }}>
