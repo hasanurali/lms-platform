@@ -18,6 +18,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 
 import useGlobalContext from "@/hooks/useGlobalContext"
 import useAuthUser from "@/features/auth/hooks/useAuthUser";
+import useLogout from "@/features/auth/hooks/useLogout";
 
 const NAV_LINKS = [{ page: "Home", link: "/" }, { page: "Courses", link: "/courses" }];
 const MOBILE_NAV_LINKS = [{ page: "Home", link: "/" }, { page: "Courses", link: "/courses" }, { page: "Profile", link: "#" }];
@@ -30,9 +31,9 @@ const Navbar = () => {
     const { scrolled, setScrolled } = useGlobalContext();
 
     const { data: user } = useAuthUser();
+    const { mutate: logout, isPending } = useLogout();
 
     const location = useLocation();
-
     useEffect(() => {
         setIsMenuOpen(false);
     }, [location]);
@@ -96,7 +97,12 @@ const Navbar = () => {
                                 <Typography sx={{ fontSize: 16, fontWeight: 600, letterSpacing: "0.5px" }}>Profile</Typography>
                             </Box>
 
-                            <Box className="flex items-center hover:bg-[#f5f5f5] cursor-pointer" >
+                            <Box onClick={!isPending ? logout : undefined}
+                                className="flex items-center hover:bg-[#f5f5f5] cursor-pointer"
+                                sx={{
+                                    pointerEvents: isPending ? "none" : "auto",
+                                    opacity: isPending ? 0.5 : 1
+                                }}>
                                 <IconButton sx={{ color: "red", padding: "none" }}>
                                     <LogoutIcon sx={{ fontSize: 25 }} />
                                 </IconButton>
