@@ -62,13 +62,15 @@ api.interceptors.response.use(
             } catch (refreshErr) {
                 processQueue(refreshErr);
 
-                const guestRoutes = [
+                const guestAndPublicRoutes = [
+                    "/",
+                    "/courses",
                     "/auth/login",
                     "/auth/register",
                     "/auth/verify-otp",
                 ];
 
-                if (!guestRoutes.includes(window.location.pathname)) {
+                if (!guestAndPublicRoutes.includes(window.location.pathname)) {
                     window.location.href = "/auth/login";
                 }
 
