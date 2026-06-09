@@ -14,9 +14,10 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 import useGlobalContext from "@/hooks/useGlobalContext"
 import SectionReavealWrapper from "../components/SectionReavealWrapper"
-import { FELLOWSHIPS, INSTITUTIONS, PHILOSOPHY } from "../constants/homeData"
+import { INSTITUTIONS, PHILOSOPHY } from "../constants/homeData"
 import CourseCard from "@/features/course/components/CourseCard";
 import useAuthUser from "@/features/auth/hooks/useAuthUser";
+import useFetchCourses from "@/features/course/hooks/useFetchCourse";
 
 
 const HomePage = () => {
@@ -26,6 +27,7 @@ const HomePage = () => {
   const { scrolled, setScrolled } = useGlobalContext();
 
   const { data: user } = useAuthUser();
+  const { data } = useFetchCourses(1, 3);
 
   // Orb animation
   useEffect(() => {
@@ -123,7 +125,7 @@ const HomePage = () => {
             </Box>
           </SectionReavealWrapper>
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: { xs: 4, md: 5 } }}>
-            {FELLOWSHIPS.map((course, i) => (
+            {data?.data?.data?.map((course, i) => (
               <SectionReavealWrapper key={course._id} delay={i * 0.1}>
                 <CourseCard course={course} />
               </SectionReavealWrapper>
