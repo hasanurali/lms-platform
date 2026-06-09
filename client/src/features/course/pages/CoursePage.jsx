@@ -10,110 +10,22 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import CourseCard from "../components/CourseCard";
-
-const COURSES = [
-    {
-        _id: "1",
-        title: "The Legend of Java script",
-        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit eos quia aut dolore similique, laudantium quasi odio ipsam id. Cupiditate vero accusamus corrupti laboriosam veritatis id, suscipit sequi consectetur commodi animi aperiam laudantium quam fugiat, ipsam vitae fugit ea recusandae veniam facere magni molestiae eveniet adipisci! Perspiciatis laudantium deleniti quia.",
-        instructor: "69fc1aba69412bb33278a18c",
-        price: 0,
-        isPublished: true,
-        averageRating: 4.4,
-        totalReviews: 1,
-        thumbnail: "https://res.cloudinary.com/scholarly-editorial/image/upload/v1779076516/thumbnails/wgtndgmdqiju3yenalfi.jpg"
-    },
-    {
-        _id: "2",
-        title: "The Legend of Java script",
-        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit eos quia aut dolore similique, laudantium quasi odio ipsam id. Cupiditate vero accusamus corrupti laboriosam veritatis id, suscipit sequi consectetur commodi animi aperiam laudantium quam fugiat, ipsam vitae fugit ea recusandae veniam facere magni molestiae eveniet adipisci! Perspiciatis laudantium deleniti quia.",
-        instructor: "69fc1aba69412bb33278a18c",
-        price: 0,
-        isPublished: true,
-        averageRating: 4.4,
-        totalReviews: 1,
-        thumbnail: "https://res.cloudinary.com/scholarly-editorial/image/upload/v1779076516/thumbnails/wgtndgmdqiju3yenalfi.jpg"
-    },
-    {
-        _id: "3",
-        title: "The Legend of Java script",
-        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit eos quia aut dolore similique, laudantium quasi odio ipsam id. Cupiditate vero accusamus corrupti laboriosam veritatis id, suscipit sequi consectetur commodi animi aperiam laudantium quam fugiat, ipsam vitae fugit ea recusandae veniam facere magni molestiae eveniet adipisci! Perspiciatis laudantium deleniti quia.",
-        instructor: "69fc1aba69412bb33278a18c",
-        price: 0,
-        isPublished: true,
-        averageRating: 4.4,
-        totalReviews: 1,
-        thumbnail: "https://res.cloudinary.com/scholarly-editorial/image/upload/v1779076516/thumbnails/wgtndgmdqiju3yenalfi.jpg"
-    },
-    {
-        _id: "4",
-        title: "The Legend of Java script",
-        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit eos quia aut dolore similique, laudantium quasi odio ipsam id. Cupiditate vero accusamus corrupti laboriosam veritatis id, suscipit sequi consectetur commodi animi aperiam laudantium quam fugiat, ipsam vitae fugit ea recusandae veniam facere magni molestiae eveniet adipisci! Perspiciatis laudantium deleniti quia.",
-        instructor: "69fc1aba69412bb33278a18c",
-        price: 0,
-        isPublished: true,
-        averageRating: 4.4,
-        totalReviews: 1,
-        thumbnail: "https://res.cloudinary.com/scholarly-editorial/image/upload/v1779076516/thumbnails/wgtndgmdqiju3yenalfi.jpg"
-    },
-    {
-        _id: "5",
-        title: "The Legend of Java script",
-        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit eos quia aut dolore similique, laudantium quasi odio ipsam id. Cupiditate vero accusamus corrupti laboriosam veritatis id, suscipit sequi consectetur commodi animi aperiam laudantium quam fugiat, ipsam vitae fugit ea recusandae veniam facere magni molestiae eveniet adipisci! Perspiciatis laudantium deleniti quia.",
-        instructor: "69fc1aba69412bb33278a18c",
-        price: 0,
-        isPublished: true,
-        averageRating: 4.4,
-        totalReviews: 1,
-        thumbnail: "https://res.cloudinary.com/scholarly-editorial/image/upload/v1779076516/thumbnails/wgtndgmdqiju3yenalfi.jpg"
-    },
-    {
-        _id: "6",
-        title: "The Legend of Java script",
-        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit eos quia aut dolore similique, laudantium quasi odio ipsam id. Cupiditate vero accusamus corrupti laboriosam veritatis id, suscipit sequi consectetur commodi animi aperiam laudantium quam fugiat, ipsam vitae fugit ea recusandae veniam facere magni molestiae eveniet adipisci! Perspiciatis laudantium deleniti quia.",
-        instructor: "69fc1aba69412bb33278a18c",
-        price: 0,
-        isPublished: true,
-        averageRating: 4.4,
-        totalReviews: 1,
-        thumbnail: "https://res.cloudinary.com/scholarly-editorial/image/upload/v1779076516/thumbnails/wgtndgmdqiju3yenalfi.jpg"
-    },
-    {
-        _id: "7",
-        title: "The Legend of Java script",
-        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit eos quia aut dolore similique, laudantium quasi odio ipsam id. Cupiditate vero accusamus corrupti laboriosam veritatis id, suscipit sequi consectetur commodi animi aperiam laudantium quam fugiat, ipsam vitae fugit ea recusandae veniam facere magni molestiae eveniet adipisci! Perspiciatis laudantium deleniti quia.",
-        instructor: "69fc1aba69412bb33278a18c",
-        price: 0,
-        isPublished: true,
-        averageRating: 4.4,
-        totalReviews: 1,
-        thumbnail: "https://res.cloudinary.com/scholarly-editorial/image/upload/v1779076516/thumbnails/wgtndgmdqiju3yenalfi.jpg"
-    },
-    {
-        _id: "8",
-        title: "The Legend of Java script",
-        description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit eos quia aut dolore similique, laudantium quasi odio ipsam id. Cupiditate vero accusamus corrupti laboriosam veritatis id, suscipit sequi consectetur commodi animi aperiam laudantium quam fugiat, ipsam vitae fugit ea recusandae veniam facere magni molestiae eveniet adipisci! Perspiciatis laudantium deleniti quia.",
-        instructor: "69fc1aba69412bb33278a18c",
-        price: 0,
-        isPublished: true,
-        averageRating: 4.4,
-        totalReviews: 1,
-        thumbnail: "https://res.cloudinary.com/scholarly-editorial/image/upload/v1779076516/thumbnails/wgtndgmdqiju3yenalfi.jpg"
-    },
-];
+import useFetchCourses from "../hooks/useFetchCourse"
 
 
 const CoursePage = () => {
 
-    const [courses, setCourses] = useState(COURSES)
     const [page, setPage] = useState(1);
-
-    const itemsPerPage = 8;
-    const totalPages = 4;
 
     const handleChange = (e, value) => {
         setPage(value);
     };
+
+    const { data, isPending } = useFetchCourses(page)
+
+    if (isPending) {
+        return <div className="h-screen pt-20">Loding...</div>
+    }
 
     return (
         <Box sx={{ background: "#f7f9fb", minHeight: "100vh", color: "#191c1e", fontFamily: "'DM Sans', sans-serif" }}>
@@ -140,14 +52,14 @@ const CoursePage = () => {
 
                         {/* Grid */}
                         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)", xl: "repeat(4, 1fr)" }, gap: 5 }}>
-                            {courses.map(course => (
+                            {data?.data?.data?.map(course => (
                                 <CourseCard key={course._id} course={course} />
                             ))}
                         </Box>
 
 
                         <Pagination
-                            count={totalPages}
+                            count={data?.data?.pagination?.pages}
                             page={page}
                             onChange={handleChange}
                             variant="outlined"
