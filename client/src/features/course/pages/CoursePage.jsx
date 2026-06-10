@@ -10,7 +10,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import CourseCard from "../components/CourseCard";
-import useFetchCourses from "../hooks/useFetchCourse"
+import useFetchCourses from "../hooks/useFetchCourses"
 
 
 const CoursePage = () => {

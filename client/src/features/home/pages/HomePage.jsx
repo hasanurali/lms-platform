@@ -17,7 +17,7 @@ import SectionReavealWrapper from "../components/SectionReavealWrapper"
 import { INSTITUTIONS, PHILOSOPHY } from "../constants/homeData"
 import CourseCard from "@/features/course/components/CourseCard";
 import useAuthUser from "@/features/auth/hooks/useAuthUser";
-import useFetchCourses from "@/features/course/hooks/useFetchCourse";
+import useFetchCourses from "@/features/course/hooks/useFetchCourses";
 
 
 const HomePage = () => {
