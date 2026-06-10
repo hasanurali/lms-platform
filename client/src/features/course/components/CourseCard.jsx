@@ -2,9 +2,7 @@ import React, { useState, } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, IconButton, Chip } from "@mui/material";
 
-import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import StarHalfIcon from '@mui/icons-material/StarHalf';
+import RenderStars from "./RenderStars";
 
 const CourseCard = ({ course }) => {
 
@@ -13,24 +11,6 @@ const CourseCard = ({ course }) => {
   const isFree = price === 0;
 
   const navigate = useNavigate()
-
-  // Render 5 stars filled/half/empty based on averageRating
-  const renderStars = () => {
-    let isHalfComplete = false;
-    return Array.from({ length: 5 }, (_, i) => (
-      i < Math.floor(averageRating) ?
-        <StarIcon key={i} sx={{ fontSize: 13, color: "#44b5a8" }} />
-        :
-        averageRating > Math.floor(averageRating) && !isHalfComplete ?
-          (
-            isHalfComplete = true,
-            <StarHalfIcon key={i} sx={{ fontSize: 13, color: "#44b5a8" }} />
-          )
-          :
-          <StarBorderIcon key={i} sx={{ fontSize: 13, color: "#c8c5d3" }} />
-    ))
-  };
-
 
   return (
     <Box onClick={() => navigate(`/courses/${_id}`)} sx={{
@@ -100,7 +80,7 @@ const CourseCard = ({ course }) => {
 
         {/* Rating row */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-          <Box sx={{ display: "flex", alignItems: "center" }}>{renderStars()}</Box>
+          <RenderStars rating={averageRating} />
           <Typography sx={{ fontSize: 11, fontWeight: 700, color: "#44b5a8" }}>
             {averageRating > 0 ? averageRating.toFixed(1) : "New"}
           </Typography>
