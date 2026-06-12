@@ -9,7 +9,7 @@ import LoginPage from "@/features/auth/pages/LoginPage";
 import RegisterPage from "@/features/auth/pages/RegisterPage";
 import VerifyOtpPage from "@/features/auth/pages/VerifyOtpPage";
 import CoursePage from "@/features/course/pages/CoursePage";
-import CourseDetailsPage from "@/features/course/pages/courseDetails";
+import CourseDetailsPage from "@/features/course/pages/CourseDetails";
 import NotFoundPage from "@/features/error/pages/NotFoundPage";
 
 import GuestRoute from "@/routes/GuestRoute";

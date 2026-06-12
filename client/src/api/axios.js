@@ -70,7 +70,8 @@ api.interceptors.response.use(
                     "/auth/verify-otp",
                 ];
 
-                if (!guestAndPublicRoutes.includes(window.location.pathname)) {
+                const pathname = window.location.pathname;
+                if (!guestAndPublicRoutes.includes(pathname) && !pathname.startsWith("/courses/")) {
                     window.location.href = "/auth/login";
                 }
 
