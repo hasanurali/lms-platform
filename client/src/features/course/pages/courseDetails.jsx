@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Typography, Button, IconButton, LinearProgress, Container } from "@mui/material";
+import { Box, Typography, Button, IconButton, LinearProgress, Container, Stack, Pagination } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast"
 
@@ -14,10 +14,48 @@ import useFetchFullCourse from "../hooks/useFetchFullCourse"
 import useAuthUser from "@/features/auth/hooks/useAuthUser"
 import useEnrollCourse from "@/features/enrollment/hooks/useEnrollCourse";
 import useFetchEnrolledCourses from "@/features/enrollment/hooks/useFetchEnrolledCourses";
+import ReviewCard from "@/features/review/components/ReviewCard";
+
+
+const reviews = [
+  {
+    _id: 1,
+    name: "Sk Hasanur Ali",
+    profilePicture: "https://api.dicebear.com/9.x/identicon/svg?seed=1",
+    rating: 4.4,
+    message: "This course is excellent! Very well explained.",
+    createdAt: "2026-05-03T10:30:00Z"
+  },
+  {
+    _id: 2,
+    name: "Sk Hasanur Ali",
+    profilePicture: "https://api.dicebear.com/9.x/identicon/svg?seed=2",
+    rating: 4,
+    message: "This course is excellent! Very well explained.",
+    createdAt: "2026-05-03T10:30:00Z"
+  },
+  {
+    _id: 3,
+    name: "Sk Hasanur Ali",
+    profilePicture: "https://api.dicebear.com/9.x/identicon/svg?seed=3",
+    rating: 5,
+    message: "This course is excellent! Very well explained.",
+    createdAt: "2026-05-03T10:30:00Z"
+  },
+  {
+    _id: 5,
+    name: "Sk Hasanur Ali",
+    profilePicture: "https://api.dicebear.com/9.x/identicon/svg?seed=3",
+    rating: 5,
+    message: "This course is excellent! Very well explained.",
+    createdAt: "2026-05-03T10:30:00Z"
+  },
+]
 
 const CourseDetailsPage = () => {
 
   const [activeTab, setActiveTab] = useState(0);
+  const [page, setPage] = useState(1)
 
   const navigate = useNavigate();
 
@@ -66,6 +104,10 @@ const CourseDetailsPage = () => {
   // Calculate price and total lessons
   const isFree = price === 0;
   const totalLessons = modules.reduce((acc, m) => acc + (m.lessons?.length ?? 0), 0);
+
+  const handleChange = (e, value) => {
+    setPage(value)
+  };
 
   if (courseDataPending) {
     return <div>Loading...</div>
@@ -303,9 +345,34 @@ const CourseDetailsPage = () => {
           <Box>doubt</Box>
         )}
 
-        {/* Review tab */}
+        {/* Review tab with pagination */}
         {activeTab === 2 && (
-          <Box>review</Box>
+          <Stack spacing={2}>
+
+            <Box sx={{
+              maxWidth: "100%",
+              mx: "auto",
+              px: { xs: 2, md: 5 }, py: { xs: 6, md: 10 },
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+              gap: 3,
+            }}>
+              {reviews?.map(review => <ReviewCard key={review._id} review={review} />)}
+            </Box>
+
+            <Pagination
+              count={1}
+              page={page}
+              onChange={handleChange}
+              variant="outlined"
+              color="primary"
+              sx={{
+                justifyItems: "center",
+                paddingTop: "20px",
+                paddingBottom: "20px"
+              }} />
+
+          </Stack>
         )}
 
       </Box>
