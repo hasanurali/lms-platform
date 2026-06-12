@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Box, Typography, Button, IconButton, LinearProgress, Container } from "@mui/material";
+import { useParams, useNavigate } from "react-router-dom";
 
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StarIcon from "@mui/icons-material/Star";
@@ -8,56 +9,31 @@ import DoneAllIcon from "@mui/icons-material/DoneAll";
 import ModuleAccordion from "../components/ModuleAccordion";
 import { TABS, FEATURE_CARDS, INCLUSIONS } from "../constants/courseData"
 import RenderStars from "../components/RenderStars";
+import useFetchFullCourse from "../hooks/useFetchFullCourse"
 
 const CourseDetailsPage = () => {
-  
+
   const [activeTab, setActiveTab] = useState(0);
 
-  // Dummy data
-  const data = {
-    course: {
-      _id: '6a03f9a95300f27e4310502f',
-      title: 'Mern stack basis',
-      description: 'This course is clear your basic in mern stack',
-      instructor: {
-        _id: '69fc1aba69412bb33278a18c',
-        name: 'Sk Hasanur Ali',
-        email: 'Skhasanur708@gmail.com',
-        profilePicture: 'https://res.cloudinary.com/scholarly-editorial/image/upload/v1778604641/avatars/dwmkavwdv6snnfegfmg9.jpg'
-      },
-      price: 0,
-      thumbnail: 'https://res.cloudinary.com/scholarly-editorial/image/upload/v1778645417/thumbnails/bxrowopcoks8sm6vhm5a.jpg',
-      isPublished: false,
-      averageRating: 4.6,
-      ratingDistribution: { '1': 100, '2': 200, '3': 300, '4': 400, '5': 900 },
-      totalReviews: 1000
-    },
-    modules: [
-      {
-        _id: '6a06ad970d891399b31a21b1',
-        course: '6a03f9a95300f27e4310502f',
-        title: 'New best course',
-        lessons: [
-          {
-            _id: '6a06adc80d891399b31a21b2',
-            module: '6a06ad970d891399b31a21b1',
-            title: 'This is the best Js course',
-            content: null,
-            order: 1,
-            video: 'https://res.cloudinary.com/scholarly-editorial/video/upload/v1778822600/lessons/xwxe5sphhvlrlvx64w1s.mp4'
-          }
-        ]
-      }
-    ],
-    progress: { percentage: 10, completed: true, lastAccessLesson: null }
+  const navigate = useNavigate();
+
+  const { id } = useParams()
+  const { data, isPending, error } = useFetchFullCourse(id);
+  if (error?.response?.status) {
+    navigate("/courses")
   }
 
-  const { course, modules = [], progress } = data;
-  const { title, description, instructor, price, thumbnail, averageRating = 0, totalReviews = 0, } = course;
+  if (!data) return null;
+  const { course, modules = [], progress } = data?.data;
+  const { title, description, instructor, price, thumbnail, averageRating = 0, totalReviews = 0 } = course;
 
   const isFree = price === 0;
-  const isEnrolled = true
+  const isEnrolled = false
   const totalLessons = modules.reduce((acc, m) => acc + (m.lessons?.length ?? 0), 0);
+
+  if (isPending) {
+    return <div>Loading...</div>
+  }
 
   return (
     <Box sx={{ background: "#f7f9fb", color: "#191c1e", fontFamily: "'DM Sans', sans-serif" }}>
