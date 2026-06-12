@@ -22,5 +22,11 @@ export const ENDPOINTS = {
     ENROLLMENT: {
         ENROLL: (id) => `/courses/${id}/enroll`,
         FETCHCOURSES: "/enrollments/my"
+    },
+    REVIEW: {
+        CREATE: (id) => `/courses/${id}/reviews`,
+        FETCH: (id) => `/courses/${id}/reviews`,
+        UPDATE: (id) => `/reviews/${id}`,
+        DELETE: (id) => `/reviews/${id}`
     }
 };

@@ -15,42 +15,8 @@ import useAuthUser from "@/features/auth/hooks/useAuthUser"
 import useEnrollCourse from "@/features/enrollment/hooks/useEnrollCourse";
 import useFetchEnrolledCourses from "@/features/enrollment/hooks/useFetchEnrolledCourses";
 import ReviewCard from "@/features/review/components/ReviewCard";
+import useFetchReviews from "@/features/review/hooks/useFetchReviews";
 
-
-const reviews = [
-  {
-    _id: 1,
-    name: "Sk Hasanur Ali",
-    profilePicture: "https://api.dicebear.com/9.x/identicon/svg?seed=1",
-    rating: 4.4,
-    message: "This course is excellent! Very well explained.",
-    createdAt: "2026-05-03T10:30:00Z"
-  },
-  {
-    _id: 2,
-    name: "Sk Hasanur Ali",
-    profilePicture: "https://api.dicebear.com/9.x/identicon/svg?seed=2",
-    rating: 4,
-    message: "This course is excellent! Very well explained.",
-    createdAt: "2026-05-03T10:30:00Z"
-  },
-  {
-    _id: 3,
-    name: "Sk Hasanur Ali",
-    profilePicture: "https://api.dicebear.com/9.x/identicon/svg?seed=3",
-    rating: 5,
-    message: "This course is excellent! Very well explained.",
-    createdAt: "2026-05-03T10:30:00Z"
-  },
-  {
-    _id: 5,
-    name: "Sk Hasanur Ali",
-    profilePicture: "https://api.dicebear.com/9.x/identicon/svg?seed=3",
-    rating: 5,
-    message: "This course is excellent! Very well explained.",
-    createdAt: "2026-05-03T10:30:00Z"
-  },
-]
 
 const CourseDetailsPage = () => {
 
@@ -59,15 +25,20 @@ const CourseDetailsPage = () => {
 
   const navigate = useNavigate();
 
+  // Get course id from params  
+  const { id } = useParams()
+
+  // Fetch user
   const { data: user } = useAuthUser()
 
+  // Fetch reviews
+  const { data: reviews } = useFetchReviews(id);
+
   // Handle fetching full course details
-  const { id } = useParams()
   const { data: courseData, isPending: courseDataPending, error: courseDataErr } = useFetchFullCourse(id);
   if (courseDataErr?.response?.status) {
     navigate("/courses")
   };
-
 
   // Check enrollment
   let isEnrolled;
@@ -105,6 +76,7 @@ const CourseDetailsPage = () => {
   const isFree = price === 0;
   const totalLessons = modules.reduce((acc, m) => acc + (m.lessons?.length ?? 0), 0);
 
+  // Handle review pagination
   const handleChange = (e, value) => {
     setPage(value)
   };
@@ -347,32 +319,45 @@ const CourseDetailsPage = () => {
 
         {/* Review tab with pagination */}
         {activeTab === 2 && (
-          <Stack spacing={2}>
-
+          !reviews?.data?.data?.length ?
             <Box sx={{
-              maxWidth: "100%",
-              mx: "auto",
-              px: { xs: 2, md: 5 }, py: { xs: 6, md: 10 },
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-              gap: 3,
+              height: 300,
+              display: "flex", justifyContent: "center", alignItems: "center"
             }}>
-              {reviews?.map(review => <ReviewCard key={review._id} review={review} />)}
+              <Typography color="primary">No reviews yet.</Typography>
             </Box>
+            :
+            <Stack spacing={2}>
 
-            <Pagination
-              count={1}
-              page={page}
-              onChange={handleChange}
-              variant="outlined"
-              color="primary"
-              sx={{
-                justifyItems: "center",
-                paddingTop: "20px",
-                paddingBottom: "20px"
-              }} />
+              <Box sx={{
+                maxWidth: "100%",
+                mx: "auto",
+                px: { xs: 2, md: 5 }, py: { xs: 6, md: 10 },
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, 1fr)",
+                  md: "repeat(3, 1fr)",
+                  lg: "repeat(4, 1fr)",
+                },
+                gap: 3,
+              }}>
+                {reviews?.data?.data?.map(review => <ReviewCard key={review._id} review={review} />)}
+              </Box>
 
-          </Stack>
+              <Pagination
+                count={reviews?.data?.pagination?.pages}
+                page={page}
+                onChange={handleChange}
+                variant="outlined"
+                color="primary"
+                sx={{
+                  justifyItems: "center",
+                  paddingTop: "20px",
+                  paddingBottom: "20px"
+                }} />
+
+            </Stack>
         )}
 
       </Box>
