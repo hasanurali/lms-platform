@@ -1,11 +1,16 @@
 import React, { useState } from "react";
-import { Box, Typography, Button, IconButton, LinearProgress, Container, Stack, Pagination } from "@mui/material";
+import { Box, Typography, Button, IconButton, LinearProgress, Container, Stack, Pagination, Dialog, DialogContent, DialogTitle, CircularProgress, TextField } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast"
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StarIcon from "@mui/icons-material/Star";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
+import CloseIcon from "@mui/icons-material/Close";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
 import ModuleAccordion from "../components/ModuleAccordion";
 import { TABS, FEATURE_CARDS, INCLUSIONS } from "../constants/courseData"
@@ -16,12 +21,16 @@ import useEnrollCourse from "@/features/enrollment/hooks/useEnrollCourse";
 import useFetchEnrolledCourses from "@/features/enrollment/hooks/useFetchEnrolledCourses";
 import ReviewCard from "@/features/review/components/ReviewCard";
 import useFetchReviews from "@/features/review/hooks/useFetchReviews";
+import createReviewSchema from "@/features/review/schemas/createReviewSchema";
+import useCreateReview from "@/features/review/hooks/useCreateReview"
+import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 
 
 const CourseDetailsPage = () => {
 
   const [activeTab, setActiveTab] = useState(0);
   const [page, setPage] = useState(1)
+  const [reviewModalOpen, setReviewModalOpen] = useState(false)
 
   const navigate = useNavigate();
 
@@ -33,6 +42,29 @@ const CourseDetailsPage = () => {
 
   // Fetch reviews
   const { data: reviews } = useFetchReviews(id);
+
+
+  // handle create review
+  const { control, handleSubmit, reset, formState: { errors }, setError } = useForm({
+    resolver: zodResolver(createReviewSchema),
+    defaultValues: {
+      rating: 0,
+      message: ""
+    }
+  });
+
+  const { mutate: createReviewMutate, isPending: isReviewPending } = useCreateReview()
+  const onSubmit = (data) => {
+    createReviewMutate({ id, data }, {
+      onSuccess: () => {
+        reset();
+        setReviewModalOpen(false);
+      },
+      onError: (error) => {
+        handleFieldApiErrors(error, setError);
+      },
+    });
+  };
 
   // Handle fetching full course details
   const { data: courseData, isPending: courseDataPending, error: courseDataErr } = useFetchFullCourse(id);
@@ -318,8 +350,143 @@ const CourseDetailsPage = () => {
         )}
 
         {/* Review tab with pagination */}
-        {activeTab === 2 && (
-          !reviews?.data?.data?.length ?
+        {activeTab === 2 && <Box>
+
+          <Dialog
+            open={reviewModalOpen}
+            onClose={() => { reset(); setReviewModalOpen(false); }}
+            maxWidth="sm"
+            fullWidth
+            slotProps={{
+              backdrop: {
+                sx: { background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" },
+              },
+              paper: {
+                sx: { borderRadius: "16px", p: 1, boxShadow: "0 24px 60px rgba(0,0,0,0.2)" },
+              }
+            }}
+          >
+            <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pb: 1 }}>
+              <Typography sx={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 800, color: "#1a146b" }}>
+                Write a Review
+              </Typography>
+              <IconButton onClick={() => { reset(); setReviewModalOpen(false); }} size="small" sx={{ color: "#505f76" }}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </DialogTitle>
+
+            <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+
+                {/* Star rating */}
+                <Box>
+                  <Typography sx={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#474651", mb: 1.5 }}>
+                    Your Rating
+                  </Typography>
+                  <Controller
+                    name="rating"
+                    control={control}
+                    render={({ field }) => (
+                      <Box sx={{ display: "flex", gap: 0.5 }}>
+                        {[1, 2, 3, 4, 5].map(n => (
+                          <Box
+                            key={n}
+                            component="button"
+                            type="button"
+                            onClick={() => field.onChange(n)}
+                            sx={{
+                              background: "none", border: "none", cursor: "pointer", p: 0.25,
+                              transition: "transform 0.15s",
+                              "&:hover": { transform: "scale(1.2)" },
+                            }}
+                          >
+                            {n <= field.value
+                              ? <StarIcon sx={{ fontSize: 32, color: "#44b5a8" }} />
+                              : <StarBorderIcon sx={{ fontSize: 32, color: "#c8c5d3" }} />}
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                  />
+                  {errors.rating && (
+                    <Typography sx={{ fontSize: 11, color: "#ba1a1a", mt: 0.75 }}>
+                      {errors.rating.message}
+                    </Typography>
+                  )}
+                </Box>
+
+                {/* Message */}
+                <Box>
+                  <Typography sx={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#474651", mb: 1.5 }}>
+                    Your Review
+                  </Typography>
+                  <Controller
+                    name="message"
+                    control={control}
+                    render={({ field }) => (
+                      <Box>
+                        <TextField
+                          {...field}
+                          multiline
+                          rows={4}
+                          fullWidth
+                          placeholder="Share your experience with this course..."
+                          error={!!errors.message}
+                          helperText={errors.message?.message || " "}
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: "10px", background: "#f2f4f6",
+                              fontFamily: "'DM Sans', sans-serif", fontSize: 14,
+                              "& fieldset": { border: "2px solid transparent" },
+                              "&.Mui-focused": {
+                                background: "#fff",
+                                boxShadow: "0 0 0 4px rgba(26,20,107,0.08)",
+                                "& fieldset": { borderColor: "#1a146b" },
+                              },
+                              "&.Mui-error fieldset": { borderColor: "#ba1a1a !important" },
+                            },
+                            "& .MuiFormHelperText-root": { fontSize: 11 },
+                          }}
+                        />
+
+                        {/* Character count */}
+                        <Typography sx={{ fontSize: 10, color: "#a0a0a8", textAlign: "right", mt: -1.5 }}>
+                          {field.value.length}/500
+                        </Typography>
+                      </Box>
+                    )}
+                  />
+                </Box>
+
+                {/* Submit */}
+                <Button
+                  type="submit"
+                  fullWidth
+                  disabled={isReviewPending}
+                  sx={{
+                    py: 1.75,
+                    background: "linear-gradient(135deg, #1a146b 0%, #312e81 100%)",
+                    color: "white", borderRadius: "10px",
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontWeight: 700, letterSpacing: "0.1em",
+                    textTransform: "uppercase", fontSize: 12,
+                    "&:hover": { opacity: 0.9 },
+                    "&.Mui-disabled": { background: "#eceef0", color: "#c8c5d3" },
+                  }}
+                >
+                  {isReviewPending
+                    ? <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                      <CircularProgress size={14} sx={{ color: "white" }} />
+                      Submitting...
+                    </Box>
+                    : "Submit Review"}
+                </Button>
+
+              </Box>
+            </DialogContent>
+          </Dialog>
+
+          {!reviews?.data?.data?.length ?
             <Box sx={{
               height: 300,
               display: "flex", justifyContent: "center", alignItems: "center"
@@ -328,6 +495,42 @@ const CourseDetailsPage = () => {
             </Box>
             :
             <Stack spacing={2}>
+
+              {/* Top bar count and create review button */}
+              <Box sx={{
+                display: "flex", justifyContent: "space-between",
+                alignItems: "center", flexWrap: "wrap", gap: 2,
+                paddingTop: 2,
+                paddingX: 5
+              }}>
+                <Typography sx={{ fontSize: 13, color: "#505f76" }}>
+                  <Box component="span" sx={{ color: "#1a146b", fontWeight: 700 }}>
+                    {reviews?.data?.data?.length}
+                  </Box> Reviews
+                </Typography>
+
+                {/* Only show if enrolled */}
+                {isEnrolled && (
+                  <Button
+                    onClick={() => setReviewModalOpen(true)}
+                    sx={{
+                      px: 3, py: 1.25,
+                      background: "linear-gradient(135deg, #1a146b 0%, #312e81 100%)",
+                      color: "white", borderRadius: "10px",
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontWeight: 700, letterSpacing: "0.1em",
+                      textTransform: "uppercase", fontSize: 11,
+                      boxShadow: "0 4px 16px rgba(26,20,107,0.22)",
+                      "&:hover": { opacity: 0.9, transform: "translateY(-1px)" },
+                      transition: "all 0.2s",
+                    }}
+                    startIcon={<EditOutlinedIcon sx={{ fontSize: "16px !important" }} />}
+                  >
+                    Write a Review
+                  </Button>
+                )}
+
+              </Box>
 
               <Box sx={{
                 maxWidth: "100%",
@@ -357,8 +560,10 @@ const CourseDetailsPage = () => {
                   paddingBottom: "20px"
                 }} />
 
-            </Stack>
-        )}
+            </Stack>}
+
+        </Box>
+        }
 
       </Box>
     </Box >

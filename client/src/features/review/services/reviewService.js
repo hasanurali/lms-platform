@@ -8,3 +8,12 @@ export const fetchReviews = async (id) => {
 
     return response.data;
 };
+
+export const createReview = async (data) => {
+    const response = await api.post(
+        ENDPOINTS.REVIEW.CREATE(data?.id),
+        data?.data
+    );
+
+    return response.data;
+};
