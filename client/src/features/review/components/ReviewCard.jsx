@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { Box, Typography, Avatar } from "@mui/material";
+import { Box, Typography, Avatar, IconButton } from "@mui/material";
 
 import RenderStars from "@/features/course/components/RenderStars"
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ClearIcon from '@mui/icons-material/Clear';
 
 const MAX_CHARS = 160;
 
-const ReviewCard = ({ review }) => {
-
+const ReviewCard = ({ review, user, onEdit }) => {
 
     const [expanded, setExpanded] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false)
 
     const isLong = review.message?.length > MAX_CHARS;
     const displayText = isLong && !expanded
@@ -36,7 +40,7 @@ const ReviewCard = ({ review }) => {
         }}>
 
             {/* Tob bar avatar, name and date */}
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5 }}>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5, position: "relative" }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
                     <Avatar
                         src={review.profilePicture}
@@ -63,6 +67,32 @@ const ReviewCard = ({ review }) => {
 
                 {/* Stars */}
                 <RenderStars rating={review.rating} />
+
+                {/* Three dot menu */}
+                {review?.student?._id === user?._id && <Box sx={{ position: "absolute", right: -15, top: -23 }}>
+                    {!menuOpen ?
+                        <MoreHorizIcon onClick={() => setMenuOpen(!menuOpen)} sx={{ fontSize: 25, color: "#a0a0a8", cursor: "pointer" }} />
+                        :
+                        <ClearIcon onClick={() => setMenuOpen(!menuOpen)} sx={{ fontSize: 25, color: "#a0a0a8", cursor: "pointer" }} />
+                    }
+                </Box>}
+
+                {/* Menu box */}
+                {menuOpen && <Box sx={{ width: "130px", height: "88px", backgroundColor: "white", position: "absolute", top: "0px", right: "0px", paddingY: "3px", borderRadius: "5px", color: "#1a146b", boxShadow: 1 }}>
+                    <Box onClick={() => { onEdit(review), setMenuOpen(false) }} className="flex items-center hover:bg-[#f5f5f5] cursor-pointer">
+                        <IconButton sx={{ padding: "none" }}>
+                            <EditNoteIcon sx={{ fontSize: 25 }} />
+                        </IconButton>
+                        <Typography sx={{ fontSize: 16, fontWeight: 600, letterSpacing: "0.5px" }}>Edit</Typography>
+                    </Box>
+                    <Box className="flex items-center hover:bg-[#f5f5f5] cursor-pointer">
+                        <IconButton sx={{ padding: "none" }}>
+                            <DeleteIcon sx={{ fontSize: 25 }} />
+                        </IconButton>
+                        <Typography sx={{ fontSize: 16, fontWeight: 600, letterSpacing: "0.5px" }}>Delete</Typography>
+                    </Box>
+                </Box>
+                }
 
             </Box>
 

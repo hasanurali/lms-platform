@@ -17,3 +17,12 @@ export const createReview = async (data) => {
 
     return response.data;
 };
+
+export const updateReview = async (data) => {
+    const response = await api.put(
+        ENDPOINTS.REVIEW.UPDATE(data?.id),
+        data?.data
+    );
+
+    return response.data;
+};

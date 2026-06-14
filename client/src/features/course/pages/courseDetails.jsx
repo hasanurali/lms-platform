@@ -24,6 +24,7 @@ import useFetchReviews from "@/features/review/hooks/useFetchReviews";
 import createReviewSchema from "@/features/review/schemas/createReviewSchema";
 import useCreateReview from "@/features/review/hooks/useCreateReview"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
+import useUpdateReview from "@/features/review/hooks/useUpdateReview"
 
 
 const CourseDetailsPage = () => {
@@ -31,6 +32,8 @@ const CourseDetailsPage = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [page, setPage] = useState(1)
   const [reviewModalOpen, setReviewModalOpen] = useState(false)
+  const [isEdit, setIsEdit] = useState(false);
+  const [reviewId, setReviewId] = useState(null)
 
   const navigate = useNavigate();
 
@@ -44,8 +47,8 @@ const CourseDetailsPage = () => {
   const { data: reviews } = useFetchReviews(id);
 
 
-  // handle create review
-  const { control, handleSubmit, reset, formState: { errors }, setError } = useForm({
+  // handle create and update review
+  const { control, handleSubmit, reset, formState: { errors, isDirty }, setError, setValue } = useForm({
     resolver: zodResolver(createReviewSchema),
     defaultValues: {
       rating: 0,
@@ -54,16 +57,32 @@ const CourseDetailsPage = () => {
   });
 
   const { mutate: createReviewMutate, isPending: isReviewPending } = useCreateReview()
+  const { mutate: updateReviewMutate, isPending: isUpdateReviewPending } = useUpdateReview()
   const onSubmit = (data) => {
-    createReviewMutate({ id, data }, {
-      onSuccess: () => {
-        reset();
-        setReviewModalOpen(false);
-      },
-      onError: (error) => {
-        handleFieldApiErrors(error, setError);
-      },
-    });
+
+    if (isEdit) {
+      updateReviewMutate({ id: reviewId, data }, {
+        onSuccess: () => {
+          reset();
+          setIsEdit(false);
+          setReviewModalOpen(false);
+        },
+        onError: (error) => {
+          handleFieldApiErrors(error, setError);
+        },
+      });
+    } else {
+      createReviewMutate({ id, data }, {
+        onSuccess: () => {
+          reset();
+          setReviewModalOpen(false);
+        },
+        onError: (error) => {
+          handleFieldApiErrors(error, setError);
+        },
+      });
+    }
+
   };
 
   // Handle fetching full course details
@@ -111,6 +130,17 @@ const CourseDetailsPage = () => {
   // Handle review pagination
   const handleChange = (e, value) => {
     setPage(value)
+  };
+
+  // Handle review edit
+  const handleReviewEdit = (data) => {
+    
+    setIsEdit(true);
+    setReviewModalOpen(true);
+    setReviewId(data?._id)
+
+    setValue("rating", data?.rating, { shouldValidate: true });
+    setValue("message", data?.message, { shouldValidate: true });
   };
 
   if (courseDataPending) {
@@ -368,7 +398,7 @@ const CourseDetailsPage = () => {
           >
             <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pb: 1 }}>
               <Typography sx={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 800, color: "#1a146b" }}>
-                Write a Review
+                {isEdit ? "Edit Review" : "Write a Review"}
               </Typography>
               <IconButton onClick={() => { reset(); setReviewModalOpen(false); }} size="small" sx={{ color: "#505f76" }}>
                 <CloseIcon fontSize="small" />
@@ -426,6 +456,7 @@ const CourseDetailsPage = () => {
                     render={({ field }) => (
                       <Box>
                         <TextField
+                          id="message"
                           {...field}
                           multiline
                           rows={4}
@@ -462,7 +493,7 @@ const CourseDetailsPage = () => {
                 <Button
                   type="submit"
                   fullWidth
-                  disabled={isReviewPending}
+                  disabled={isReviewPending || isUpdateReviewPending || !isDirty}
                   sx={{
                     py: 1.75,
                     background: "linear-gradient(135deg, #1a146b 0%, #312e81 100%)",
@@ -474,7 +505,7 @@ const CourseDetailsPage = () => {
                     "&.Mui-disabled": { background: "#eceef0", color: "#c8c5d3" },
                   }}
                 >
-                  {isReviewPending
+                  {isReviewPending || isUpdateReviewPending
                     ? <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                       <CircularProgress size={14} sx={{ color: "white" }} />
                       Submitting...
@@ -512,7 +543,7 @@ const CourseDetailsPage = () => {
                 {/* Only show if enrolled */}
                 {isEnrolled && (
                   <Button
-                    onClick={() => setReviewModalOpen(true)}
+                    onClick={() => { setIsEdit(false), setReviewModalOpen(true) }}
                     sx={{
                       px: 3, py: 1.25,
                       background: "linear-gradient(135deg, #1a146b 0%, #312e81 100%)",
@@ -545,7 +576,7 @@ const CourseDetailsPage = () => {
                 },
                 gap: 3,
               }}>
-                {reviews?.data?.data?.map(review => <ReviewCard key={review._id} review={review} />)}
+                {reviews?.data?.data?.map(review => <ReviewCard key={review._id} review={review} user={user} onEdit={handleReviewEdit} />)}
               </Box>
 
               <Pagination
