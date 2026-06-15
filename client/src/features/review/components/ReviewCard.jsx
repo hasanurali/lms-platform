@@ -7,12 +7,21 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ClearIcon from '@mui/icons-material/Clear';
 
+import useDeleteReview from "../hooks/useDeleteReview";
+
 const MAX_CHARS = 160;
 
 const ReviewCard = ({ review, user, onEdit }) => {
 
     const [expanded, setExpanded] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false)
+
+    const { mutate, isPending } = useDeleteReview(review?.course)
+    const handleReviewDelete = () => {
+        if (!isPending) {
+            mutate(review?._id)
+        };
+    }
 
     const isLong = review.message?.length > MAX_CHARS;
     const displayText = isLong && !expanded
@@ -85,11 +94,17 @@ const ReviewCard = ({ review, user, onEdit }) => {
                         </IconButton>
                         <Typography sx={{ fontSize: 16, fontWeight: 600, letterSpacing: "0.5px" }}>Edit</Typography>
                     </Box>
-                    <Box className="flex items-center hover:bg-[#f5f5f5] cursor-pointer">
+                    <Box onClick={handleReviewDelete} className="flex items-center hover:bg-[#f5f5f5] cursor-pointer">
                         <IconButton sx={{ padding: "none" }}>
                             <DeleteIcon sx={{ fontSize: 25 }} />
                         </IconButton>
-                        <Typography sx={{ fontSize: 16, fontWeight: 600, letterSpacing: "0.5px" }}>Delete</Typography>
+                        <Typography sx={{ fontSize: 16, fontWeight: 600, letterSpacing: "0.5px" }}>
+                            {isPending ?
+                                "Deleting..."
+                                :
+                                "Delete"
+                            }
+                        </Typography>
                     </Box>
                 </Box>
                 }

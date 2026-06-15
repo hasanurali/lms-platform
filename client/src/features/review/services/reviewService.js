@@ -26,3 +26,11 @@ export const updateReview = async (data) => {
 
     return response.data;
 };
+
+export const deleteReview = async (id) => {
+    const response = await api.delete(
+        ENDPOINTS.REVIEW.DELETE(id)
+    );
+
+    return response.data;
+};

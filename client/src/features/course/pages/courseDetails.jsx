@@ -134,7 +134,7 @@ const CourseDetailsPage = () => {
 
   // Handle review edit
   const handleReviewEdit = (data) => {
-    
+
     setIsEdit(true);
     setReviewModalOpen(true);
     setReviewId(data?._id)
@@ -382,6 +382,42 @@ const CourseDetailsPage = () => {
         {/* Review tab with pagination */}
         {activeTab === 2 && <Box>
 
+          {/* Top bar count and create review button */}
+          <Box sx={{
+            display: "flex", justifyContent: "space-between",
+            alignItems: "center", flexWrap: "wrap", gap: 2,
+            paddingTop: 2,
+            paddingX: 5
+          }}>
+            <Typography sx={{ fontSize: 13, color: "#505f76" }}>
+              <Box component="span" sx={{ color: "#1a146b", fontWeight: 700 }}>
+                {reviews?.data?.data?.length}
+              </Box> Reviews
+            </Typography>
+
+            {/* Only show if enrolled */}
+            {isEnrolled && (
+              <Button
+                onClick={() => { setIsEdit(false), setReviewModalOpen(true) }}
+                sx={{
+                  px: 3, py: 1.25,
+                  background: "linear-gradient(135deg, #1a146b 0%, #312e81 100%)",
+                  color: "white", borderRadius: "10px",
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontWeight: 700, letterSpacing: "0.1em",
+                  textTransform: "uppercase", fontSize: 11,
+                  boxShadow: "0 4px 16px rgba(26,20,107,0.22)",
+                  "&:hover": { opacity: 0.9, transform: "translateY(-1px)" },
+                  transition: "all 0.2s",
+                }}
+                startIcon={<EditOutlinedIcon sx={{ fontSize: "16px !important" }} />}
+              >
+                Write a Review
+              </Button>
+            )}
+
+          </Box>
+
           <Dialog
             open={reviewModalOpen}
             onClose={() => { reset(); setReviewModalOpen(false); }}
@@ -526,42 +562,6 @@ const CourseDetailsPage = () => {
             </Box>
             :
             <Stack spacing={2}>
-
-              {/* Top bar count and create review button */}
-              <Box sx={{
-                display: "flex", justifyContent: "space-between",
-                alignItems: "center", flexWrap: "wrap", gap: 2,
-                paddingTop: 2,
-                paddingX: 5
-              }}>
-                <Typography sx={{ fontSize: 13, color: "#505f76" }}>
-                  <Box component="span" sx={{ color: "#1a146b", fontWeight: 700 }}>
-                    {reviews?.data?.data?.length}
-                  </Box> Reviews
-                </Typography>
-
-                {/* Only show if enrolled */}
-                {isEnrolled && (
-                  <Button
-                    onClick={() => { setIsEdit(false), setReviewModalOpen(true) }}
-                    sx={{
-                      px: 3, py: 1.25,
-                      background: "linear-gradient(135deg, #1a146b 0%, #312e81 100%)",
-                      color: "white", borderRadius: "10px",
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontWeight: 700, letterSpacing: "0.1em",
-                      textTransform: "uppercase", fontSize: 11,
-                      boxShadow: "0 4px 16px rgba(26,20,107,0.22)",
-                      "&:hover": { opacity: 0.9, transform: "translateY(-1px)" },
-                      transition: "all 0.2s",
-                    }}
-                    startIcon={<EditOutlinedIcon sx={{ fontSize: "16px !important" }} />}
-                  >
-                    Write a Review
-                  </Button>
-                )}
-
-              </Box>
 
               <Box sx={{
                 maxWidth: "100%",
