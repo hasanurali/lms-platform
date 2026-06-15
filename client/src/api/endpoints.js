@@ -9,5 +9,24 @@ export const ENDPOINTS = {
     },
     USER: {
         ME: "/users/me"
+    },
+    COURSE: {
+        CREATE: "/courses",
+        FETCH: (page, limit) => (page || limit) ? `/courses?page=${page}&limit=${limit}` : "/courses",
+        FETCHMY: (page, limit) => (page || limit) ? `/courses/my?page=${page}&limit=${limit}` : "/courses/my",
+        DETAILS: (id) => `/courses/${id}`,
+        FULL: (id) => `/courses/${id}/full`,
+        UPDATE: (id) => `/courses/${id}`,
+        DELETE: (id) => `/courses/${id}`
+    },
+    ENROLLMENT: {
+        ENROLL: (id) => `/courses/${id}/enroll`,
+        FETCHCOURSES: "/enrollments/my"
+    },
+    REVIEW: {
+        CREATE: (id) => `/courses/${id}/reviews`,
+        FETCH: (id) => `/courses/${id}/reviews`,
+        UPDATE: (id) => `/reviews/${id}`,
+        DELETE: (id) => `/reviews/${id}`
     }
 };

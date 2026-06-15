@@ -8,7 +8,10 @@ import HomePage from "@/features/home/pages/HomePage";
 import LoginPage from "@/features/auth/pages/LoginPage";
 import RegisterPage from "@/features/auth/pages/RegisterPage";
 import VerifyOtpPage from "@/features/auth/pages/VerifyOtpPage";
+import CoursePage from "@/features/course/pages/CoursePage";
+import CourseDetailsPage from "@/features/course/pages/CourseDetails";
 import NotFoundPage from "@/features/error/pages/NotFoundPage";
+
 import GuestRoute from "@/routes/GuestRoute";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 
@@ -43,7 +46,15 @@ const router = createBrowserRouter([
             {
                 index: true,
                 element: <HomePage />,
-            }
+            },
+            {
+                path: "courses",
+                element: <CoursePage />,
+            },
+            {
+                path: "courses/:id",
+                element: <CourseDetailsPage />,
+            },
         ]
     },
 

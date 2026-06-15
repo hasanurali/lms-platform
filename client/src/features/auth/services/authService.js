@@ -52,3 +52,11 @@ export const refreshToken = async () => {
 
     return;
 };
+
+export const logoutUser = async () => {
+    const response = await api.post(
+        ENDPOINTS.AUTH.LOGOUT
+    );
+
+    return;
+};
