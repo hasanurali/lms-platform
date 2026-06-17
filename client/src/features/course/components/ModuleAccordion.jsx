@@ -1,15 +1,18 @@
 import react, { useState } from "react";
 import { Box, Typography } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 
 import PlayCircleFilledIcon from "@mui/icons-material/PlayCircleFilled";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import LockIcon from "@mui/icons-material/LockOutlined"
 
 
 const ModuleAccordion = ({ module, index, isEnrolled }) => {
     const [open, setOpen] = useState(index === 0);
     const totalLessons = module.lessons?.length ?? 0;
+    const completed = false;
 
     return (
         <Box sx={{ background: "#ffffff", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(25,28,30,0.06)" }}>
@@ -47,27 +50,27 @@ const ModuleAccordion = ({ module, index, isEnrolled }) => {
             {open && (
                 <Box sx={{ px: 3, pb: 3, display: "flex", flexDirection: "column", gap: 1 }}>
                     {module.lessons?.map((lesson, li) => {
-                        const accessible = isEnrolled || li === 0;
-                        const completed = lesson.completed ?? false;
                         return (
                             <Box
+                                component={RouterLink}
+                                to={isEnrolled && `/lessons/${lesson?._id}`}
                                 key={lesson._id}
                                 sx={{
                                     display: "flex", alignItems: "center", justifyContent: "space-between",
                                     p: "12px 16px", borderRadius: "8px",
-                                    background: completed ? "rgba(68,181,168,0.06)" : accessible ? "#f7f9fb" : "transparent",
-                                    cursor: accessible ? "pointer" : "default",
+                                    background: completed ? "rgba(68,181,168,0.06)" : isEnrolled ? "#f7f9fb" : "transparent",
+                                    cursor: isEnrolled ? "pointer" : "default",
                                     transition: "background 0.2s",
-                                    "&:hover": accessible ? { background: "#eceef0" } : {},
+                                    "&:hover": isEnrolled ? { background: "#eceef0" } : {},
                                 }}
                             >
                                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                                     {completed
                                         ? <CheckCircleIcon sx={{ fontSize: 16, color: "#44b5a8" }} />
-                                        : accessible
+                                        : isEnrolled
                                             ? <PlayCircleFilledIcon sx={{ fontSize: 16, color: "#44b5a8" }} />
                                             : <LockIcon sx={{ fontSize: 14, color: "#c8c5d3" }} />}
-                                    <Typography sx={{ fontSize: 13, color: accessible ? "#191c1e" : "#a0a0a8", fontWeight: accessible ? 500 : 400 }}>
+                                    <Typography sx={{ fontSize: 13, color: isEnrolled ? "#191c1e" : "#a0a0a8", fontWeight: isEnrolled ? 500 : 400 }}>
                                         {lesson.title}
                                     </Typography>
                                 </Box>
