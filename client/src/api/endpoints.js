@@ -35,5 +35,10 @@ export const ENDPOINTS = {
         FETCH: (id) => `lessons/${id}`,
         UPDATE: (id) => `lessons/${id}`,
         DELETE: (id) => `lessons/${id}`
+    },
+    PROGRESS: {
+        FETCH: (courseId) => `/progress/${courseId}`,
+        MARKCOMPLETE: `/progress/complete-lesson`,
+        LASTLESSON: `/progress/last-lesson`
     }
 };
