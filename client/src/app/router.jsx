@@ -73,12 +73,12 @@ const router = createBrowserRouter([
                 ],
             },
             {
-                path: "lessons/:id",
+                path: "/courses/:courseId/lessons/:lessonId",
                 element: <LessonVideoPlayer />
             }
         ],
     },
-    
+
     {
         path: "*",
         element: <NotFoundPage />,

@@ -53,7 +53,7 @@ const ModuleAccordion = ({ module, index, isEnrolled }) => {
                         return (
                             <Box
                                 component={RouterLink}
-                                to={isEnrolled && `/lessons/${lesson?._id}`}
+                                to={isEnrolled && `/courses/${module?.course}/lessons/${lesson?._id}`}
                                 key={lesson._id}
                                 sx={{
                                     display: "flex", alignItems: "center", justifyContent: "space-between",
