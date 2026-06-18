@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Box, Typography, Button, IconButton, CircularProgress } from "@mui/material";
 
@@ -9,6 +9,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlineOutlin
 import VideoPlayer from "../components/VideoPlayer";
 import useFetchLesson from "../hooks/useFetchLesson";
 import useMarkLessonComplete from "@/features/progress/hooks/useMarkLessonComplete";
+import useFetchProgress from "@/features/progress/hooks/useFetchProgress";
 
 
 const LessonVideoPlayer = () => {
@@ -18,10 +19,20 @@ const LessonVideoPlayer = () => {
     const { courseId, lessonId } = useParams();
     const navigate = useNavigate();
 
+    // Fetch lessson
     const { data, isPending, isError } = useFetchLesson(lessonId);
     const lesson = data?.data;
 
-    const { mutate, isPending: isUpdatePending } = useMarkLessonComplete();
+    // Fetch Progress
+    const { data: progressData } = useFetchProgress(courseId);
+    useEffect(() => {
+        if (progressData?.data?.progress?.completedLessons?.includes(lessonId)) {
+            setCompleted(true)
+        }
+    }, [progressData])
+
+
+    const { mutate, isPending: isUpdatePending } = useMarkLessonComplete(courseId);
     const handleMarkComplete = () => {
         if (completed) return;
         mutate({ lesson: lessonId, course: courseId }, {
@@ -30,7 +41,6 @@ const LessonVideoPlayer = () => {
             }
         })
     }
-
 
     if (isPending) {
         return (

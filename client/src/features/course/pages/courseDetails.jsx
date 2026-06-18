@@ -25,6 +25,7 @@ import createReviewSchema from "@/features/review/schemas/createReviewSchema";
 import useCreateReview from "@/features/review/hooks/useCreateReview"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 import useUpdateReview from "@/features/review/hooks/useUpdateReview"
+import useFetchProgress from "@/features/progress/hooks/useFetchProgress";
 
 
 const CourseDetailsPage = () => {
@@ -46,6 +47,8 @@ const CourseDetailsPage = () => {
   // Fetch reviews
   const { data: reviews } = useFetchReviews(id);
 
+  // Fetch Progress
+  const { data: progressData } = useFetchProgress(id);
 
   // handle create and update review
   const { control, handleSubmit, reset, formState: { errors, isDirty }, setError, setValue } = useForm({
@@ -196,7 +199,7 @@ const CourseDetailsPage = () => {
               {/* CTA */}
               <Box sx={{ pt: 1 }}>
                 <Button onClick={handleEnrollment} sx={{ px: 4, py: 1.75, background: "white", color: "#1a146b", borderRadius: "8px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", fontSize: 12, boxShadow: "0 8px 24px rgba(0,0,0,0.2)", "&:hover": { background: "#89f5e7" }, transition: "background 0.2s" }}>
-                  {isEnrolled ? "Continue Learning" : isFree ? "Enroll Free" : `Enroll Now — $${price}`}
+                  {progressData?.data?.progress?.completed ? "Course Completed" : isEnrolled ? "Continue Learning" : isFree ? "Enroll Free" : `Enroll Now — $${price}`}
                 </Button>
               </Box>
             </Box>
@@ -296,7 +299,7 @@ const CourseDetailsPage = () => {
                 </Box>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   {modules?.map((module, i) => (
-                    <ModuleAccordion key={module._id} module={module} index={i} isEnrolled={isEnrolled} />
+                    <ModuleAccordion key={module._id} module={module} index={i} isEnrolled={isEnrolled} progressData={progressData} />
                   ))}
                 </Box>
               </Box>

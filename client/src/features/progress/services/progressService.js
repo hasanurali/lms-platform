@@ -9,3 +9,11 @@ export const markLessonComplete = async (data) => {
 
     return response.data;
 };
+
+export const fetchProgress = async (id) => {
+    const response = await api.get(
+        ENDPOINTS.PROGRESS.FETCH(id)
+    );
+
+    return response.data;
+};

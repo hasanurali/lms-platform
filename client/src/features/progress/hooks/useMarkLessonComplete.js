@@ -1,10 +1,15 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { markLessonComplete } from "../services/progressService";
 
-const useMarkLessonComplete = () => {
+const useMarkLessonComplete = (id) => {
+
+    const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: markLessonComplete
+        mutationFn: markLessonComplete,
+        onSuccess:()=>{
+            queryClient.invalidateQueries(["courses", id])
+        }
     });
 };
 

@@ -9,10 +9,14 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import LockIcon from "@mui/icons-material/LockOutlined"
 
 
-const ModuleAccordion = ({ module, index, isEnrolled }) => {
+const ModuleAccordion = ({ module, index, isEnrolled, progressData }) => {
     const [open, setOpen] = useState(index === 0);
     const totalLessons = module.lessons?.length ?? 0;
     const completed = false;
+
+    const handleCompleted = (id) => {
+        return progressData?.data?.progress?.completedLessons?.includes(id);
+    }
 
     return (
         <Box sx={{ background: "#ffffff", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(25,28,30,0.06)" }}>
@@ -58,14 +62,14 @@ const ModuleAccordion = ({ module, index, isEnrolled }) => {
                                 sx={{
                                     display: "flex", alignItems: "center", justifyContent: "space-between",
                                     p: "12px 16px", borderRadius: "8px",
-                                    background: completed ? "rgba(68,181,168,0.06)" : isEnrolled ? "#f7f9fb" : "transparent",
+                                    background: handleCompleted(lesson._id) ? "rgba(68,181,168,0.06)" : isEnrolled ? "#f7f9fb" : "transparent",
                                     cursor: isEnrolled ? "pointer" : "default",
                                     transition: "background 0.2s",
                                     "&:hover": isEnrolled ? { background: "#eceef0" } : {},
                                 }}
                             >
                                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                                    {completed
+                                    {handleCompleted(lesson?._id)
                                         ? <CheckCircleIcon sx={{ fontSize: 16, color: "#44b5a8" }} />
                                         : isEnrolled
                                             ? <PlayCircleFilledIcon sx={{ fontSize: 16, color: "#44b5a8" }} />
