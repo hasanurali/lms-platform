@@ -11,6 +11,7 @@ import VerifyOtpPage from "@/features/auth/pages/VerifyOtpPage";
 import CoursePage from "@/features/course/pages/CoursePage";
 import CourseDetailsPage from "@/features/course/pages/CourseDetails";
 import NotFoundPage from "@/features/error/pages/NotFoundPage";
+import LessonVideoPlayer from "@/features/lesson/page/LessonVideoPlayer";
 
 import GuestRoute from "@/routes/GuestRoute";
 import ProtectedRoute from "@/routes/ProtectedRoute";
@@ -71,7 +72,11 @@ const router = createBrowserRouter([
                     }
                 ],
             },
-        ]
+            {
+                path: "/courses/:courseId/lessons/:lessonId",
+                element: <LessonVideoPlayer />
+            }
+        ],
     },
 
     {

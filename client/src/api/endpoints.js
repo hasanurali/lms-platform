@@ -28,5 +28,17 @@ export const ENDPOINTS = {
         FETCH: (id) => `/courses/${id}/reviews`,
         UPDATE: (id) => `/reviews/${id}`,
         DELETE: (id) => `/reviews/${id}`
+    },
+    LESSON: {
+        CREATE: (id) => `/modules/${id}/lessons`,
+        FETCHALL: (id) => `/modules/${id}/lessons`,
+        FETCH: (id) => `lessons/${id}`,
+        UPDATE: (id) => `lessons/${id}`,
+        DELETE: (id) => `lessons/${id}`
+    },
+    PROGRESS: {
+        FETCH: (courseId) => `/progress/${courseId}`,
+        MARKCOMPLETE: `/progress/complete-lesson`,
+        LASTLESSON: `/progress/last-lesson`
     }
 };

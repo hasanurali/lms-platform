@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Box, Typography, Button, IconButton, LinearProgress, Container, Stack, Pagination, Dialog, DialogContent, DialogTitle, CircularProgress, TextField } from "@mui/material";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
 import { toast } from "react-hot-toast"
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +25,7 @@ import createReviewSchema from "@/features/review/schemas/createReviewSchema";
 import useCreateReview from "@/features/review/hooks/useCreateReview"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 import useUpdateReview from "@/features/review/hooks/useUpdateReview"
+import useFetchProgress from "@/features/progress/hooks/useFetchProgress";
 
 
 const CourseDetailsPage = () => {
@@ -46,6 +47,10 @@ const CourseDetailsPage = () => {
   // Fetch reviews
   const { data: reviews } = useFetchReviews(id);
 
+  // Fetch Progress
+  const { data: progressData } = useFetchProgress(id);
+  const isCourseComplete = progressData?.data?.progress?.completed;
+  const lastAccessedLesson = progressData?.data?.progress?.lastAccessLesson;
 
   // handle create and update review
   const { control, handleSubmit, reset, formState: { errors, isDirty }, setError, setValue } = useForm({
@@ -98,13 +103,20 @@ const CourseDetailsPage = () => {
 
   // Handle enrollment
   const { mutate } = useEnrollCourse(id);
-  const handleEnrollment = () => {
+  const handleEnrollment = (firstLesson) => {
 
     if (!user) {
-      navigate("/auth/register")
+      return navigate("/auth/register")
     };
 
-    if (isEnrolled) return;
+    if (isCourseComplete) return;
+
+    if (isEnrolled && !isCourseComplete) {
+      return !lastAccessedLesson ?
+        navigate(`/courses/${id}/lessons/${firstLesson}`)
+        :
+        navigate(`/courses/${id}/lessons/${lastAccessedLesson}`);
+    };
 
     mutate(id, {
 
@@ -123,9 +135,10 @@ const CourseDetailsPage = () => {
   const { course, modules = [], progress } = courseData?.data;
   const { title, description, instructor, price, thumbnail, averageRating = 0, totalReviews = 0 } = course;
 
-  // Calculate price and total lessons
+  // Calculate price, first and total lessons
   const isFree = price === 0;
   const totalLessons = modules.reduce((acc, m) => acc + (m.lessons?.length ?? 0), 0);
+  const firstLesson = modules?.[0]?.lessons?.[0]?._id;
 
   // Handle review pagination
   const handleChange = (e, value) => {
@@ -195,19 +208,22 @@ const CourseDetailsPage = () => {
 
               {/* CTA */}
               <Box sx={{ pt: 1 }}>
-                <Button onClick={handleEnrollment} sx={{ px: 4, py: 1.75, background: "white", color: "#1a146b", borderRadius: "8px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", fontSize: 12, boxShadow: "0 8px 24px rgba(0,0,0,0.2)", "&:hover": { background: "#89f5e7" }, transition: "background 0.2s" }}>
-                  {isEnrolled ? "Continue Learning" : isFree ? "Enroll Free" : `Enroll Now — $${price}`}
+                <Button onClick={() => handleEnrollment(firstLesson)} sx={{ px: 4, py: 1.75, background: "white", color: "#1a146b", borderRadius: "8px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", fontSize: 12, boxShadow: "0 8px 24px rgba(0,0,0,0.2)", "&:hover": { background: "#89f5e7" }, transition: "background 0.2s" }}>
+                  {isCourseComplete ? "Course Completed" : isEnrolled ? "Continue Learning" : isFree ? "Enroll Free" : `Enroll Now — $${price}`}
                 </Button>
               </Box>
             </Box>
 
             {/* Right video thumbnail */}
-            <Box sx={{
-              aspectRatio: "16/9", borderRadius: "14px", overflow: "hidden",
-              position: "relative", cursor: "pointer", boxShadow: "0 24px 60px rgba(0,0,0,0.3)",
-              "&:hover img": { transform: "scale(1.05)" },
-              "&:hover .play-overlay": { background: "rgba(26,20,107,0.1)" },
-            }}>
+            <Box
+              component={RouterLink}
+              to={`/courses/${id}/lessons/${firstLesson}`}
+              sx={{
+                aspectRatio: "16/9", borderRadius: "14px", overflow: "hidden",
+                position: "relative", cursor: "pointer", boxShadow: "0 24px 60px rgba(0,0,0,0.3)",
+                "&:hover img": { transform: "scale(1.05)" },
+                "&:hover .play-overlay": { background: "rgba(26,20,107,0.1)" },
+              }}>
               <Box component="img" src={thumbnail} alt={title} sx={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.7s" }} />
               <Box className="play-overlay" sx={{ position: "absolute", inset: 0, background: "rgba(26,20,107,0.2)", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.3s" }}>
                 <Box sx={{ width: 72, height: 72, background: "rgba(255,255,255,0.92)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 32px rgba(0,0,0,0.2)" }}>
@@ -296,7 +312,7 @@ const CourseDetailsPage = () => {
                 </Box>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   {modules?.map((module, i) => (
-                    <ModuleAccordion key={module._id} module={module} index={i} isEnrolled={isEnrolled} />
+                    <ModuleAccordion key={module._id} module={module} index={i} isEnrolled={isEnrolled} progressData={progressData} />
                   ))}
                 </Box>
               </Box>
