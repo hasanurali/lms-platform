@@ -17,3 +17,12 @@ export const fetchProgress = async (id) => {
 
     return response.data;
 };
+
+export const setLastLesson = async (data) => {
+    const response = await api.post(
+        ENDPOINTS.PROGRESS.LASTLESSON,
+        data
+    );
+
+    return response.data;
+};

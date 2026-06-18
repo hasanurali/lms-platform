@@ -7,6 +7,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import LockIcon from "@mui/icons-material/LockOutlined"
+import useSetLastLesson from "@/features/progress/hooks/useSetLastLesson";
 
 
 const ModuleAccordion = ({ module, index, isEnrolled, progressData }) => {
@@ -17,6 +18,10 @@ const ModuleAccordion = ({ module, index, isEnrolled, progressData }) => {
     const handleCompleted = (id) => {
         return progressData?.data?.progress?.completedLessons?.includes(id);
     }
+    const { mutate } = useSetLastLesson(module?.course)
+    const handleLastLesson = (data) => {
+        mutate(data);
+    };
 
     return (
         <Box sx={{ background: "#ffffff", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(25,28,30,0.06)" }}>
@@ -56,6 +61,7 @@ const ModuleAccordion = ({ module, index, isEnrolled, progressData }) => {
                     {module.lessons?.map((lesson, li) => {
                         return (
                             <Box
+                                onClick={() => handleLastLesson({ course: module?.course, lesson: lesson?._id })}
                                 component={RouterLink}
                                 to={isEnrolled && `/courses/${module?.course}/lessons/${lesson?._id}`}
                                 key={lesson._id}
