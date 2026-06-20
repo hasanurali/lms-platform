@@ -10,11 +10,13 @@ import VideoPlayer from "../components/VideoPlayer";
 import useFetchLesson from "../hooks/useFetchLesson";
 import useMarkLessonComplete from "@/features/progress/hooks/useMarkLessonComplete";
 import useFetchProgress from "@/features/progress/hooks/useFetchProgress";
+import LessonDoubtsTab from "@/features/doubt/components/LessonDoubtsTab"
 
 
 const LessonVideoPlayer = () => {
 
     const [completed, setCompleted] = useState(false);
+    const [activeTab, setActiveTab] = useState(0);
 
     const { courseId, lessonId } = useParams();
     const navigate = useNavigate();
@@ -136,29 +138,49 @@ const LessonVideoPlayer = () => {
                     {/* Divider */}
                     <Box sx={{ height: 1, background: "#eceef0" }} />
 
-                    {/* Content / notes */}
-                    {lesson.content ? (
-                        <Box>
-                            <Typography sx={{
-                                fontSize: 10, fontWeight: 700, letterSpacing: "0.18em",
-                                textTransform: "uppercase", color: "#474651", mb: 2,
-                            }}>
-                                Lesson Notes
-                            </Typography>
-                            <Typography sx={{ fontSize: 15, color: "#474651", lineHeight: 1.8 }}>
-                                {lesson.content}
-                            </Typography>
-                        </Box>
-                    ) : (
-                        <Box sx={{
-                            background: "#fff", borderRadius: "12px",
-                            p: 3, border: "1px dashed #c8c5d3",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                        }}>
-                            <Typography sx={{ fontSize: 13, color: "#a0a0a8" }}>
-                                No notes for this lesson.
-                            </Typography>
-                        </Box>
+                    <Box sx={{ display: "flex", gap: 4, borderBottom: "1px solid #eceef0", mb: 4 }}>
+                        {["Notes", "Doubts"].map((tab, i) => (
+                            <Box
+                                key={tab}
+                                component="button"
+                                onClick={() => setActiveTab(i)}
+                                sx={{
+                                    pb: "14px", border: "none", background: "none", cursor: "pointer",
+                                    borderBottom: "2px solid",
+                                    borderBottomColor: activeTab === i ? "#1a146b" : "transparent",
+                                    color: activeTab === i ? "#1a146b" : "#505f76",
+                                    fontFamily: "'DM Sans', sans-serif",
+                                    fontWeight: activeTab === i ? 700 : 500,
+                                    fontSize: 13, transition: "all 0.2s",
+                                    "&:hover": { color: "#1a146b" },
+                                }}
+                            >
+                                {tab}
+                            </Box>
+                        ))}
+                    </Box>
+
+                    {/* Notes and doubts tab */}
+                    {activeTab === 0 && (
+                        lesson.content ? (
+                            <Box>
+                                <Typography sx={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#474651", mb: 2 }}>
+                                    Lesson Notes
+                                </Typography>
+                                <Typography sx={{ fontSize: 15, color: "#474651", lineHeight: 1.8 }}>
+                                    {lesson.content}
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <Box sx={{ background: "#fff", borderRadius: "12px", p: 3, border: "1px dashed #c8c5d3", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <Typography sx={{ fontSize: 13, color: "#a0a0a8" }}>No notes for this lesson.</Typography>
+                            </Box>
+                        )
+                    )}
+
+                    {/* Doubts tab */}
+                    {activeTab === 1 && (
+                        <LessonDoubtsTab lessonId={lessonId} courseId={courseId} />
                     )}
 
                 </Box>

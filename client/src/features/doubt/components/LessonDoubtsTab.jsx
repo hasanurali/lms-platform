@@ -1,0 +1,207 @@
+import React, { useState } from "react";
+import { Box, Typography, Button, TextField } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import { btnPrimary, btnGhost, inputSx } from "../constants/doubtConstants"
+import DoubtCard from "./DoubtCard"
+import ReplyBubble from "./ReplyBubble"
+import StatusChip from "./StatusChip";
+
+const doubts = [{
+  _id: "6a056e4481c777ac9265b894",
+  course: {
+    _id: "6a04ad1e684e40cd30188bc4",
+    title: "Mern stack basic"
+  },
+  lesson: {
+    _id: "6a054f1343c63f40c5f001a0",
+    title: "About js"
+  },
+  student: {
+    _id: "69fc1aba69412bb33278a18c",
+    name: "anas"
+  },
+  title: "about jwt",
+  status: "answered",
+  lastReplyAt: "2026-05-18T04:04:20.615Z"
+}];
+
+const replies = [
+  {
+    _id: "6a056e4581c777ac9265b895",
+    doubt: "6a056e4481c777ac9265b894",
+    author: {
+      _id: "69fc1aba69412bb33278a18c",
+      name: "anas",
+      role: "admin",
+      profilePicture: "https://cloudinary.com"
+    },
+    message: "i have doubt in jwt",
+    createdAt: "2026-05-14T06:40:05.041Z"
+  }
+];
+
+
+
+const LessonDoubtsTab = ({ lessonId, courseId }) => {
+
+  const [selectedId, setSelectedId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const selected = doubts.find(d => d._id === selectedId);
+
+  return (
+    <Box sx={{
+      display: "grid",
+      gridTemplateColumns: { xs: "1fr", md: "280px 1fr" },
+      gap: 3, alignItems: "flex-start",
+    }}>
+
+      {/* Left list */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+
+        {/* Ask button */}
+        {!showForm && (
+          <Button
+            onClick={() => setShowForm(true)}
+            startIcon={<AddIcon sx={{ fontSize: "16px !important" }} />}
+            sx={{ ...btnPrimary, mb: 0.5 }}
+          >
+            Ask a Doubt
+          </Button>
+        )}
+
+        {/* Create form */}
+        {showForm && (
+          <Box sx={{
+            background: "#fff", borderRadius: "12px", p: 2,
+            border: "1px solid rgba(26,20,107,0.1)", mb: 0.5,
+          }}>
+            <Typography sx={{ fontWeight: 700, fontSize: 13, color: "#1a146b", mb: 1.25 }}>
+              Your Question
+            </Typography>
+            <TextField
+              multiline rows={3} fullWidth
+              placeholder="What would you like to ask?"
+              sx={{ ...inputSx, mb: 1.5 }}
+            />
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                sx={btnPrimary}
+              >
+                Submit
+              </Button>
+              <Button onClick={() => { setShowForm(false) }} sx={btnGhost}>
+                Cancel
+              </Button>
+            </Box>
+          </Box>
+        )}
+
+        {/* Doubt list */}
+        {doubts.length === 0 ? (
+          <Box sx={{ py: 5, textAlign: "center" }}>
+            <Typography sx={{ fontSize: 13, color: "#a0a0a8" }}>
+              No doubts for this lesson yet.
+            </Typography>
+          </Box>
+        ) : (
+          doubts.map(d => (
+            <DoubtCard
+              key={d._id}
+              doubt={d}
+              selected={d._id === selectedId}
+              onClick={() => setSelectedId(d._id)}
+            />
+          ))
+        )}
+      </Box>
+
+      {/* Right conversation */}
+      {selected ? (
+        <Box sx={{ background: "#fff", borderRadius: "14px", border: "1px solid #eceef0", overflow: "hidden" }}>
+
+          {/* Header */}
+          <Box sx={{ p: "18px 22px", borderBottom: "1px solid #eceef0" }}>
+            <Box sx={{ mb: 1 }}><StatusChip status={selected.status} /></Box>
+            <Typography sx={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: { xs: 17, md: 20 }, fontWeight: 800,
+              color: "#191c1e", lineHeight: 1.2,
+            }}>
+              {selected?.title}
+            </Typography>
+            <Typography sx={{
+              fontSize: { xs: 12, md: 14 },
+              color: "gray", lineHeight: 1.2,
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              paddingTop: "2px"
+            }}>
+              {selected.course?.title}
+              <Box component="span">•</Box>
+              {selected.lesson?.title}
+            </Typography>
+          </Box>
+
+          {/* Replies */}
+          <Box sx={{ p: "18px 22px", display: "flex", flexDirection: "column", gap: 2, minHeight: 120 }}>
+            {!selected.replies?.length ? (
+              <Box sx={{ py: 4, textAlign: "center" }}>
+                <Typography sx={{ fontSize: 13, color: "#a0a0a8" }}>No replies yet.</Typography>
+              </Box>
+            ) : (
+              replies?.map(r => <ReplyBubble key={r._id} reply={r} />)
+            )}
+          </Box>
+
+          {/* Reply form */}
+          {selected.status !== "closed" && (
+            <Box sx={{ p: "16px 22px", borderTop: "1px solid #eceef0" }}>
+              <Typography sx={{ fontWeight: 700, fontSize: 15, color: "#191c1e", mb: 1.5 }}>
+                Add Reply
+              </Typography>
+              <TextField
+                multiline rows={3} fullWidth
+                placeholder="Write your reply..."
+                sx={{ ...inputSx, mb: 1.5 }}
+              />
+              <Box sx={{ display: "flex", gap: 1.25, flexWrap: "wrap" }}>
+                <Button
+                  sx={btnPrimary}
+                >
+                  Send Reply
+                </Button>
+                {selected.status === "open" && (
+                  <Button sx={btnGhost}>
+                    Mark as Answered
+                  </Button>
+                )}
+                <Button
+                  sx={{ ...btnGhost, "&:hover": { background: "#ffdad6", color: "#ba1a1a" } }}
+                >
+                  Close Doubt
+                </Button>
+              </Box>
+            </Box>
+          )}
+
+          {selected.status === "closed" && (
+            <Box sx={{ p: "14px 22px", borderTop: "1px solid #eceef0", background: "#f7f9fb", textAlign: "center" }}>
+              <Typography sx={{ fontSize: 12, color: "#a0a0a8" }}>This doubt is closed.</Typography>
+            </Box>
+          )}
+        </Box>
+      ) : (
+        <Box sx={{
+          background: "#fff", borderRadius: "14px", border: "1px solid #eceef0",
+          p: 5, display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <Typography sx={{ fontSize: 13, color: "#a0a0a8" }}>Select a doubt to view.</Typography>
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+export default LessonDoubtsTab;
