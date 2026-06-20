@@ -13,25 +13,8 @@ import StatusChip from "./StatusChip";
 import createDoubtSchema from "../schema/createDoubtSehema";
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 import useCreateDoubt from "../hooks/useCreateDoubt"
+import useFetchLessonDoubt from "../hooks/useFetchLessonDoubt"
 
-const doubts = [{
-  _id: "6a056e4481c777ac9265b894",
-  course: {
-    _id: "6a04ad1e684e40cd30188bc4",
-    title: "Mern stack basic"
-  },
-  lesson: {
-    _id: "6a054f1343c63f40c5f001a0",
-    title: "About js"
-  },
-  student: {
-    _id: "69fc1aba69412bb33278a18c",
-    name: "anas"
-  },
-  title: "about jwt",
-  status: "answered",
-  lastReplyAt: "2026-05-18T04:04:20.615Z"
-}];
 
 const replies = [
   {
@@ -48,8 +31,6 @@ const replies = [
   }
 ];
 
-
-
 const LessonDoubtsTab = ({ lessonId, courseId }) => {
 
   const { control, handleSubmit, reset, formState: { errors, isDirty }, setError } = useForm({
@@ -63,14 +44,13 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
   const [selectedId, setSelectedId] = useState(null);
   const [showForm, setShowForm] = useState(false);
 
-  const selected = doubts.find(d => d._id === selectedId);
+  // Fetch doubts
+  const { data: doubtsData } = useFetchLessonDoubt(lessonId);
+  const doubts = doubtsData?.data ?? [];
 
-  const { mutate: createDoubtMutate, isPending: isCreateDoubtPending } = useCreateDoubt()
+  // Create doubts
+  const { mutate: createDoubtMutate, isPending: isCreateDoubtPending } = useCreateDoubt(lessonId)
   const onSubmit = (data) => {
-    if (!lessonId || !courseId) {
-      toast.error("Something went wrong")
-    }
-
     createDoubtMutate({ lesson: lessonId, course: courseId, ...data }, {
       onSuccess: () => {
         reset(); setShowForm(false);
@@ -80,6 +60,8 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
       }
     })
   };
+
+  const selected = doubts?.length && doubts?.find(d => d._id === selectedId);
 
   return (
     <Box sx={{
