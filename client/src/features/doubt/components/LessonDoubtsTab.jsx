@@ -1,10 +1,18 @@
 import React, { useState } from "react";
 import { Box, Typography, Button, TextField } from "@mui/material";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "react-hot-toast"
+
 import AddIcon from "@mui/icons-material/Add";
+
 import { btnPrimary, btnGhost, inputSx } from "../constants/doubtConstants"
 import DoubtCard from "./DoubtCard"
 import ReplyBubble from "./ReplyBubble"
 import StatusChip from "./StatusChip";
+import createDoubtSchema from "../schema/createDoubtSehema";
+import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
+import useCreateDoubt from "../hooks/useCreateDoubt"
 
 const doubts = [{
   _id: "6a056e4481c777ac9265b894",
@@ -44,10 +52,34 @@ const replies = [
 
 const LessonDoubtsTab = ({ lessonId, courseId }) => {
 
+  const { control, handleSubmit, reset, formState: { errors, isDirty }, setError } = useForm({
+    resolver: zodResolver(createDoubtSchema),
+    defaultValues: {
+      title: "",
+      description: ""
+    }
+  });
+
   const [selectedId, setSelectedId] = useState(null);
   const [showForm, setShowForm] = useState(false);
 
   const selected = doubts.find(d => d._id === selectedId);
+
+  const { mutate: createDoubtMutate, isPending: isCreateDoubtPending } = useCreateDoubt()
+  const onSubmit = (data) => {
+    if (!lessonId || !courseId) {
+      toast.error("Something went wrong")
+    }
+
+    createDoubtMutate({ lesson: lessonId, course: courseId, ...data }, {
+      onSuccess: () => {
+        reset(); setShowForm(false);
+      },
+      onError: (error) => {
+        handleFieldApiErrors(error, setError);
+      }
+    })
+  };
 
   return (
     <Box sx={{
@@ -72,25 +104,59 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
 
         {/* Create form */}
         {showForm && (
-          <Box sx={{
-            background: "#fff", borderRadius: "12px", p: 2,
-            border: "1px solid rgba(26,20,107,0.1)", mb: 0.5,
-          }}>
+          <Box
+            component="form"
+            onSubmit={handleSubmit(onSubmit)}
+            sx={{
+              background: "#fff", borderRadius: "12px", p: 2,
+              border: "1px solid rgba(26,20,107,0.1)", mb: 0.5,
+            }}>
             <Typography sx={{ fontWeight: 700, fontSize: 13, color: "#1a146b", mb: 1.25 }}>
               Your Question
             </Typography>
-            <TextField
-              multiline rows={3} fullWidth
-              placeholder="What would you like to ask?"
-              sx={{ ...inputSx, mb: 1.5 }}
+
+            {/* Title field */}
+            <Controller
+              name="title"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  placeholder="What would you like to ask?"
+                  error={!!errors.title}
+                  helperText={errors.title?.message || " "}
+                  sx={{ ...inputSx, mb: 0.5 }}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              )}
             />
+
+            {/* Description field */}
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  multiline rows={3} fullWidth
+                  placeholder="Describe your question..."
+                  error={!!errors.description}
+                  helperText={errors.description?.message || " "}
+                  sx={{ ...inputSx, mb: 1 }}
+                />
+              )}
+            />
+
             <Box sx={{ display: "flex", gap: 1 }}>
               <Button
+                type="submit"
                 sx={btnPrimary}
+                disabled={!isDirty || isCreateDoubtPending}
               >
-                Submit
+                {isCreateDoubtPending ? "Submitting..." : "Submit"}
               </Button>
-              <Button onClick={() => { setShowForm(false) }} sx={btnGhost}>
+              <Button onClick={() => { setShowForm(false); reset() }} sx={btnGhost}>
                 Cancel
               </Button>
             </Box>
