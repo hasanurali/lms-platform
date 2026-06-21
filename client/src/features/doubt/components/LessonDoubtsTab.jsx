@@ -14,22 +14,8 @@ import createDoubtSchema from "../schema/createDoubtSehema";
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 import useCreateDoubt from "../hooks/useCreateDoubt"
 import useFetchLessonDoubt from "../hooks/useFetchLessonDoubt"
+import useFetchDoubtDetails from "../hooks/useFetchDoubtDetails"
 
-
-const replies = [
-  {
-    _id: "6a056e4581c777ac9265b895",
-    doubt: "6a056e4481c777ac9265b894",
-    author: {
-      _id: "69fc1aba69412bb33278a18c",
-      name: "anas",
-      role: "admin",
-      profilePicture: "https://cloudinary.com"
-    },
-    message: "i have doubt in jwt",
-    createdAt: "2026-05-14T06:40:05.041Z"
-  }
-];
 
 const LessonDoubtsTab = ({ lessonId, courseId }) => {
 
@@ -61,7 +47,9 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
     })
   };
 
-  const selected = doubts?.length && doubts?.find(d => d._id === selectedId);
+  // Fetch doubt details
+  const { data: doubtDetailsData, isPending: isDoubtDetailsPending } = useFetchDoubtDetails(selectedId)
+  const selected = doubtDetailsData?.data;
 
   return (
     <Box sx={{
@@ -158,7 +146,7 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
               key={d._id}
               doubt={d}
               selected={d._id === selectedId}
-              onClick={() => setSelectedId(d._id)}
+              onClick={setSelectedId}
             />
           ))
         )}
@@ -170,13 +158,13 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
 
           {/* Header */}
           <Box sx={{ p: "18px 22px", borderBottom: "1px solid #eceef0" }}>
-            <Box sx={{ mb: 1 }}><StatusChip status={selected.status} /></Box>
+            <Box sx={{ mb: 1 }}><StatusChip status={selected.doubt?.status} /></Box>
             <Typography sx={{
               fontFamily: "'Playfair Display', serif",
               fontSize: { xs: 17, md: 20 }, fontWeight: 800,
               color: "#191c1e", lineHeight: 1.2,
             }}>
-              {selected?.title}
+              {selected.doubt?.title}
             </Typography>
             <Typography sx={{
               fontSize: { xs: 12, md: 14 },
@@ -186,9 +174,9 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
               gap: "4px",
               paddingTop: "2px"
             }}>
-              {selected.course?.title}
+              {selected.doubt?.course?.title}
               <Box component="span">•</Box>
-              {selected.lesson?.title}
+              {selected.doubt?.lesson?.title}
             </Typography>
           </Box>
 
@@ -199,12 +187,12 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
                 <Typography sx={{ fontSize: 13, color: "#a0a0a8" }}>No replies yet.</Typography>
               </Box>
             ) : (
-              replies?.map(r => <ReplyBubble key={r._id} reply={r} />)
+              selected.replies?.map(r => <ReplyBubble key={r._id} reply={r} />)
             )}
           </Box>
 
           {/* Reply form */}
-          {selected.status !== "closed" && (
+          {selected.doubt?.status !== "closed" && (
             <Box sx={{ p: "16px 22px", borderTop: "1px solid #eceef0" }}>
               <Typography sx={{ fontWeight: 700, fontSize: 15, color: "#191c1e", mb: 1.5 }}>
                 Add Reply
@@ -220,7 +208,7 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
                 >
                   Send Reply
                 </Button>
-                {selected.status === "open" && (
+                {selected.doubt?.status === "open" && (
                   <Button sx={btnGhost}>
                     Mark as Answered
                   </Button>
@@ -234,7 +222,7 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
             </Box>
           )}
 
-          {selected.status === "closed" && (
+          {selected.doubt?.status === "closed" && (
             <Box sx={{ p: "14px 22px", borderTop: "1px solid #eceef0", background: "#f7f9fb", textAlign: "center" }}>
               <Typography sx={{ fontSize: 12, color: "#a0a0a8" }}>This doubt is closed.</Typography>
             </Box>

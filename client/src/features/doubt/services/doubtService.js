@@ -17,3 +17,16 @@ export const fetchLessonDoubt = async (id) => {
 
     return response.data;
 };
+
+export const fetchDoubtDetails = async (id) => {
+
+    if (!id) {
+        return null;
+    }
+
+    const response = await api.get(
+        ENDPOINTS.DOUBT.FETCHDETAILS(id)
+    );
+
+    return response.data;
+};
