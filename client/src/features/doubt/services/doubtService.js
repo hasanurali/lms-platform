@@ -39,3 +39,11 @@ export const addDoubtReply = async (data) => {
 
     return response.data;
 };
+
+export const markDoubtAnswered = async (id) => {
+    const response = await api.put(
+        ENDPOINTS.DOUBT.MARKANSWER(id)
+    );
+
+    return response.data;
+};

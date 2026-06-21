@@ -7,8 +7,9 @@ import { inputSx, btnPrimary, btnGhost } from '../constants/doubtConstants'
 import doubtReplySchema from '../schema/doubtReplySchema';
 import useAddDoubtReply from "../hooks/useAddDoubtReply"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
+import useMarkDoubtAnswered from '../hooks/useMarkDoubtAnswered';
 
-const ReplyForm = ({ selected }) => {
+const ReplyForm = ({ selected, lessonId }) => {
 
     const { control, handleSubmit, reset, formState: { errors, isDirty }, setError } = useForm({
         resolver: zodResolver(doubtReplySchema),
@@ -29,6 +30,11 @@ const ReplyForm = ({ selected }) => {
                 handleFieldApiErrors(error, setError);
             }
         })
+    };
+
+    const { mutate: markAnswerMutate, isPending: isMarkAnswerPending } = useMarkDoubtAnswered(lessonId, doubtId)
+    const handleMarkAnswer = () => {
+        markAnswerMutate(doubtId)
     };
 
 
@@ -67,8 +73,10 @@ const ReplyForm = ({ selected }) => {
                     {isaddDoubtReplyPending ? "Sending..." : "Send Reply"}
                 </Button>
                 {selected.doubt?.status === "open" && (
-                    <Button sx={btnGhost}>
-                        Mark as Answered
+                    <Button
+                        onClick={handleMarkAnswer}
+                        sx={btnGhost}>
+                        {isMarkAnswerPending ? "Marking..." : "Mark as Answered"}
                     </Button>
                 )}
                 <Button

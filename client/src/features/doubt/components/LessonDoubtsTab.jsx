@@ -193,7 +193,7 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
           </Box>
 
           {/* Reply form */}
-          {selected.doubt?.status !== "closed" && <ReplyForm selected={selected} />}
+          {selected.doubt?.status !== "closed" && <ReplyForm selected={selected} lessonId={lessonId}/>}
 
           {selected.doubt?.status === "closed" && (
             <Box sx={{ p: "14px 22px", borderTop: "1px solid #eceef0", background: "#f7f9fb", textAlign: "center" }}>
