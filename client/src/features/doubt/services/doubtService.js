@@ -47,3 +47,11 @@ export const markDoubtAnswered = async (id) => {
 
     return response.data;
 };
+
+export const markDoubtClosed = async (id) => {
+    const response = await api.put(
+        ENDPOINTS.DOUBT.MARKCLOSE(id)
+    );
+
+    return response.data;
+};

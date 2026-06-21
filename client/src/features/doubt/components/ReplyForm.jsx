@@ -8,6 +8,7 @@ import doubtReplySchema from '../schema/doubtReplySchema';
 import useAddDoubtReply from "../hooks/useAddDoubtReply"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 import useMarkDoubtAnswered from '../hooks/useMarkDoubtAnswered';
+import useMarkDoubtClosed from "../hooks/useMarkDoubtClosed"
 
 const ReplyForm = ({ selected, lessonId }) => {
 
@@ -35,6 +36,11 @@ const ReplyForm = ({ selected, lessonId }) => {
     const { mutate: markAnswerMutate, isPending: isMarkAnswerPending } = useMarkDoubtAnswered(lessonId, doubtId)
     const handleMarkAnswer = () => {
         markAnswerMutate(doubtId)
+    };
+
+    const { mutate: markCloseMutate, isPending: isMarkClosePending } = useMarkDoubtClosed(lessonId, doubtId)
+    const handleMarkClose = () => {
+        markCloseMutate(doubtId)
     };
 
 
@@ -75,14 +81,17 @@ const ReplyForm = ({ selected, lessonId }) => {
                 {selected.doubt?.status === "open" && (
                     <Button
                         onClick={handleMarkAnswer}
+                        disabled={isMarkAnswerPending}
                         sx={btnGhost}>
                         {isMarkAnswerPending ? "Marking..." : "Mark as Answered"}
                     </Button>
                 )}
                 <Button
+                    onClick={handleMarkClose}
+                    disabled={isMarkClosePending}
                     sx={{ ...btnGhost, "&:hover": { background: "#ffdad6", color: "#ba1a1a" } }}
                 >
-                    Close Doubt
+                    {isMarkClosePending ? "Closing..." : "Close Doubt"}
                 </Button>
             </Box>
         </Box>
