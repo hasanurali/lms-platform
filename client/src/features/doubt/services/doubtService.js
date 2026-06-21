@@ -30,3 +30,12 @@ export const fetchDoubtDetails = async (id) => {
 
     return response.data;
 };
+
+export const addDoubtReply = async (data) => {
+    const response = await api.post(
+        ENDPOINTS.DOUBT.REPLY(data.id),
+        data.data
+    );
+
+    return response.data;
+};

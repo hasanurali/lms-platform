@@ -15,6 +15,7 @@ import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 import useCreateDoubt from "../hooks/useCreateDoubt"
 import useFetchLessonDoubt from "../hooks/useFetchLessonDoubt"
 import useFetchDoubtDetails from "../hooks/useFetchDoubtDetails"
+import ReplyForm from "./ReplyForm";
 
 
 const LessonDoubtsTab = ({ lessonId, courseId }) => {
@@ -192,35 +193,7 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
           </Box>
 
           {/* Reply form */}
-          {selected.doubt?.status !== "closed" && (
-            <Box sx={{ p: "16px 22px", borderTop: "1px solid #eceef0" }}>
-              <Typography sx={{ fontWeight: 700, fontSize: 15, color: "#191c1e", mb: 1.5 }}>
-                Add Reply
-              </Typography>
-              <TextField
-                multiline rows={3} fullWidth
-                placeholder="Write your reply..."
-                sx={{ ...inputSx, mb: 1.5 }}
-              />
-              <Box sx={{ display: "flex", gap: 1.25, flexWrap: "wrap" }}>
-                <Button
-                  sx={btnPrimary}
-                >
-                  Send Reply
-                </Button>
-                {selected.doubt?.status === "open" && (
-                  <Button sx={btnGhost}>
-                    Mark as Answered
-                  </Button>
-                )}
-                <Button
-                  sx={{ ...btnGhost, "&:hover": { background: "#ffdad6", color: "#ba1a1a" } }}
-                >
-                  Close Doubt
-                </Button>
-              </Box>
-            </Box>
-          )}
+          {selected.doubt?.status !== "closed" && <ReplyForm selected={selected} />}
 
           {selected.doubt?.status === "closed" && (
             <Box sx={{ p: "14px 22px", borderTop: "1px solid #eceef0", background: "#f7f9fb", textAlign: "center" }}>
