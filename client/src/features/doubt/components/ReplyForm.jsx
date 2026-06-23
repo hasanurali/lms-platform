@@ -47,7 +47,7 @@ const ReplyForm = ({ selected, lessonId, isCurrentUser, isValidToMark }) => {
         <Box
             component="form"
             onSubmit={handleSubmit(onSubmit)}
-            sx={{ p: "16px 22px", borderTop: "1px solid #eceef0" }}>
+            sx={{ p: "16px 22px" }}>
             <Typography sx={{ fontWeight: 700, fontSize: 15, color: "#191c1e", mb: 1.5 }}>
                 Add Reply
             </Typography>

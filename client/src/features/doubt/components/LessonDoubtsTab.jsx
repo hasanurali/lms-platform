@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Box, Typography, Button, TextField } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +21,6 @@ import useStore from "@/store/store";
 import useDoubtSocket from "@/socket/hooks/useDoubtSocket";
 
 
-
 const LessonDoubtsTab = ({ lessonId, courseId }) => {
 
   const { control, handleSubmit, reset, formState: { errors, isDirty }, setError } = useForm({
@@ -34,6 +33,8 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
 
   const [selectedId, setSelectedId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+
+  const repliesContainerRef = useRef(null);
 
   const currentInstructorId = useStore((state) => state.currentInstructorId);
 
@@ -70,114 +71,150 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
   const selected = doubtDetailsData?.data;
   const isCurrentUser = selected?.doubt?.student?._id === user._id;
 
+  // Trigger smooth scroll when add new reply
+  useEffect(() => {
+    if (selected?.replies && repliesContainerRef.current) {
+      repliesContainerRef.current.scrollTo({
+        top: repliesContainerRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+    }
+  }, [selected?.replies?.length]);
 
   return (
     <Box sx={{
       display: "grid",
-      gridTemplateColumns: { xs: "1fr", md: "280px 1fr" },
-      gap: 3, alignItems: "flex-start",
+      gridTemplateColumns: { xs: "1fr", md: "320px 1fr" },
+      gap: 3,
+      alignItems: "flex-start",
     }}>
 
-      {/* Left list */}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      {/* Left column container */}
+      <Box sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "700px"
+      }}>
 
-        {/* Ask button */}
-        {!showForm && (
-          <Button
-            onClick={() => setShowForm(true)}
-            startIcon={<AddIcon sx={{ fontSize: "16px !important" }} />}
-            sx={{ ...btnPrimary, mb: 0.5 }}
-          >
-            Ask a Doubt
-          </Button>
-        )}
+        {/* Ask doubt button */}
+        <Box sx={{ mb: 1.5, flexShrink: 0 }}>
+          {/* Ask button */}
+          {!showForm && (
+            <Button
+              onClick={() => setShowForm(true)}
+              startIcon={<AddIcon sx={{ fontSize: "16px !important" }} />}
+              sx={{ ...btnPrimary, width: "100%" }}
+            >
+              Ask a Doubt
+            </Button>
+          )}
 
-        {/* Create form */}
-        {showForm && (
-          <Box
-            component="form"
-            onSubmit={handleSubmit(onSubmit)}
-            sx={{
-              background: "#fff", borderRadius: "12px", p: 2,
-              border: "1px solid rgba(26,20,107,0.1)", mb: 0.5,
-            }}>
-            <Typography sx={{ fontWeight: 700, fontSize: 13, color: "#1a146b", mb: 1.25 }}>
-              Your Question
-            </Typography>
+          {/* Create form */}
+          {showForm && (
+            <Box
+              component="form"
+              onSubmit={handleSubmit(onSubmit)}
+              sx={{
+                background: "#fff", borderRadius: "12px", p: 2,
+                border: "1px solid rgba(26,20,107,0.1)",
+              }}>
+              <Typography sx={{ fontWeight: 700, fontSize: 13, color: "#1a146b", mb: 1.25 }}>
+                Your Question
+              </Typography>
 
-            {/* Title field */}
-            <Controller
-              name="title"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  placeholder="What would you like to ask?"
-                  error={!!errors.title}
-                  helperText={errors.title?.message || " "}
-                  sx={{ ...inputSx, mb: 0.5 }}
-                  slotProps={{ inputLabel: { shrink: true } }}
-                />
-              )}
-            />
+              {/* Title field */}
+              <Controller
+                name="title"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    placeholder="What would you like to ask?"
+                    error={!!errors.title}
+                    helperText={errors.title?.message || " "}
+                    sx={{ ...inputSx, mb: 0.5 }}
+                    slotProps={{ inputLabel: { shrink: true } }}
+                  />
+                )}
+              />
 
-            {/* Description field */}
-            <Controller
-              name="description"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  multiline rows={3} fullWidth
-                  placeholder="Describe your question..."
-                  error={!!errors.description}
-                  helperText={errors.description?.message || " "}
-                  sx={{ ...inputSx, mb: 1 }}
-                />
-              )}
-            />
+              {/* Description field */}
+              <Controller
+                name="description"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    multiline rows={3} fullWidth
+                    placeholder="Describe your question..."
+                    error={!!errors.description}
+                    helperText={errors.description?.message || " "}
+                    sx={{ ...inputSx, mb: 1 }}
+                  />
+                )}
+              />
 
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <Button
-                type="submit"
-                sx={btnPrimary}
-                disabled={!isDirty || isCreateDoubtPending}
-              >
-                {isCreateDoubtPending ? "Submitting..." : "Submit"}
-              </Button>
-              <Button onClick={() => { setShowForm(false); reset() }} sx={btnGhost}>
-                Cancel
-              </Button>
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <Button
+                  type="submit"
+                  sx={btnPrimary}
+                  disabled={!isDirty || isCreateDoubtPending}
+                >
+                  {isCreateDoubtPending ? "Submitting..." : "Submit"}
+                </Button>
+                <Button onClick={() => { setShowForm(false); reset() }} sx={btnGhost}>
+                  Cancel
+                </Button>
+              </Box>
             </Box>
-          </Box>
-        )}
+          )}
+        </Box>
 
-        {/* Doubt list */}
-        {doubts.length === 0 ? (
-          <Box sx={{ py: 5, textAlign: "center" }}>
-            <Typography sx={{ fontSize: 13, color: "#a0a0a8" }}>
-              No doubts for this lesson yet.
-            </Typography>
-          </Box>
-        ) : (
-          doubts.map(d => (
-            <DoubtCard
-              key={d._id}
-              doubt={d}
-              selected={d._id === selectedId}
-              onClick={setSelectedId}
-            />
-          ))
-        )}
+        {/* Doubt list*/}
+        <Box sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+          flexGrow: 1,
+          overflowY: "auto",
+          pr: 0.5,
+          "::-webkit-scrollbar": { width: "6px" },
+          "::-webkit-scrollbar-thumb": { background: "#eceef0", borderRadius: "4px" }
+        }}>
+          {doubts.length === 0 ? (
+            <Box sx={{ py: 5, textAlign: "center" }}>
+              <Typography sx={{ fontSize: 13, color: "#a0a0a8" }}>
+                No doubts for this lesson yet.
+              </Typography>
+            </Box>
+          ) : (
+            doubts.map(d => (
+              <DoubtCard
+                key={d._id}
+                doubt={d}
+                selected={d._id === selectedId}
+                onClick={setSelectedId}
+              />
+            ))
+          )}
+        </Box>
       </Box>
 
       {/* Right conversation */}
       {selected ? (
-        <Box sx={{ background: "#fff", borderRadius: "14px", border: "1px solid #eceef0", overflow: "hidden" }}>
+        <Box sx={{
+          background: "#fff",
+          borderRadius: "14px",
+          border: "1px solid #eceef0",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          height: "700px"
+        }}>
 
           {/* Header */}
-          <Box sx={{ p: "18px 22px", borderBottom: "1px solid #eceef0" }}>
+          <Box sx={{ p: "18px 22px", borderBottom: "1px solid #eceef0", background: "#fff", zIndex: 1 }}>
             <Box sx={{ mb: 1 }}><StatusChip status={selected.doubt?.status} /></Box>
             <Typography sx={{
               fontFamily: "'Playfair Display', serif",
@@ -200,10 +237,27 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
             </Typography>
           </Box>
 
-          {/* Replies */}
-          <Box sx={{ p: "18px 22px", display: "flex", flexDirection: "column", gap: 2, minHeight: 120 }}>
+          {/* Replies container */}
+          <Box
+            ref={repliesContainerRef}
+            sx={{
+              p: "18px 22px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              flexGrow: 1,
+              overflowY: "auto",
+              background: "#fafafa",
+              scrollBehavior: "smooth",
+              scrollbarWidth: "none",
+              "msOverflowStyle": "none",
+              "&::-webkit-scrollbar": {
+                display: "none",
+              },
+            }}
+          >
             {!selected.replies?.length ? (
-              <Box sx={{ py: 4, textAlign: "center" }}>
+              <Box sx={{ m: "auto", py: 4, textAlign: "center" }}>
                 <Typography sx={{ fontSize: 13, color: "#a0a0a8" }}>No replies yet.</Typography>
               </Box>
             ) : (
@@ -212,18 +266,32 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
           </Box>
 
           {/* Reply form */}
-          {(isValidToReply || isCurrentUser) && (selected.doubt?.status !== "closed" && <ReplyForm selected={selected} lessonId={lessonId} isCurrentUser={isCurrentUser} isValidToMark={isValidToReply} />)}
+          <Box sx={{
+            borderTop: "1px solid #eceef0",
+            background: "#fff",
+            p: 1.5
+          }}>
+            {(isValidToReply || isCurrentUser) && selected.doubt?.status !== "closed" && (
+              <ReplyForm
+                selected={selected}
+                lessonId={lessonId}
+                isCurrentUser={isCurrentUser}
+                isValidToMark={isValidToReply}
+              />
+            )}
 
-          {selected.doubt?.status === "closed" && (
-            <Box sx={{ p: "14px 22px", borderTop: "1px solid #eceef0", background: "#f7f9fb", textAlign: "center" }}>
-              <Typography sx={{ fontSize: 12, color: "#a0a0a8" }}>This doubt is closed.</Typography>
-            </Box>
-          )}
+            {selected.doubt?.status === "closed" && (
+              <Box sx={{ p: "10px 22px", background: "#f7f9fb", borderRadius: "8px", textAlign: "center" }}>
+                <Typography sx={{ fontSize: 12, color: "#a0a0a8" }}>This doubt is closed.</Typography>
+              </Box>
+            )}
+          </Box>
+
         </Box>
       ) : (
         <Box sx={{
           background: "#fff", borderRadius: "14px", border: "1px solid #eceef0",
-          p: 5, display: "flex", alignItems: "center", justifyContent: "center",
+          height: "700px", display: "flex", alignItems: "center", justifyContent: "center",
         }}>
           <Typography sx={{ fontSize: 13, color: "#a0a0a8" }}>Select a doubt to view.</Typography>
         </Box>
