@@ -34,6 +34,6 @@ export const createReplyValidation = [
     body("message")
         .trim()
         .notEmpty().withMessage("Message is required")
-        .isLength({ min: 5, max: 5000 })
+        .isLength({ min: 1, max: 5000 })
         .withMessage("Message must be between 5 and 5000 characters")
 ];
