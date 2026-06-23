@@ -18,6 +18,7 @@ import useFetchDoubtDetails from "../hooks/useFetchDoubtDetails"
 import ReplyForm from "./ReplyForm";
 import useAuthUser from "@/features/auth/hooks/useAuthUser"
 import useStore from "@/store/store";
+import useDoubtSocket from "@/socket/hooks/useDoubtSocket";
 
 
 
@@ -38,12 +39,18 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
 
   // Fetch user
   const { data: user } = useAuthUser();
-  
+
   const isValidToReply = user.role === "admin" || currentInstructorId === user._id;
 
   // Fetch doubts
   const { data: doubtsData } = useFetchLessonDoubt(lessonId);
   const doubts = doubtsData?.data ?? [];
+
+  // Use socket hook for real time update
+  useDoubtSocket({
+    doubtId: selectedId,
+    lessonId,
+  });
 
   // Create doubts
   const { mutate: createDoubtMutate, isPending: isCreateDoubtPending } = useCreateDoubt(lessonId)
@@ -62,6 +69,7 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
   const { data: doubtDetailsData, isPending: isDoubtDetailsPending } = useFetchDoubtDetails(selectedId)
   const selected = doubtDetailsData?.data;
   const isCurrentUser = selected?.doubt?.student?._id === user._id;
+
 
   return (
     <Box sx={{
