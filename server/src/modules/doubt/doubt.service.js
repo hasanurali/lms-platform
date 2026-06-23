@@ -131,6 +131,8 @@ export const createDoubtService = async (courseId, lessonId, title, description,
             title: doubt.title,
             status: doubt.status,
             student: doubt.student,
+            course: doubt.course,
+            lesson: doubt.lesson,
             lastReplyAt: doubt.lastReplyAt
         }
     );
