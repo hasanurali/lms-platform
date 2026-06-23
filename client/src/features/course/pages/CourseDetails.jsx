@@ -26,6 +26,7 @@ import useCreateReview from "@/features/review/hooks/useCreateReview"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 import useUpdateReview from "@/features/review/hooks/useUpdateReview"
 import useFetchProgress from "@/features/progress/hooks/useFetchProgress";
+import useStore from "@/app/store";
 
 
 const CourseDetailsPage = () => {
@@ -35,6 +36,8 @@ const CourseDetailsPage = () => {
     const [reviewModalOpen, setReviewModalOpen] = useState(false)
     const [isEdit, setIsEdit] = useState(false);
     const [reviewId, setReviewId] = useState(null)
+
+    const setCurrentInstructorId = useStore((state) => state.setCurrentInstructorId);
 
     const navigate = useNavigate();
 
@@ -141,6 +144,7 @@ const CourseDetailsPage = () => {
     const isFree = price === 0;
     const totalLessons = modules.reduce((acc, m) => acc + (m.lessons?.length ?? 0), 0);
     const firstLesson = modules?.[0]?.lessons?.[0]?._id;
+    setCurrentInstructorId(course.instructor?._id);
 
     // Handle review pagination
     const handleChange = (e, value) => {

@@ -16,6 +16,9 @@ import useCreateDoubt from "../hooks/useCreateDoubt"
 import useFetchLessonDoubt from "../hooks/useFetchLessonDoubt"
 import useFetchDoubtDetails from "../hooks/useFetchDoubtDetails"
 import ReplyForm from "./ReplyForm";
+import useAuthUser from "@/features/auth/hooks/useAuthUser"
+import useStore from "@/app/store";
+
 
 
 const LessonDoubtsTab = ({ lessonId, courseId }) => {
@@ -30,6 +33,13 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
 
   const [selectedId, setSelectedId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+
+  const currentInstructorId = useStore((state) => state.currentInstructorId);
+
+  // Fetch user
+  const { data: user } = useAuthUser();
+  
+  const isValidToReply = user.role === "admin" || currentInstructorId === user._id;
 
   // Fetch doubts
   const { data: doubtsData } = useFetchLessonDoubt(lessonId);
@@ -193,7 +203,7 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
           </Box>
 
           {/* Reply form */}
-          {selected.doubt?.status !== "closed" && <ReplyForm selected={selected} lessonId={lessonId}/>}
+          {isValidToReply && (selected.doubt?.status !== "closed" && <ReplyForm selected={selected} lessonId={lessonId} user={user} isValidToMark={isValidToReply} />)}
 
           {selected.doubt?.status === "closed" && (
             <Box sx={{ p: "14px 22px", borderTop: "1px solid #eceef0", background: "#f7f9fb", textAlign: "center" }}>

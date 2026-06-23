@@ -10,7 +10,7 @@ import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 import useMarkDoubtAnswered from '../hooks/useMarkDoubtAnswered';
 import useMarkDoubtClosed from "../hooks/useMarkDoubtClosed"
 
-const ReplyForm = ({ selected, lessonId }) => {
+const ReplyForm = ({ selected, lessonId, user, isValidToMark }) => {
 
     const { control, handleSubmit, reset, formState: { errors, isDirty }, setError } = useForm({
         resolver: zodResolver(doubtReplySchema),
@@ -43,7 +43,6 @@ const ReplyForm = ({ selected, lessonId }) => {
         markCloseMutate(doubtId)
     };
 
-
     return (
         <Box
             component="form"
@@ -71,6 +70,7 @@ const ReplyForm = ({ selected, lessonId }) => {
             />
 
             <Box sx={{ display: "flex", gap: 1.25, flexWrap: "wrap" }}>
+
                 <Button
                     type='submit'
                     disabled={!isDirty || isaddDoubtReplyPending}
@@ -78,21 +78,23 @@ const ReplyForm = ({ selected, lessonId }) => {
                 >
                     {isaddDoubtReplyPending ? "Sending..." : "Send Reply"}
                 </Button>
-                {selected.doubt?.status === "open" && (
-                    <Button
-                        onClick={handleMarkAnswer}
-                        disabled={isMarkAnswerPending}
-                        sx={btnGhost}>
-                        {isMarkAnswerPending ? "Marking..." : "Mark as Answered"}
-                    </Button>
+
+                {isValidToMark && (selected.doubt?.status === "open" && <Button
+                    onClick={handleMarkAnswer}
+                    disabled={isMarkAnswerPending}
+                    sx={btnGhost}>
+                    {isMarkAnswerPending ? "Marking..." : "Mark as Answered"}
+                </Button>
                 )}
-                <Button
+
+                {selected.doubt?.student?._id === user._id && <Button
                     onClick={handleMarkClose}
                     disabled={isMarkClosePending}
                     sx={{ ...btnGhost, "&:hover": { background: "#ffdad6", color: "#ba1a1a" } }}
                 >
                     {isMarkClosePending ? "Closing..." : "Close Doubt"}
-                </Button>
+                </Button>}
+
             </Box>
         </Box>
     )
