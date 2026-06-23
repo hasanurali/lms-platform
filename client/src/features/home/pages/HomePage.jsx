@@ -12,19 +12,19 @@ import ForumIcon from "@mui/icons-material/Forum";
 import MailOutlineIcon from "@mui/icons-material/MailOutlineOutlined";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
-import useGlobalContext from "@/hooks/useGlobalContext"
 import SectionReavealWrapper from "../components/SectionReavealWrapper"
 import { INSTITUTIONS, PHILOSOPHY } from "../constants/homeData"
 import CourseCard from "@/features/course/components/CourseCard";
 import useAuthUser from "@/features/auth/hooks/useAuthUser";
 import useFetchCourses from "@/features/course/hooks/useFetchCourses";
+import useStore from "@/store/store";
 
 
 const HomePage = () => {
 
   const orbRef = useRef(null);
 
-  const { scrolled, setScrolled } = useGlobalContext();
+  const setScrolled = useStore((state) => state.setScrolled);
 
   const { data: user } = useAuthUser();
   const { data } = useFetchCourses(1, 3);

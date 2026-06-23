@@ -16,9 +16,10 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 
-import useGlobalContext from "@/hooks/useGlobalContext"
 import useAuthUser from "@/features/auth/hooks/useAuthUser";
 import useLogout from "@/features/auth/hooks/useLogout";
+import useStore from "@/store/store";
+
 
 const NAV_LINKS = [{ page: "Home", link: "/" }, { page: "Courses", link: "/courses" }];
 const MOBILE_NAV_LINKS = [{ page: "Home", link: "/" }, { page: "Courses", link: "/courses" }, { page: "Profile", link: "#" }];
@@ -28,7 +29,7 @@ const Navbar = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-    const { scrolled, setScrolled } = useGlobalContext();
+    const scrolled = useStore((state) => state.scrolled);
 
     const { data: user } = useAuthUser();
     const { mutate: logout, isPending } = useLogout();

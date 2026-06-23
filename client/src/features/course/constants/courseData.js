@@ -1,7 +1,7 @@
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import ArchitectureIcon from "@mui/icons-material/Architecture";
 
-export const TABS = ["About This Course", "Doubts", "Reviews"];
+export const TABS = ["About This Course", "Reviews"];
 
 export const FEATURE_CARDS = [
     { Icon: AutoAwesomeIcon, title: "Intentional Focus", desc: "Learn to eliminate noise and direct the learner's attention to what truly matters." },

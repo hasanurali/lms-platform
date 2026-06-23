@@ -40,5 +40,15 @@ export const ENDPOINTS = {
         FETCH: (courseId) => `/progress/${courseId}`,
         MARKCOMPLETE: `/progress/complete-lesson`,
         LASTLESSON: `/progress/last-lesson`
+    },
+    DOUBT: {
+        CREATE: "/doubts",
+        FETCHLESSON: (id) => `/lessons/${id}/doubts`,
+        FETCHMY: `/doubts/my`,
+        FETCHCOURSE: (id) => `/courses/${id}/doubts`,
+        FETCHDETAILS: (id) => `/doubts/${id}`,
+        REPLY: (id) => `/doubts/${id}/replies`,
+        MARKANSWER: (id) => `/doubts/${id}/mark-answered`,
+        MARKCLOSE: (id) => `/doubts/${id}/close`
     }
 };
