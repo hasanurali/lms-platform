@@ -17,7 +17,7 @@ import useFetchLessonDoubt from "../hooks/useFetchLessonDoubt"
 import useFetchDoubtDetails from "../hooks/useFetchDoubtDetails"
 import ReplyForm from "./ReplyForm";
 import useAuthUser from "@/features/auth/hooks/useAuthUser"
-import useStore from "@/app/store";
+import useStore from "@/store/store";
 
 
 

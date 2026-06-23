@@ -18,7 +18,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 
 import useAuthUser from "@/features/auth/hooks/useAuthUser";
 import useLogout from "@/features/auth/hooks/useLogout";
-import useStore from "@/app/store";
+import useStore from "@/store/store";
 
 
 const NAV_LINKS = [{ page: "Home", link: "/" }, { page: "Courses", link: "/courses" }];

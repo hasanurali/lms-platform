@@ -26,7 +26,7 @@ import useCreateReview from "@/features/review/hooks/useCreateReview"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 import useUpdateReview from "@/features/review/hooks/useUpdateReview"
 import useFetchProgress from "@/features/progress/hooks/useFetchProgress";
-import useStore from "@/app/store";
+import useStore from "@/store/store";
 
 
 const CourseDetailsPage = () => {

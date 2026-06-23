@@ -17,7 +17,7 @@ import { INSTITUTIONS, PHILOSOPHY } from "../constants/homeData"
 import CourseCard from "@/features/course/components/CourseCard";
 import useAuthUser from "@/features/auth/hooks/useAuthUser";
 import useFetchCourses from "@/features/course/hooks/useFetchCourses";
-import useStore from "@/app/store";
+import useStore from "@/store/store";
 
 
 const HomePage = () => {
