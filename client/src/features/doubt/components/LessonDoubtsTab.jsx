@@ -61,6 +61,7 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
   // Fetch doubt details
   const { data: doubtDetailsData, isPending: isDoubtDetailsPending } = useFetchDoubtDetails(selectedId)
   const selected = doubtDetailsData?.data;
+  const isCurrentUser = selected?.doubt?.student?._id === user._id;
 
   return (
     <Box sx={{
@@ -203,7 +204,7 @@ const LessonDoubtsTab = ({ lessonId, courseId }) => {
           </Box>
 
           {/* Reply form */}
-          {isValidToReply && (selected.doubt?.status !== "closed" && <ReplyForm selected={selected} lessonId={lessonId} user={user} isValidToMark={isValidToReply} />)}
+          {(isValidToReply || isCurrentUser) && (selected.doubt?.status !== "closed" && <ReplyForm selected={selected} lessonId={lessonId} isCurrentUser={isCurrentUser} isValidToMark={isValidToReply} />)}
 
           {selected.doubt?.status === "closed" && (
             <Box sx={{ p: "14px 22px", borderTop: "1px solid #eceef0", background: "#f7f9fb", textAlign: "center" }}>

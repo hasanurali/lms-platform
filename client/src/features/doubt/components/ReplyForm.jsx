@@ -10,7 +10,7 @@ import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 import useMarkDoubtAnswered from '../hooks/useMarkDoubtAnswered';
 import useMarkDoubtClosed from "../hooks/useMarkDoubtClosed"
 
-const ReplyForm = ({ selected, lessonId, user, isValidToMark }) => {
+const ReplyForm = ({ selected, lessonId, isCurrentUser, isValidToMark }) => {
 
     const { control, handleSubmit, reset, formState: { errors, isDirty }, setError } = useForm({
         resolver: zodResolver(doubtReplySchema),
@@ -87,7 +87,7 @@ const ReplyForm = ({ selected, lessonId, user, isValidToMark }) => {
                 </Button>
                 )}
 
-                {selected.doubt?.student?._id === user._id && <Button
+                {isCurrentUser && <Button
                     onClick={handleMarkClose}
                     disabled={isMarkClosePending}
                     sx={{ ...btnGhost, "&:hover": { background: "#ffdad6", color: "#ba1a1a" } }}
