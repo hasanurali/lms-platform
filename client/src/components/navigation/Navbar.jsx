@@ -22,6 +22,7 @@ import useLogout from "@/features/auth/hooks/useLogout";
 import useStore from "@/store/store";
 import NotificationDropdown from "@/features/notification/components/NotificationDropdown";
 import useFetchNotifications from "@/features/notification/hooks/useFetchNotifications";
+import markAllReadNotifications from "@/features/notification/hooks/useMarkAllReadNotifications"
 
 
 const NAV_LINKS = [{ page: "Home", link: "/" }, { page: "Courses", link: "/courses" }];
@@ -42,7 +43,15 @@ const Navbar = () => {
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useFetchNotifications();
 
     const notifications = data?.pages.flatMap((page) => page.data.data) || [];
-    const isNewNotification = notifications.some(notification => notification.isRead !== true);
+    const unreadCount = notifications.filter(notification => notification.isRead !== true).length;
+
+    // Mark all unread messages when mark all button was clicked
+    const { mutate: markAllReadMutation, isPending: isMarkAllReadPending } = markAllReadNotifications();
+    const handleMarkAllRead = () => {
+        if (unreadCount) {
+            markAllReadMutation()
+        }
+    }
 
     const location = useLocation();
     useEffect(() => {
@@ -88,15 +97,16 @@ const Navbar = () => {
 
                         {/* Notification bell */}
                         <Badge
-                            badgeContent={isNewNotification}
+                            badgeContent={unreadCount}
                             color="error"
                             sx={{
                                 "& .MuiBadge-badge": {
-                                    height: "13px", minWidth: "2px",
+                                    height: 18, width: 3,
+                                    fontSize: "10px",
                                     border: "1.5px solid white",
                                     borderRadius: "50%",
                                     position: "relative",
-                                    right: "25px",
+                                    right: "28px",
                                     top: "9px"
                                 }
                             }}
@@ -116,6 +126,8 @@ const Navbar = () => {
                                 onNotificationToggle={setNotificationToggle}
                                 notifications={notifications} fetchNextPage={fetchNextPage}
                                 hasNextPage={hasNextPage} isFetchingNextPage={isFetchingNextPage}
+                                onMarkAllRead={handleMarkAllRead} isMarkAllReadPending={isMarkAllReadPending}
+                                unreadCount={unreadCount}
                             />}
 
                         </Badge>
@@ -228,6 +240,7 @@ const Navbar = () => {
                     fetchNextPage={fetchNextPage}
                     hasNextPage={hasNextPage}
                     isFetchingNextPage={isFetchingNextPage}
+                    unreadCount={unreadCount}
                 />
             </Drawer>
 

@@ -53,6 +53,7 @@ export const ENDPOINTS = {
     },
     NOTIFICATION: {
         FETCH: (page, limit) => (page || limit) ? `/notifications?page=${page}&limit=${limit}` : "/notifications",
+        MARKREAD: (id)=>`/notifications/${id}/read`,
         MARKALLREAD: "/notifications/read-all"
     }
 };
