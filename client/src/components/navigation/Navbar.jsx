@@ -23,12 +23,15 @@ import useStore from "@/store/store";
 import NotificationDropdown from "@/features/notification/components/NotificationDropdown";
 import useFetchNotifications from "@/features/notification/hooks/useFetchNotifications";
 import markAllReadNotifications from "@/features/notification/hooks/useMarkAllReadNotifications"
+import useNotificationSocket from "@/socket/hooks/useNotificationSocket"
 
 
 const NAV_LINKS = [{ page: "Home", link: "/" }, { page: "Courses", link: "/courses" }];
 const MOBILE_NAV_LINKS = [{ page: "Home", link: "/" }, { page: "Courses", link: "/courses" }, { page: "Profile", link: "#" }];
 
 const Navbar = () => {
+
+    useNotificationSocket();
 
     const [mobileOpen, setMobileOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);

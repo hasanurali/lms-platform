@@ -4,5 +4,7 @@ export const SOCKET_EVENTS = {
     LEAVE_DOUBT_ROOM: "doubt:leave",
     
     NEW_DOUBT_REPLY: "new:doubt:reply",
-    DOUBT_STATUS_UPDATED: "doubt:status:updated"
+    DOUBT_STATUS_UPDATED: "doubt:status:updated",
+
+    NEW_NOTIFICATION: "new:notification",
 };
