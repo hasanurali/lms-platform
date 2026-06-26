@@ -4,7 +4,7 @@ import { RouterProvider } from 'react-router-dom'
 import { ThemeProvider } from '@mui/material'
 
 import router from './app/router.jsx'
-import Providers from './app/providers.jsx'
+import Providers from './app/Providers.jsx'
 import theme from './theme/muiTheme.js'
 
 import './index.css'

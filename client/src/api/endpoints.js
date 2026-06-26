@@ -50,5 +50,10 @@ export const ENDPOINTS = {
         REPLY: (id) => `/doubts/${id}/replies`,
         MARKANSWER: (id) => `/doubts/${id}/mark-answered`,
         MARKCLOSE: (id) => `/doubts/${id}/close`
+    },
+    NOTIFICATION: {
+        FETCH: (page, limit) => (page || limit) ? `/notifications?page=${page}&limit=${limit}` : "/notifications",
+        MARKREAD: (id)=>`/notifications/${id}/read`,
+        MARKALLREAD: "/notifications/read-all"
     }
 };
