@@ -12,6 +12,11 @@ const useStore = create((set) => ({
         currentInstructorId: instructorId
     }),
 
+    activeTab: "profile",
+    setActiveTab: (tab) => set({
+        activeTab: tab
+    }),
+
 }))
 
 export default useStore;

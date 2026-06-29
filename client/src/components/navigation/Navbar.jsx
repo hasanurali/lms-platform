@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Typography, Button, IconButton, Badge, Drawer } from "@mui/material";
 import { Link as RouterLink, NavLink, useLocation } from "react-router-dom";
 
@@ -26,8 +26,9 @@ import markAllReadNotifications from "@/features/notification/hooks/useMarkAllRe
 import useNotificationSocket from "@/socket/hooks/useNotificationSocket"
 
 
-const NAV_LINKS = [{ page: "Home", link: "/" }, { page: "Courses", link: "/courses" }];
-const MOBILE_NAV_LINKS = [{ page: "Home", link: "/" }, { page: "Courses", link: "/courses" }, { page: "Profile", link: "#" }];
+const NAV_LINKS = [{ page: "Home", link: "/" }, { page: "Courses", link: "/courses" }, { page: "Dashboard", link: "/dashboard" }];
+const MOBILE_NAV_LINKS = [{ page: "Home", link: "/" }, { page: "Courses", link: "/courses" }, { page: "Dashboard", link: "/dashboard" }];
+const SUB_LINKS = [{ id: "profile", label: "Profile" }, { id: "courses", label: "Courses" }]
 
 const Navbar = () => {
 
@@ -55,6 +56,9 @@ const Navbar = () => {
             markAllReadMutation()
         }
     }
+
+    const activeTab = useStore((state) => state.activeTab);
+    const setActiveTab = useStore((state) => state.setActiveTab);
 
     const location = useLocation();
     useEffect(() => {
@@ -112,16 +116,14 @@ const Navbar = () => {
                                     right: "28px",
                                     top: "9px"
                                 }
-                            }}
-                        >
+                            }}>
                             <IconButton
                                 onClick={() => setNotificationToggle(!notificationToggle)}
                                 size="small"
                                 sx={{
                                     color: "#474651",
                                     "&:hover": { background: "rgba(26,20,107,0.06)", color: "#1a146b" },
-                                }}
-                            >
+                                }}>
                                 <NotificationsNoneIcon sx={{ fontSize: 23 }} />
                             </IconButton>
 
@@ -211,14 +213,39 @@ const Navbar = () => {
             {/* Mobile menu */}
             {mobileOpen && (
                 <Box sx={{ display: { md: "none" }, background: "#fff", borderTop: "1px solid #eceef0", px: 3, py: 2, flexDirection: "column", gap: 2 }}>
+
                     {MOBILE_NAV_LINKS.map(link => (
-                        <Typography key={link.link} component={NavLink} to={link.link} sx={{
-                            display: "block", fontSize: 14, fontWeight: 600,
-                            color: "#191c1e", textDecoration: "none", py: 0.5,
-                            '&.active': { color: 'primary.main', fontWeight: 'bold' }
-                        }}>
-                            {link.page}
-                        </Typography>
+                        <Box key={link.link}>
+                            <Typography component={NavLink} to={link.link} sx={{
+                                display: "block", fontSize: 14, fontWeight: 600,
+                                color: "#191c1e", textDecoration: "none", py: 0.5,
+                                '&.active': { color: 'primary.main', fontWeight: 'bold' }
+                            }}>
+                                {link.page}
+                            </Typography>
+
+                            {/* Dashboard sub-tabs only show when on /dashboard */}
+                            {link.link === "/dashboard" && location.pathname === "/dashboard" && (
+                                <Box sx={{ borderLeft: "2px solid #e0e7ff", ml: 1.5, pl: 2, mt: 0.5, mb: 0.5, display: "flex", flexDirection: "column", gap: 0.5 }}>
+                                    {SUB_LINKS.map(({ id, label }) => (
+                                        <Typography
+                                            className="md:hidden"
+                                            key={id}
+                                            onClick={() => { setActiveTab(id); setMobileOpen(false); }}
+                                            sx={{
+                                                fontSize: 12, fontWeight: 600,
+                                                letterSpacing: "0.1em", textTransform: "uppercase",
+                                                color: activeTab === id ? "#1a146b" : "#94a3b8",
+                                                py: 0.75, cursor: "pointer",
+                                                transition: "color 0.15s",
+                                                "&:hover": { color: "#1a146b" },
+                                            }}>
+                                            {label}
+                                        </Typography>
+                                    ))}
+                                </Box>
+                            )}
+                        </Box>
                     ))}
 
                     <Typography onClick={() => { setMobileOpen(false), setNotificationDrawer(true) }} sx={{
