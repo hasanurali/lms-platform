@@ -161,7 +161,7 @@ const Navbar = () => {
                                     paddingY: "3px", borderRadius: "5px",
                                     color: "#1a146b", boxShadow: 1,
                                 }}>
-                                    <Box className="flex items-center hover:bg-[#f5f5f5] cursor-pointer">
+                                    <Box component={RouterLink} to={"/dashboard"} className="flex items-center hover:bg-[#f5f5f5] cursor-pointer">
                                         <IconButton sx={{ padding: "none" }}>
                                             <AccountCircleIcon sx={{ fontSize: 25 }} />
                                         </IconButton>
@@ -226,7 +226,7 @@ const Navbar = () => {
 
                             {/* Dashboard sub-tabs only show when on /dashboard */}
                             {link.link === "/dashboard" && location.pathname === "/dashboard" && (
-                                <Box sx={{ borderLeft: "2px solid #e0e7ff", ml: 1.5, pl: 2, mt: 0.5, mb: 0.5, display: "flex", flexDirection: "column", gap: 0.5 }}>
+                                <Box className="flex md:hidden" sx={{ borderLeft: "2px solid #e0e7ff", ml: 1.5, pl: 2, mt: 0.5, mb: 0.5, flexDirection: "column", gap: 0.5 }}>
                                     {SUB_LINKS.map(({ id, label }) => (
                                         <Typography
                                             className="md:hidden"
