@@ -18,6 +18,8 @@ export const me = asyncHandler(async (req, res) => {
             bio: user.bio,
             profilePicture: user.profilePicture?.url,
             role: user.role,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
         }));
 });
 
