@@ -1,9 +1,14 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Box, Avatar, Button, IconButton, Paper, TextField, Tooltip, Typography } from '@mui/material';
+import { useForm, Controller } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 
-import { AccessTime, CalendarMonth, Cancel, Edit, ImageOutlined, Person, Save } from '@mui/icons-material';
+import { AccessTime, CalendarMonth, Cancel, Edit, Person, Save, PhotoCamera } from '@mui/icons-material';
 
 import formatDate from "@/utils/formatData";
+import updateProfileSchema from "../Schema/updateProfileSchema"
+import useUpdateProfile from "../hooks/useUpdateProfile"
+import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 
 
 const MOCK_COURSES = [
@@ -87,16 +92,53 @@ const MOCK_COURSES = [
 const ProfileTab = ({ user }) => {
 
     const [editing, setEditing] = useState(false);
-    const [form, setForm] = useState({ name: user.name, profilePicture: user.profilePicture, bio: user.bio });
-    const [saved, setSaved] = useState({ ...form });
 
-    const handleSave = () => {
-        setSaved({ ...form });
-        setEditing(false);
+
+    const fileRef = useRef(null);
+    const [previewUrl, setPreviewUrl] = useState(user.profilePicture);
+    const [selectedFile, setSelectedFile] = useState(null);
+
+
+    const { control, handleSubmit, reset, formState: { errors, isDirty }, setError } = useForm({
+        resolver: zodResolver(updateProfileSchema),
+        defaultValues: {
+            name: user.name ?? "",
+            bio: user.bio ?? "",
+        },
+    });
+
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setSelectedFile(file);
+        setPreviewUrl(URL.createObjectURL(file));
+    };
+
+    const { mutate: updateProfileMutate, isPending: isUpdateProfilePending } = useUpdateProfile()
+    const onSubmit = (data) => {
+        const formData = new FormData();
+        formData.append("name", data.name);
+        formData.append("bio", data.bio ?? "");
+        if (selectedFile) {
+            formData.append("profilePicture", selectedFile);
+        }
+
+        updateProfileMutate(formData, {
+            onSuccess: () => {
+                setEditing(false);
+                setSelectedFile(null);
+            },
+            onError: (error) => {
+                handleFieldApiErrors(error, setError);
+            }
+        });
     };
 
     const handleCancel = () => {
-        setForm({ ...saved });
+        reset(); // resets to defaultValues
+        setPreviewUrl(user.profilePicture);
+        setSelectedFile(null);
         setEditing(false);
     };
 
@@ -104,24 +146,68 @@ const ProfileTab = ({ user }) => {
         <Box className="space-y-8 max-w-3xl">
 
             {/* Hero card */}
-            <Paper elevation={0} className="bg-white! rounded-xl! shadow-sm! overflow-hidden!">
+            <Paper
+                elevation={0}
+                component="form"
+                onSubmit={handleSubmit(onSubmit)}
+                noValidate
+                className="bg-white! rounded-xl! shadow-sm! overflow-hidden!">
 
                 {/* Banner */}
                 <Box
                     className="h-28 w-full"
                     style={{ background: "linear-gradient(135deg, #1a146b 0%, #312e81 100%)" }}
                 />
+
                 {/* Avatar and actions */}
                 <Box className="px-8 pb-6 -mt-10 flex items-end justify-between">
                     <Box className="relative">
-                        <Avatar
-                            src={editing ? form.profilePicture : saved.profilePicture}
-                            alt={user.name}
-                            sx={{
-                                width: 80, height: 80,
-                                border: "4px solid white",
-                                boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-                            }} />
+
+                        {/* Hidden file input */}
+                        <input
+                            ref={fileRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleFileChange}
+                        />
+
+                        {/* Avatar clickable when editing */}
+                        <Box
+                            onClick={editing ? () => fileRef.current.click() : undefined}
+                            sx={{ position: "relative", width: 80, height: 80, cursor: editing ? "pointer" : "default" }}
+                        >
+                            <Avatar
+                                src={previewUrl}
+                                alt={user.name}
+                                sx={{
+                                    width: 80, height: 80,
+                                    border: "4px solid white",
+                                    boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+                                }}
+                            />
+
+                            {/* Dark overlay with camera icon when editing */}
+                            {editing && (
+                                <Box sx={{
+                                    position: "absolute", inset: 0,
+                                    borderRadius: "50%",
+                                    background: "rgba(0,0,0,0.45)",
+                                    display: "flex", flexDirection: "column",
+                                    alignItems: "center", justifyContent: "center",
+                                    border: "4px solid white",
+                                    transition: "opacity 0.2s",
+                                    "&:hover": { background: "rgba(0,0,0,0.6)" },
+                                }}>
+                                    <PhotoCamera sx={{ fontSize: 20, color: "white" }} />
+                                    <Typography sx={{ fontSize: 8, color: "white", fontWeight: 700, letterSpacing: "0.05em", mt: 0.3 }}>
+                                        CHANGE
+                                    </Typography>
+                                </Box>
+                            )}
+                        </Box>
+
+                        {/* Edit pencil only when NOT editing */}
                         {!editing && (
                             <Tooltip title="Edit profile">
                                 <IconButton
@@ -133,16 +219,29 @@ const ProfileTab = ({ user }) => {
                                 </IconButton>
                             </Tooltip>
                         )}
+
+                        {/* Selected file name hint */}
+                        {editing && selectedFile && (
+                            <Typography sx={{
+                                position: "absolute", top: "calc(100% + 6px)", left: "50%",
+                                transform: "translateX(-50%)", whiteSpace: "nowrap",
+                                fontSize: 9, color: "#64748b", fontWeight: 600,
+                                maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis",
+                            }}>
+                                {selectedFile.name}
+                            </Typography>
+                        )}
                     </Box>
                     {editing && (
                         <Box className="flex gap-2 mb-1">
                             <Button
+                                type="submit"
                                 size="small"
                                 variant="contained"
-                                startIcon={<Save fontSize="small" />}
-                                onClick={handleSave}
+                                startIcon={!isUpdateProfilePending && <Save fontSize="small" />}
+                                disabled={!isDirty && !selectedFile}
                                 className="bg-indigo-900! text-white! text-[10px]! font-bold! uppercase! tracking-widest! rounded-lg!">
-                                Save
+                                {isUpdateProfilePending ? "Saving..." : "Save"}
                             </Button>
                             <Button
                                 size="small"
@@ -160,68 +259,55 @@ const ProfileTab = ({ user }) => {
                 <Box className="px-8 pb-8 space-y-5">
                     {editing ? (
                         <>
-                            <Box className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                <Box>
-                                    <Box component="label" className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1.5">
-                                        Full Name
-                                    </Box>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        value={form.name}
-                                        onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                        variant="outlined"
-                                        sx={{ "& .MuiOutlinedInput-root": { borderRadius: "0.5rem", fontSize: "0.875rem" } }}
-                                    />
+
+                        {/* Name field*/}
+                            <Box>
+                                <Box component="label" className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1.5">
+                                    Full Name
                                 </Box>
-                                <Box>
-                                    <Box component="label" className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1.5">
-                                        Profile Picture URL
-                                    </Box>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        value={form.profilePicture}
-                                        onChange={(e) => setForm({ ...form, profilePicture: e.target.value })}
-                                        placeholder="https://example.com/avatar.jpg"
-                                        variant="outlined"
-                                        InputProps={{
-                                            startAdornment: (
-                                                <Box sx={{ mr: 1, display: "flex", alignItems: "center" }}>
-                                                    <ImageOutlined sx={{ fontSize: 18, color: "#94a3b8" }} />
-                                                </Box>
-                                            ),
-                                            endAdornment: form.profilePicture ? (
-                                                <Box sx={{ ml: 1, display: "flex", alignItems: "center" }}>
-                                                    <Avatar
-                                                        src={form.profilePicture}
-                                                        sx={{ width: 24, height: 24 }}
-                                                        onError={(e) => { e.target.src = ""; }}
-                                                    />
-                                                </Box>
-                                            ) : null,
-                                        }}
-                                        sx={{ "& .MuiOutlinedInput-root": { borderRadius: "0.5rem", fontSize: "0.875rem" } }}
-                                    />
-                                    <Typography className="text-[10px]! text-slate-400! mt-1! block!">
-                                        Paste any image URL — preview updates live
-                                    </Typography>
-                                </Box>
+                                <Controller
+                                    name="name"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            size="small"
+                                            variant="outlined"
+                                            error={!!errors.name}
+                                            helperText={errors.name?.message}
+                                            sx={{ "& .MuiOutlinedInput-root": { borderRadius: "0.5rem", fontSize: "0.875rem" } }}
+                                        />
+                                    )}
+                                />
                             </Box>
+                            
+                            {/* Bio field */}
                             <Box>
                                 <Box component="label" className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1.5">
                                     Bio
                                 </Box>
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    rows={3}
-                                    size="small"
-                                    value={form.bio}
-                                    onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                                    placeholder="Tell us a little about yourself…"
-                                    variant="outlined"
-                                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: "0.5rem", fontSize: "0.875rem" } }}
+                                <Controller
+                                    name="bio"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            multiline
+                                            rows={3}
+                                            size="small"
+                                            variant="outlined"
+                                            placeholder="Tell us a little about yourself…"
+                                            error={!!errors.bio}
+                                            helperText={
+                                                errors.bio?.message
+                                                    ? errors.bio.message
+                                                    : `${field.value?.length ?? 0}/500`
+                                            }
+                                            sx={{ "& .MuiOutlinedInput-root": { borderRadius: "0.5rem", fontSize: "0.875rem" } }}
+                                        />
+                                    )}
                                 />
                             </Box>
                         </>
@@ -229,12 +315,12 @@ const ProfileTab = ({ user }) => {
                         <>
                             <Box>
                                 <Typography className="text-2xl! font-bold! text-indigo-950! tracking-tight!">
-                                    {saved.name}
+                                    {user.name}
                                 </Typography>
                                 <Typography className="text-sm! text-slate-400! mt-0.5!">{user.email}</Typography>
                             </Box>
-                            {saved.bio ? (
-                                <Typography className="text-sm! text-slate-600! leading-relaxed!">{saved.bio}</Typography>
+                            {user.bio ? (
+                                <Typography className="text-sm! text-slate-600! leading-relaxed!">{user.bio}</Typography>
                             ) : (
                                 <Typography className="text-sm! text-slate-400! italic!">No bio added yet.</Typography>
                             )}
