@@ -8,7 +8,9 @@ const useCreateReview = () => {
     return useMutation({
         mutationFn: (data) => createReview(data),
         onSuccess: (res) => {
-            queryClient.invalidateQueries({ queryKey: ["reviews", res.data.course] })
+            queryClient.invalidateQueries({ queryKey: ["reviews", res.data?.course] })
+            queryClient.invalidateQueries({ queryKey: ["courses", res.data?.course] })
+            queryClient.invalidateQueries({ queryKey: ["enrollments"] })
         }
     })
 };
