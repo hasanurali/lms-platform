@@ -10,6 +10,7 @@ const useMarkDoubtClosed = (lessonId, doubtId) => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["lessons", lessonId, "doubts"] });
             queryClient.invalidateQueries({ queryKey: ["doubts", doubtId] });
+            queryClient.invalidateQueries({ queryKey: ["my-doubts"] });
         }
     });
 };

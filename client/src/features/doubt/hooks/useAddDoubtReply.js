@@ -8,7 +8,7 @@ const useAddDoubtReply = (id) => {
     return useMutation({
         mutationFn: addDoubtReply,
         onSuccess: () => {
-            queryClient.invalidateQueries(["doubts", id])
+            queryClient.invalidateQueries({ queryKey: ["doubts", id] })
         }
     });
 };
