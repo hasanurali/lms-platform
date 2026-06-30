@@ -1,14 +1,18 @@
+import { Link as RouterLink } from "react-router-dom"
 import { Box, Paper, Typography } from '@mui/material';
 
 import { EmojiEvents, OpenInNew } from '@mui/icons-material';
 
 import RenderStars from "@/features/course/components/RenderStars";
 
-const EnrolledCourseCard = ({ course, onOpen }) => {
+const EnrolledCourseCard = ({ course }) => {
+    
     const isComplete = course.progressPercentage === 100;
 
     return (
         <Paper
+            component={RouterLink}
+            to={`/courses/${course?._id}`}
             elevation={0}
             className="flex flex-col md:flex-row gap-0 overflow-hidden cursor-pointer group"
             sx={{
@@ -21,8 +25,7 @@ const EnrolledCourseCard = ({ course, onOpen }) => {
                     boxShadow: 3,
                     transform: "translateY(-2px)",
                 },
-            }}
-            onClick={() => onOpen(course)}>
+            }}>
 
             <Box sx={{ aspectRatio: "16/9" }} className="w-full md:w-44 h-36 md:h-auto shrink-0 relative overflow-hidden" sx={{ bgcolor: "grey.100" }}>
                 <Box
@@ -41,9 +44,6 @@ const EnrolledCourseCard = ({ course, onOpen }) => {
 
             <Box className="flex-1 flex flex-col justify-between p-5" sx={{ p: { xs: 2.5, md: 3 } }}>
                 <Box>
-                    <Box component="span" className="text-xs mb-2 text-slate-400 whitespace-nowrap">
-                        {course.progress.completedLessons.length}/{course.totalLessons} Lessons
-                    </Box>
                     <Typography className="font-bold text-indigo-950 text-base mb-1 leading-snug group-hover:text-indigo-700 transition-colors">
                         {course.title}
                     </Typography>

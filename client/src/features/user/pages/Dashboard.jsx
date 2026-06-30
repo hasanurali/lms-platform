@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Box } from "@mui/material"
 
@@ -7,6 +7,8 @@ import ProfileTab from "../components/ProfileTab";
 import CoursesTab from "../components/CoursesTab";
 import useStore from "@/store/store"
 import useAuthUser from "@/features/auth/hooks/useAuthUser";
+import fetchEnrolledCourses from "@/features/enrollment/hooks/useFetchEnrolledCourses"
+import useAllCoursesProgress from "@/features/progress/hooks/useAllCoursesProgress"
 
 const Dashboard = () => {
 
@@ -15,7 +17,24 @@ const Dashboard = () => {
   const activeTab = useStore((state) => state.activeTab);
   const setActiveTab = useStore((state) => state.setActiveTab);
 
-  if (isPending) {
+  const { data: myEnroledCourses, isPending: isMyEnroledCoursesPending } = fetchEnrolledCourses()
+
+  // Fetch course progress with useQueries and get data with destructure
+  const progressResults = useAllCoursesProgress(myEnroledCourses?.data);
+  const allProgressData = progressResults
+    .filter(result => result.isSuccess)
+    .map(result => result.data?.data);
+
+  // Group Course with there progress to get easy access
+  const groupedData = myEnroledCourses?.data.map((data, i) => {
+    return {
+      ...data.course,
+      progress: { completedLessons: allProgressData[i]?.progress?.completedLessons, completed: allProgressData[i]?.progress?.completed },
+      progressPercentage: allProgressData[i]?.progressPercentage
+    }
+  });
+
+  if (isPending || isMyEnroledCoursesPending) {
     return <div className="pt-20">Loding...</div>
   }
 
@@ -25,8 +44,8 @@ const Dashboard = () => {
 
       <Box component="main" className="md:ml-64 flex-1 pt-20 pb-12 px-6 md:px-10">
         <Box className="max-w-7xl mx-auto">
-          {activeTab === "profile" && <ProfileTab user={user} />}
-          {activeTab === "courses" && <CoursesTab />}
+          {activeTab === "profile" && <ProfileTab user={user} courses={groupedData} />}
+          {activeTab === "courses" && <CoursesTab courses={groupedData} />}
         </Box>
       </Box>
     </Box>
