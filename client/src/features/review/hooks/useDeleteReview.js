@@ -8,7 +8,9 @@ const useDeleteReview = (courseId) => {
     return useMutation({
         mutationFn: deleteReview,
         onSuccess: (res) => {
-            queryClient.invalidateQueries({ queryKey: ["reviews", courseId] })
+            queryClient.invalidateQueries({ queryKey: ["reviews", res.data?.course] })
+            queryClient.invalidateQueries({ queryKey: ["courses", res.data?.course] })
+            queryClient.invalidateQueries({ queryKey: ["enrollments"] })
         }
     });
 };

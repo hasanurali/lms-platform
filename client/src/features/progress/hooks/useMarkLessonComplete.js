@@ -7,8 +7,11 @@ const useMarkLessonComplete = (id) => {
 
     return useMutation({
         mutationFn: markLessonComplete,
-        onSuccess:()=>{
-            queryClient.invalidateQueries(["courses", id])
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["courses", id] })
+            queryClient.invalidateQueries({ queryKey: ['courseProgress', id] })
+            queryClient.invalidateQueries({ queryKey: ["enrollments"] })
+            queryClient.invalidateQueries({ queryKey: ["progress", id] })
         }
     });
 };

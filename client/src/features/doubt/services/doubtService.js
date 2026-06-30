@@ -55,3 +55,11 @@ export const markDoubtClosed = async (id) => {
 
     return response.data;
 };
+
+export const fetchMyDoubts = async () => {
+    const response = await api.get(
+        ENDPOINTS.DOUBT.FETCHMY
+    );
+
+    return response.data;
+};

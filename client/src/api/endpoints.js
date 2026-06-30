@@ -8,7 +8,10 @@ export const ENDPOINTS = {
         REFRESH: "/auth/refresh"
     },
     USER: {
-        ME: "/users/me"
+        ME: "/users/me",
+        FETCH: (id) => `/users/${id}`,
+        UPDATE: "/users/me"
+
     },
     COURSE: {
         CREATE: "/courses",
