@@ -1,13 +1,14 @@
 import React from 'react'
 import { Box, Avatar, Typography } from '@mui/material';
 
-import { Logout, MenuBook, Person } from '@mui/icons-material';
+import { Logout, MenuBook, Person, HelpCenterOutlined } from '@mui/icons-material';
 
 import useLogout from "@/features/auth/hooks/useLogout";
 
 const NAV_ITEMS = [
     { label: "Profile", icon: <Person fontSize="small" />, id: "profile" },
     { label: "Courses", icon: <MenuBook fontSize="small" />, id: "courses" },
+    { label: "Doubts", icon: <HelpCenterOutlined fontSize="small" />, id: "doubts" },
 ];
 
 const Sidebar = ({ activeTab, setActiveTab, user }) => {

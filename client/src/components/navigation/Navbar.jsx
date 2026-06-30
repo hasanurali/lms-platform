@@ -28,7 +28,7 @@ import useNotificationSocket from "@/socket/hooks/useNotificationSocket"
 
 const NAV_LINKS = [{ page: "Home", link: "/" }, { page: "Courses", link: "/courses" }, { page: "Dashboard", link: "/dashboard" }];
 const MOBILE_NAV_LINKS = [{ page: "Home", link: "/" }, { page: "Courses", link: "/courses" }, { page: "Dashboard", link: "/dashboard" }];
-const SUB_LINKS = [{ id: "profile", label: "Profile" }, { id: "courses", label: "Courses" }]
+const SUB_LINKS = [{ id: "profile", label: "Profile" }, { id: "courses", label: "Courses" }, { id: "doubts", label: "Doubts" }]
 
 const Navbar = () => {
 

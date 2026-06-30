@@ -5,10 +5,12 @@ import { Box } from "@mui/material"
 import Sidebar from "@/components/navigation/Sidebar";
 import ProfileTab from "../components/ProfileTab";
 import CoursesTab from "../components/CoursesTab";
+import DoubtsTab from '../components/DoubtsTab'
 import useStore from "@/store/store"
 import useAuthUser from "@/features/auth/hooks/useAuthUser";
 import fetchEnrolledCourses from "@/features/enrollment/hooks/useFetchEnrolledCourses"
 import useAllCoursesProgress from "@/features/progress/hooks/useAllCoursesProgress"
+
 
 const Dashboard = () => {
 
@@ -46,6 +48,7 @@ const Dashboard = () => {
         <Box className="max-w-7xl mx-auto">
           {activeTab === "profile" && <ProfileTab user={user} courses={groupedData} />}
           {activeTab === "courses" && <CoursesTab courses={groupedData} />}
+          {activeTab === "doubts" && <DoubtsTab />}
         </Box>
       </Box>
     </Box>
