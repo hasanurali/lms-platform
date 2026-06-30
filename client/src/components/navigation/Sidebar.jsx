@@ -3,12 +3,17 @@ import { Box, Avatar, Typography } from '@mui/material';
 
 import { Logout, MenuBook, Person } from '@mui/icons-material';
 
+import useLogout from "@/features/auth/hooks/useLogout";
+
 const NAV_ITEMS = [
     { label: "Profile", icon: <Person fontSize="small" />, id: "profile" },
     { label: "Courses", icon: <MenuBook fontSize="small" />, id: "courses" },
 ];
 
 const Sidebar = ({ activeTab, setActiveTab, user }) => {
+
+    const { mutate: logout, isPending } = useLogout();
+
     return (
         <Box component="aside" className="hidden md:flex flex-col fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-slate-50 border-r border-slate-100">
 
@@ -56,7 +61,10 @@ const Sidebar = ({ activeTab, setActiveTab, user }) => {
             {/* Bottom */}
             <Box className="mx-6! border-slate-100!" />
             <Box className="pt-1 pb-4">
-                <Box className="flex items-center gap-3 text-slate-500 pl-8 py-3 hover:text-red-500 transition-colors cursor-pointer">
+                <Box
+                    onClick={!isPending ? logout : undefined}
+                    className="flex items-center gap-3 text-slate-500 pl-8 py-3 hover:text-red-500 transition-colors cursor-pointer"
+                    sx={{ pointerEvents: isPending ? "none" : "auto", opacity: isPending ? 0.5 : 1 }}>
                     <Logout fontSize="small" />
                     <Box component="span" className="text-xs font-medium uppercase tracking-wide">Logout</Box>
                 </Box>
