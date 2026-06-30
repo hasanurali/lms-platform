@@ -92,7 +92,7 @@ const LessonVideoPlayer = () => {
                 <Box sx={{ mt: 4, display: "flex", flexDirection: "column", gap: 3 }}>
 
                     {/* Title andcomplete */}
-                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 2 }}>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2 }}>
                         <Box>
                             <Typography sx={{
                                 fontSize: 10, fontWeight: 700, letterSpacing: "0.18em",
