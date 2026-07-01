@@ -6,8 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { AccessTime, CalendarMonth, Cancel, Edit, Person, Save, PhotoCamera } from '@mui/icons-material';
 
 import formatDate from "@/utils/formatData";
-import updateProfileSchema from "../Schema/updateProfileSchema"
-import useUpdateProfile from "../hooks/useUpdateProfile"
+import updateProfileSchema from "@/features/user/Schema/updateProfileSchema"
+import useUpdateProfile from "@/features/user/hooks/useUpdateProfile"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 
 const ProfileTab = ({ user, courses }) => {

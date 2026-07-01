@@ -12,7 +12,7 @@ import CoursePage from "@/features/course/pages/CoursePage";
 import CourseDetailsPage from "@/features/course/pages/CourseDetails";
 import NotFoundPage from "@/features/error/pages/NotFoundPage";
 import LessonVideoPlayer from "@/features/lesson/page/LessonVideoPlayer";
-import Dashboard from "@/features/user/pages/Dashboard";
+import Dashboard from "@/features/dashboard/pages/Dashboard";
 
 import GuestRoute from "@/routes/GuestRoute";
 import ProtectedRoute from "@/routes/ProtectedRoute";
