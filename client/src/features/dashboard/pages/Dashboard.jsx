@@ -55,7 +55,7 @@ const Dashboard = () => {
           {user?.role === "student" && activeTab === "doubts" && <DoubtsTab />}
 
           {/* Instructor tabs */}
-          {user?.role === "instructor" && activeTab === "courses" && <InstructorCoursesTab courses={groupedData} />}
+          {user?.role === "instructor" && activeTab === "courses" && <InstructorCoursesTab />}
           {user?.role === "instructor" && activeTab === "doubts" && <InstructorDoubtsTab />}
           {user?.role === "instructor" && activeTab === "reviews" && <ReviewsTab />}
         </Box>
