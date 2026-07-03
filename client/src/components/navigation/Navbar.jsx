@@ -243,6 +243,21 @@ const Navbar = () => {
                                             {label}
                                         </Typography>
                                     ))}
+
+                                    {user?.role !== "student" && <Typography
+                                        className="md:hidden"
+                                        onClick={() => { setActiveTab("reviews"); setMobileOpen(false); }}
+                                        sx={{
+                                            fontSize: 12, fontWeight: 600,
+                                            letterSpacing: "0.1em", textTransform: "uppercase",
+                                            color: activeTab === "reviews" ? "#1a146b" : "#94a3b8",
+                                            py: 0.75, cursor: "pointer",
+                                            transition: "color 0.15s",
+                                            "&:hover": { color: "#1a146b" },
+                                        }}>
+                                        Reviews
+                                    </Typography>}
+
                                 </Box>
                             )}
                         </Box>

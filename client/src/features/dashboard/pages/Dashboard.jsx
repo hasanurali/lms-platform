@@ -10,7 +10,9 @@ import useStore from "@/store/store"
 import useAuthUser from "@/features/auth/hooks/useAuthUser";
 import fetchEnrolledCourses from "@/features/enrollment/hooks/useFetchEnrolledCourses"
 import useAllCoursesProgress from "@/features/progress/hooks/useAllCoursesProgress"
-
+import InstructorCoursesTab from "../components/InstructorCoursesTab"
+import InstructorDoubtsTab from "../components/InstructorDoubtsTab";
+import ReviewsTab from "../components/ReviewsTab";
 
 const Dashboard = () => {
 
@@ -47,8 +49,15 @@ const Dashboard = () => {
       <Box component="main" className="md:ml-64 flex-1 pt-20 pb-12 px-6 md:px-10">
         <Box className="max-w-7xl mx-auto">
           {activeTab === "profile" && <ProfileTab user={user} courses={groupedData} />}
-          {activeTab === "courses" && <CoursesTab courses={groupedData} />}
-          {activeTab === "doubts" && <DoubtsTab />}
+
+          {/* Student tabs */}
+          {user?.role === "student" && activeTab === "courses" && <CoursesTab courses={groupedData} />}
+          {user?.role === "student" && activeTab === "doubts" && <DoubtsTab />}
+
+          {/* Instructor tabs */}
+          {user?.role === "instructor" && activeTab === "courses" && <InstructorCoursesTab courses={groupedData} />}
+          {user?.role === "instructor" && activeTab === "doubts" && <InstructorDoubtsTab />}
+          {user?.role === "instructor" && activeTab === "reviews" && <ReviewsTab />}
         </Box>
       </Box>
     </Box>

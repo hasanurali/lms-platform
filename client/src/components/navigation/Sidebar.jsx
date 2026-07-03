@@ -1,11 +1,11 @@
-import React from 'react'
+import { useEffect } from 'react'
 import { Box, Avatar, Typography } from '@mui/material';
 
-import { Logout, MenuBook, Person, HelpCenterOutlined } from '@mui/icons-material';
+import { Logout, MenuBook, Person, HelpCenterOutlined, StarRounded } from '@mui/icons-material';
 
 import useLogout from "@/features/auth/hooks/useLogout";
 
-const NAV_ITEMS = [
+const BASE_NAV_ITEMS = [
     { label: "Profile", icon: <Person fontSize="small" />, id: "profile" },
     { label: "Courses", icon: <MenuBook fontSize="small" />, id: "courses" },
     { label: "Doubts", icon: <HelpCenterOutlined fontSize="small" />, id: "doubts" },
@@ -14,6 +14,11 @@ const NAV_ITEMS = [
 const Sidebar = ({ activeTab, setActiveTab, user }) => {
 
     const { mutate: logout, isPending } = useLogout();
+
+    const navItems = user?.role !== "student" ?
+        [...BASE_NAV_ITEMS, { label: "Reviews", icon: <StarRounded fontSize="small" />, id: "reviews" }]
+        : BASE_NAV_ITEMS;
+
 
     return (
         <Box component="aside" className="hidden md:flex flex-col fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-slate-50 border-r border-slate-100">
@@ -38,7 +43,7 @@ const Sidebar = ({ activeTab, setActiveTab, user }) => {
 
             {/* Nav */}
             <Box component="nav" className="flex-1 space-y-0.5 mt-2">
-                {NAV_ITEMS.map(({ label, icon, id }) =>
+                {navItems.map(({ label, icon, id }) =>
                     activeTab === id ? (
                         <Box
                             key={id}
