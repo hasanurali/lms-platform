@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Box, Pagination, Typography } from "@mui/material";
 
 import EnrolledCourseCard from "../components/EnrolledCourseCard";
-import { COURSES_PER_PAGE } from "../constants/userConstants";
+import { COURSES_PER_PAGE } from "../constants/dashboardConstants";
 
 const CoursesTab = ({ courses }) => {
     const [page, setPage] = useState(1);
