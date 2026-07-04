@@ -24,3 +24,12 @@ export const fetchMyCourse = async (page = 1, limit = 3) => {
 
     return response.data;
 };
+
+export const createCourse = async (data) => {
+    const response = await api.post(
+        ENDPOINTS.COURSE.CREATE,
+        data
+    );
+
+    return response.data;
+};

@@ -37,7 +37,7 @@ export default function CreateCourse({ onBack }) {
 
                 {/* Left — Course Details */}
                 <Box sx={{ position: { lg: "sticky" }, top: { lg: 90 } }}>
-                    <CourseDetailsPanel onSaved={(id) => setCourseId(id)} />
+                    <CourseDetailsPanel onSaved={setCourseId} />
                 </Box>
 
                 {/* Right — Curriculum */}

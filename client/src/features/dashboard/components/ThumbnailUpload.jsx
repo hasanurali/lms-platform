@@ -4,14 +4,14 @@ import { Box, Typography } from "@mui/material";
 import { Image as ImageIcon } from "@mui/icons-material";
 
 
-const ThumbnailUpload = ({ preview, onChange }) => {
+const ThumbnailUpload = ({ preview, onChange, isSaved }) => {
     const ref = useRef(null);
-    
+
     return (
         <Box>
             <input ref={ref} type="file" accept=".jpg,.jpeg,.png,.webp" style={{ display: "none" }} onChange={onChange} />
             <Box
-                onClick={() => ref.current.click()}
+                onClick={() => (!isSaved && ref.current.click())}
                 sx={{
                     height: 160, borderRadius: "12px",
                     border: preview ? "none" : "2px dashed #e2e8f0",
@@ -27,7 +27,7 @@ const ThumbnailUpload = ({ preview, onChange }) => {
                     <>
                         <Box component="img" src={preview} alt="thumbnail"
                             sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        <Box className="overlay" sx={{
+                        {!isSaved && <Box className="overlay" sx={{
                             position: "absolute", inset: 0, bgcolor: "rgba(0,0,0,0.4)",
                             display: "flex", flexDirection: "column",
                             alignItems: "center", justifyContent: "center",
@@ -35,7 +35,7 @@ const ThumbnailUpload = ({ preview, onChange }) => {
                         }}>
                             <ImageIcon sx={{ fontSize: 28, color: "white", mb: 0.5 }} />
                             <Typography sx={{ fontSize: 11, color: "white", fontWeight: 600 }}>Change Image</Typography>
-                        </Box>
+                        </Box>}
                     </>
                 ) : (
                     <Box sx={{ textAlign: "center" }}>
