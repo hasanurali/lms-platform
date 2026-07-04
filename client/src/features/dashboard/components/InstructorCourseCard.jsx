@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
 
 import { Box, Chip, Divider, IconButton, Menu, MenuItem, Paper, Rating, Typography } from "@mui/material";
 
@@ -8,7 +9,7 @@ const InstructorCourseCard = ({ course, onEdit, onDelete }) => {
     const [menuAnchor, setMenuAnchor] = useState(null);
 
     return (
-        <Paper elevation={0} sx={{
+        <Paper component={RouterLink} to={`/courses/${course?._id}`} elevation={0} sx={{
             bgcolor: "white", borderRadius: "14px", overflow: "hidden",
             boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
             transition: "box-shadow 0.2s",
@@ -43,7 +44,7 @@ const InstructorCourseCard = ({ course, onEdit, onDelete }) => {
                 />
 
                 {/* 3-dot menu */}
-                <Box sx={{ position: "absolute", top: 6, right: 6 }}>
+                <Box onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} sx={{ position: "absolute", top: 6, right: 6 }}>
                     <IconButton size="small" onClick={(e) => setMenuAnchor(e.currentTarget)}
                         sx={{ bgcolor: "rgba(255,255,255,0.92)", width: 28, height: 28, "&:hover": { bgcolor: "white" } }}>
                         <MoreVert sx={{ fontSize: 16, color: "#1a146b" }} />
@@ -100,18 +101,8 @@ const InstructorCourseCard = ({ course, onEdit, onDelete }) => {
                     </Typography>
                 </Box>
 
-                {/* Stats row */}
-                <Box sx={{
-                    display: "flex", alignItems: "center",
-                    pt: 1.5, borderTop: "1px solid #f1f5f9",
-                }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                        <VideoLibrary sx={{ fontSize: 13, color: "#94a3b8" }} />
-                        <Typography sx={{ fontSize: 11, color: "#94a3b8" }}>{course.totalLessons} lessons</Typography>
-                    </Box>
-                </Box>
             </Box>
-        </Paper>
+        </Paper >
     );
 }
 

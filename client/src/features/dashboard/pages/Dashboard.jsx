@@ -13,8 +13,11 @@ import useAllCoursesProgress from "@/features/progress/hooks/useAllCoursesProgre
 import InstructorCoursesTab from "../components/InstructorCoursesTab"
 import InstructorDoubtsTab from "../components/InstructorDoubtsTab";
 import ReviewsTab from "../components/ReviewsTab";
+import useFetchMyCourse from "@/features/course/hooks/useFetchMyCourse";
 
 const Dashboard = () => {
+
+  const [instructorCoursePage, setInstructorCoursePage] = useState(1)
 
   const { data: user, isPending } = useAuthUser();
 
@@ -38,6 +41,11 @@ const Dashboard = () => {
     }
   });
 
+  // Get instructor courses
+  const { data: courses } = useFetchMyCourse(user?.role, instructorCoursePage);
+  const myCourses = courses?.data;
+
+
   if (isPending || isMyEnroledCoursesPending) {
     return <div className="pt-20">Loding...</div>
   }
@@ -48,14 +56,14 @@ const Dashboard = () => {
 
       <Box component="main" className="md:ml-64 flex-1 pt-20 pb-12 px-6 md:px-10">
         <Box className="max-w-7xl mx-auto">
-          {activeTab === "profile" && <ProfileTab user={user} courses={groupedData} />}
+          {activeTab === "profile" && <ProfileTab user={user} courses={user?.role !== "student" ? myCourses?.data : groupedData} />}
 
           {/* Student tabs */}
           {user?.role === "student" && activeTab === "courses" && <CoursesTab courses={groupedData} />}
           {user?.role === "student" && activeTab === "doubts" && <DoubtsTab />}
 
           {/* Instructor tabs */}
-          {user?.role === "instructor" && activeTab === "courses" && <InstructorCoursesTab />}
+          {user?.role === "instructor" && activeTab === "courses" && <InstructorCoursesTab page={instructorCoursePage} setPage={setInstructorCoursePage} courses={myCourses?.data} publishedCount={myCourses?.publishedCount} pagination={myCourses?.pagination} />}
           {user?.role === "instructor" && activeTab === "doubts" && <InstructorDoubtsTab />}
           {user?.role === "instructor" && activeTab === "reviews" && <ReviewsTab />}
         </Box>

@@ -16,3 +16,11 @@ export const fetchFullCourse = async (id) => {
 
     return response.data;
 };
+
+export const fetchMyCourse = async (page = 1, limit = 3) => {
+    const response = await api.get(
+        ENDPOINTS.COURSE.FETCHMY(page, limit)
+    );
+
+    return response.data;
+};
