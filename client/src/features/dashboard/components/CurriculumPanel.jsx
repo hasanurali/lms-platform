@@ -73,10 +73,11 @@ const CurriculumPanel = ({ courseId }) => {
                 )}
 
                 {/* Module list */}
-                {modules?.data?.map((module) => (
+                {modules?.data?.map((module, i) => (
                     <ModuleBlock
                         key={module._id}
                         module={module}
+                        order={i + 1}
                     />
                 ))}
 

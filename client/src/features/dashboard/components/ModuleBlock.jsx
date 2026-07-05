@@ -12,7 +12,7 @@ import useUpdateModule from "@/features/module/hooks/useUpdateModule"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 import useDeleteModule from "@/features/module/hooks/useDeleteModule"
 
-const ModuleBlock = ({ module }) => {
+const ModuleBlock = ({ module, order }) => {
     const [addingLesson, setAddingLesson] = useState(false);
     const [editingTitle, setEditingTitle] = useState(false);
     const [lessons, setLessons] = useState(module.lessons ?? []);
@@ -83,7 +83,7 @@ const ModuleBlock = ({ module }) => {
                     <>
                         <Box sx={{ flex: 1 }}>
                             <Typography sx={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-                                Module {module.order}
+                                Module {order}
                             </Typography>
                             <Typography sx={{ fontSize: { xs: 13, sm: 14 }, fontWeight: 700, color: "#1a146b", lineHeight: 1.2 }}>
                                 {module.title}
