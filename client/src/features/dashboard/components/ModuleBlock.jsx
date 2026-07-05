@@ -10,6 +10,7 @@ import AddLessonForm from "./AddLessonForm";
 import updateModuleSchema from "@/features/module/schema/updateModule"
 import useUpdateModule from "@/features/module/hooks/useUpdateModule"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
+import useDeleteModule from "@/features/module/hooks/useDeleteModule"
 
 const ModuleBlock = ({ module }) => {
     const [addingLesson, setAddingLesson] = useState(false);
@@ -23,6 +24,7 @@ const ModuleBlock = ({ module }) => {
         }
     });
 
+    // Edit module
     const { mutate: updateModuleMutate, isPending: isUpdateModulePending } = useUpdateModule(module.course);
     const onSubmit = (data) => {
         if (!module._id) return;
@@ -36,6 +38,14 @@ const ModuleBlock = ({ module }) => {
             }
         })
     };
+
+    // Delete Module
+    const { mutate: deleteModuleMutate, isPending: isDeleteModulePending } = useDeleteModule(module.course);
+    const handleModuleDelete = () => {
+        if (!module._id || isDeleteModulePending) return;
+        deleteModuleMutate(module._id);
+    };
+
 
     return (
         <Paper elevation={0} sx={{ border: "1px solid #e2e8f0", borderRadius: "14px", overflow: "hidden" }}>
@@ -80,13 +90,13 @@ const ModuleBlock = ({ module }) => {
                             </Typography>
                         </Box>
                         <Box sx={{ display: "flex", gap: 1 }}>
-                            <Button size="small" onClick={() => { setEditingTitle(true), setValue("title", module.title) }}
+                            <Button disabled={isDeleteModulePending} size="small" onClick={() => { setEditingTitle(true), setValue("title", module.title) }}
                                 sx={{ minWidth: 0, px: 1.5, py: 0.5, fontSize: 11, fontWeight: 600, color: "#1a146b", bgcolor: "#e0e7ff", borderRadius: "6px", textTransform: "none", "&:hover": { bgcolor: "#c7d2fe" } }}>
                                 Edit
                             </Button>
-                            <Button size="small"
+                            <Button onClick={handleModuleDelete} size="small"
                                 sx={{ minWidth: 0, px: 1.5, py: 0.5, fontSize: 11, fontWeight: 600, color: "#dc2626", bgcolor: "#fee2e2", borderRadius: "6px", textTransform: "none", "&:hover": { bgcolor: "#fecaca" } }}>
-                                Delete
+                                {isDeleteModulePending ? "Deleting..." : "Delete"}
                             </Button>
                         </Box>
                     </>

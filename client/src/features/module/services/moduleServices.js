@@ -26,3 +26,11 @@ export const updateModule = async (data) => {
 
     return response.data;
 };
+
+export const deleteModule = async (id) => {
+    const response = await api.delete(
+        ENDPOINTS.MODULE.DELETE(id)
+    );
+
+    return response.data;
+};
