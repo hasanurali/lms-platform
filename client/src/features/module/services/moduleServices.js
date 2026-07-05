@@ -17,3 +17,12 @@ export const fetchModule = async (id) => {
 
     return response.data;
 };
+
+export const updateModule = async (data) => {
+    const response = await api.put(
+        ENDPOINTS.MODULE.UPDATE(data.id),
+        { title: data.title }
+    );
+
+    return response.data;
+};
