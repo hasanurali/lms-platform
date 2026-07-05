@@ -8,3 +8,12 @@ export const fetchLesson = async (id) => {
 
     return response.data;
 };
+
+export const createLesson = async (data) => {
+    const response = await api.post(
+        ENDPOINTS.LESSON.CREATE(data.id),
+        data.data
+    );
+
+    return response.data;
+};

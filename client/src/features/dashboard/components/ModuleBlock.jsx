@@ -17,6 +17,7 @@ const ModuleBlock = ({ module, order }) => {
     const [editingTitle, setEditingTitle] = useState(false);
     const [lessons, setLessons] = useState(module.lessons ?? []);
 
+    // Module form handler
     const { control, handleSubmit, formState: { errors, isDirty }, setError, reset, setValue } = useForm({
         resolver: zodResolver(updateModuleSchema),
         defaultValues: {

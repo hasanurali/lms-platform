@@ -3,21 +3,21 @@ import { Box, Typography } from "@mui/material";
 
 import { UploadFile } from "@mui/icons-material";
 
-const VideoUpload = ({ file, onChange }) => {
+const VideoUpload = ({ file, onChange, isSaving }) => {
     const ref = useRef(null);
 
     return (
         <Box>
             <input ref={ref} type="file" accept=".mp4,.mkv,.webm,.avi" style={{ display: "none" }} onChange={onChange} />
             <Box
-                onClick={() => ref.current.click()}
+                onClick={() => (!isSaving && ref.current.click())}
                 sx={{
                     height: 100, borderRadius: "10px",
                     border: file ? "2px solid #0d9488" : "2px dashed #e2e8f0",
                     bgcolor: file ? "#f0fdfa" : "#f8fafc",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     cursor: "pointer", gap: 2, px: 3,
-                    "&:hover": { borderColor: "#0d9488", bgcolor: "#f0fdfa" },
+                    ...(!isSaving && { "&:hover": { borderColor: "#0d9488", bgcolor: "#f0fdfa" } }),
                     transition: "all 0.2s",
                 }}
             >
