@@ -3,7 +3,7 @@ import { fetchModule } from "../services/moduleServices";
 
 const useFetchModule = (id) => {
     return useQuery({
-        queryKey: ["modules", id],
+        queryKey: ["course", id, "modules"],
         queryFn: () => fetchModule(id),
         enabled: !!id
     });

@@ -8,7 +8,7 @@ const useCreateModule = (id) => {
     return useMutation({
         mutationFn: createModule,
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ["modules", id]})
+            queryClient.invalidateQueries({ queryKey: ["course", id, "modules"] })
         }
     });
 };
