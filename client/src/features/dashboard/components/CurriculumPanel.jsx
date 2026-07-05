@@ -7,7 +7,7 @@ import { Add, VideoLibrary } from "@mui/icons-material";
 
 import StepBadge from './StepBadge'
 import ModuleBlock from "./ModuleBlock"
-import createModuleValidation from "@/features/module/schema/createModule"
+import createModuleSchema from "@/features/module/schema/createModule"
 import useCreateModule from "@/features/module/hooks/useCreateModule"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 import useFetchModule from "@/features/module/hooks/useFetchModule";
@@ -17,7 +17,7 @@ const CurriculumPanel = ({ courseId }) => {
     const [addingModule, setAddingModule] = useState(false);
 
     const { control, handleSubmit, formState: { errors, isDirty }, setError, reset } = useForm({
-        resolver: zodResolver(createModuleValidation),
+        resolver: zodResolver(createModuleSchema),
         defaultValues: {
             title: "",
         }

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const createModuleValidation = z.object({
+const createModuleSchema = z.object({
     title: z
         .string()
         .trim()
@@ -9,4 +9,4 @@ const createModuleValidation = z.object({
         .max(50, "Title must be 3-50 characters")
 });
 
-export default createModuleValidation;
+export default createModuleSchema;
