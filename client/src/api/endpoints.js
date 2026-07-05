@@ -22,6 +22,12 @@ export const ENDPOINTS = {
         UPDATE: (id) => `/courses/${id}`,
         DELETE: (id) => `/courses/${id}`
     },
+    MODULE: {
+        CREATE: (id) => `/courses/${id}/modules`,
+        FETCH: (id) => `/courses/${id}/modules`,
+        UPDATE: (id) => `/modules/${id}`,
+        DELETE: (id) => `/modules/${id}`
+    },
     ENROLLMENT: {
         ENROLL: (id) => `/courses/${id}/enroll`,
         FETCHCOURSES: "/enrollments/my"
@@ -56,7 +62,7 @@ export const ENDPOINTS = {
     },
     NOTIFICATION: {
         FETCH: (page, limit) => (page || limit) ? `/notifications?page=${page}&limit=${limit}` : "/notifications",
-        MARKREAD: (id)=>`/notifications/${id}/read`,
+        MARKREAD: (id) => `/notifications/${id}/read`,
         MARKALLREAD: "/notifications/read-all"
     }
 };
