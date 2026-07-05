@@ -9,3 +9,11 @@ export const createModule = async (data) => {
 
     return response.data;
 };
+
+export const fetchModule = async (id) => {
+    const response = await api.get(
+        ENDPOINTS.MODULE.FETCH(id)
+    );
+
+    return response.data;
+};

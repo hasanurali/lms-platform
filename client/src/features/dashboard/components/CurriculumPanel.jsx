@@ -10,10 +10,10 @@ import ModuleBlock from "./ModuleBlock"
 import createModuleValidation from "@/features/module/schema/createModule"
 import useCreateModule from "@/features/module/hooks/useCreateModule"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
+import useFetchModule from "@/features/module/hooks/useFetchModule";
 
 const CurriculumPanel = ({ courseId }) => {
 
-    const [modules, setModules] = useState([]);
     const [addingModule, setAddingModule] = useState(false);
 
     const { control, handleSubmit, formState: { errors, isDirty }, setError, reset } = useForm({
@@ -23,20 +23,24 @@ const CurriculumPanel = ({ courseId }) => {
         }
     });
 
-    const { mutate: createModuleMutate, isPending: isCreateModulePending } = useCreateModule();
+    // Create module
+    const { mutate: createModuleMutate, isPending: isCreateModulePending } = useCreateModule(courseId);
     const onSubmit = (data) => {
         if (!courseId) return;
         createModuleMutate({ id: courseId, title: data.title }, {
-            onSuccess: (res) => {
-                setModules(prev => [...prev, res.data]);
+            onSuccess: () => {
+                reset()
+                setAddingModule(false);
             },
             onError: (error) => {
                 handleFieldApiErrors(error, setError);
-            },
+            }
         })
-
-        setAddingModule(false);
     };
+
+
+    // Fetch course all modules
+    const { data: modules } = useFetchModule(courseId)
 
     const locked = !courseId;
 
@@ -52,7 +56,7 @@ const CurriculumPanel = ({ courseId }) => {
                     <Box>
                         <Typography sx={{ fontSize: 15, fontWeight: 700, color: "#1a146b" }}>Course Curriculum</Typography>
                         <Typography sx={{ fontSize: 11, color: "#94a3b8", mt: 0.1 }}>
-                            {locked ? "Save course details first" : `${modules.length} modules`}
+                            {locked ? "Save course details first" : `${modules?.data?.length} modules`}
                         </Typography>
                     </Box>
                 </Box>
@@ -61,7 +65,7 @@ const CurriculumPanel = ({ courseId }) => {
             <Box sx={{ px: 3, py: 3, display: "flex", flexDirection: "column", gap: 2 }}>
 
                 {/* Empty state */}
-                {modules.length === 0 && !addingModule && (
+                {modules?.data?.length === 0 && !addingModule && (
                     <Box sx={{ textAlign: "center", py: 5 }}>
                         <VideoLibrary sx={{ fontSize: 36, color: "#e2e8f0", display: "block", mx: "auto", mb: 1.5 }} />
                         <Typography sx={{ fontSize: 13, color: "#94a3b8" }}>No modules yet. Add your first module below.</Typography>
@@ -69,7 +73,7 @@ const CurriculumPanel = ({ courseId }) => {
                 )}
 
                 {/* Module list */}
-                {modules.map((module, mIdx) => (
+                {modules?.data?.map((module) => (
                     <ModuleBlock
                         key={module._id}
                         module={module}
@@ -102,7 +106,7 @@ const CurriculumPanel = ({ courseId }) => {
                         <Box sx={{ display: "flex", gap: 1.5 }}>
                             <Button type="submit" variant="contained" size="small" disabled={!isDirty || isCreateModulePending}
                                 startIcon={isCreateModulePending ? <CircularProgress size={12} sx={{ color: "white" }} /> : null}
-                                sx={{ bgcolor: "#1a146b", borderRadius: "8px", fontSize: 10, fontWeight: 700, textTransform: "uppercase", px: 2.5, "&:hover": { bgcolor: "#312e81" } }}>
+                                sx={{ bgcolor: "#1a146b", borderRadius: "8px", fontSize: 10, fontWeight: 700, textTransform: "uppercase", px: 2.5, "&:hover": { bgcolor: "#312e81" }, "&.Mui-disabled": { opacity: 0.45, color: "white" } }}>
                                 {isCreateModulePending ? "Adding..." : "Add Module"}
                             </Button>
                             <Button size="small" onClick={() => { setAddingModule(false); reset(); }}
