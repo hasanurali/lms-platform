@@ -183,17 +183,23 @@ export const getMyCoursesService = async (instructorId, page = 1, limit = 10) =>
                         }
                     }
                 ],
-                total: [{ $count: "count" }]
+                total: [{ $count: "count" }],
+                publishedCount: [
+                    { $match: { isPublished: true } },
+                    { $count: "count" }
+                ]
             }
         }
     ]);
 
     const courses = result[0].data;
     const total = result[0].total[0]?.count || 0;
+    const publishedCount = result[0].publishedCount[0]?.count || 0;
 
     // Return data
     return {
         data: courses,
+        publishedCount,
         pagination: {
             total,
             page: safePage,
