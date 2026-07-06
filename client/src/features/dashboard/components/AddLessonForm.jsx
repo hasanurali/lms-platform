@@ -22,7 +22,7 @@ const AddLessonForm = ({ moduleId, onCancel, onSuccess }) => {
         }
     });
 
-    const { mutate: createLessonModule, isPending: isCreateLessonPending } = useCreateLesson();
+    const { mutate: createLessonModule, isPending: isCreateLessonPending } = useCreateLesson(moduleId);
     const onSubmit = (data) => {
         if (!videoFile) {
             setVideoError("Video is required");
@@ -38,6 +38,8 @@ const AddLessonForm = ({ moduleId, onCancel, onSuccess }) => {
             onSuccess: () => {
                 reset()
                 onSuccess()
+                setVideoFile(null)
+                setVideoError("")
             },
             onError: (error) => {
                 handleFieldApiErrors(error, setError);

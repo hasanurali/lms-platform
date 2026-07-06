@@ -1,7 +1,8 @@
-import { Box, Chip, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Chip, Tooltip, Typography } from "@mui/material";
+
 import { DragIndicator, PlayCircleOutlineOutlined } from "@mui/icons-material";
 
-const LessonRow = ({ lesson, lessonIdx, onDelete }) => {
+const LessonRow = ({ lesson, order }) => {
     return (
         <Box sx={{
             display: "flex", alignItems: "center", gap: 1.5,
@@ -14,7 +15,7 @@ const LessonRow = ({ lesson, lessonIdx, onDelete }) => {
             <PlayCircleOutlineOutlined sx={{ fontSize: 15, color: "#0d9488", flexShrink: 0 }} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#1e293b" }} noWrap>
-                    Lesson {lessonIdx + 1} · {lesson.title}
+                    Lesson {order} · {lesson.title}
                 </Typography>
             </Box>
             {lesson.hasVideo && (
@@ -28,7 +29,7 @@ const LessonRow = ({ lesson, lessonIdx, onDelete }) => {
                     </Button>
                 </Tooltip>
                 <Tooltip title="Delete">
-                    <Button size="small" onClick={onDelete} sx={{ minWidth: 0, px: 1.2, py: 0.3, fontSize: 10, fontWeight: 600, color: "#dc2626", bgcolor: "#fee2e2", borderRadius: "6px", textTransform: "none", "&:hover": { bgcolor: "#fecaca" } }}>
+                    <Button size="small" sx={{ minWidth: 0, px: 1.2, py: 0.3, fontSize: 10, fontWeight: 600, color: "#dc2626", bgcolor: "#fee2e2", borderRadius: "6px", textTransform: "none", "&:hover": { bgcolor: "#fecaca" } }}>
                         Delete
                     </Button>
                 </Tooltip>

@@ -11,11 +11,11 @@ import updateModuleSchema from "@/features/module/schema/updateModule"
 import useUpdateModule from "@/features/module/hooks/useUpdateModule"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 import useDeleteModule from "@/features/module/hooks/useDeleteModule"
+import useFetchAllLessons from "@/features/lesson/hooks/useFetchAllLessons";
 
 const ModuleBlock = ({ module, order }) => {
     const [addingLesson, setAddingLesson] = useState(false);
     const [editingTitle, setEditingTitle] = useState(false);
-    const [lessons, setLessons] = useState(module.lessons ?? []);
 
     // Module form handler
     const { control, handleSubmit, formState: { errors, isDirty }, setError, reset, setValue } = useForm({
@@ -46,6 +46,10 @@ const ModuleBlock = ({ module, order }) => {
         if (!module._id || isDeleteModulePending) return;
         deleteModuleMutate(module._id);
     };
+
+    // Fetch all module lessons
+    const { data: lessonsData } = useFetchAllLessons(module._id);
+    const lessons = lessonsData?.data;
 
 
     return (
@@ -106,16 +110,13 @@ const ModuleBlock = ({ module, order }) => {
 
             {/* Lessons */}
             <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5 }}>
-                {lessons.length === 0 && !addingLesson && (
+                {lessons?.length === 0 && !addingLesson && (
                     <Typography sx={{ fontSize: 12, color: "#94a3b8", textAlign: "center", py: 1.5 }}>
                         No lessons yet.
                     </Typography>
                 )}
 
-                {lessons.map((lesson, lIdx) => (
-                    <LessonRow key={lesson._id} lesson={lesson} lessonIdx={lIdx}
-                        onDelete={() => setLessons(prev => prev.filter(l => l._id !== lesson._id))} />
-                ))}
+                {lessons?.map((lesson, i) => <LessonRow key={lesson._id} lesson={lesson} order={i + 1} />)}
 
                 {/* Add lesson form */}
                 <Collapse in={addingLesson}>

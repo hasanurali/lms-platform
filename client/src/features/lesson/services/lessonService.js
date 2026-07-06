@@ -17,3 +17,11 @@ export const createLesson = async (data) => {
 
     return response.data;
 };
+
+export const fetchAllLessons = async (id) => {
+    const response = await api.get(
+        ENDPOINTS.LESSON.FETCHALL(id),
+    );
+
+    return response.data;
+};
