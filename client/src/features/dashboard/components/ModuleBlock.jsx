@@ -16,6 +16,8 @@ import useFetchAllLessons from "@/features/lesson/hooks/useFetchAllLessons";
 const ModuleBlock = ({ module, order }) => {
     const [addingLesson, setAddingLesson] = useState(false);
     const [editingTitle, setEditingTitle] = useState(false);
+    const [isLessonEdit, setIsLessonEdit] = useState(false);
+    const [currentLesson, setCurrentLesson] = useState(null)
 
     // Module form handler
     const { control, handleSubmit, formState: { errors, isDirty }, setError, reset, setValue } = useForm({
@@ -116,14 +118,16 @@ const ModuleBlock = ({ module, order }) => {
                     </Typography>
                 )}
 
-                {lessons?.map((lesson, i) => <LessonRow key={lesson._id} lesson={lesson} order={i + 1} />)}
+                {lessons?.map((lesson, i) => <LessonRow key={lesson._id} lesson={lesson} order={i + 1} onLessonEdit={setIsLessonEdit} onCurrentLesson={setCurrentLesson}/>)}
 
                 {/* Add lesson form */}
-                <Collapse in={addingLesson}>
+                <Collapse in={addingLesson || isLessonEdit}>
                     <AddLessonForm
-                        moduleId={module._id}
-                        onCancel={() => setAddingLesson(false)}
-                        onSuccess={() => setAddingLesson(false)}
+                        module={module}
+                        lessonEdit={isLessonEdit}
+                        currentLesson={currentLesson}
+                        onSuccess={addingLesson ? () => setAddingLesson(false) : () => setIsLessonEdit(false)}
+                        onCancel={addingLesson ? () => setAddingLesson(false) : () => setIsLessonEdit(false)}
                     />
                 </Collapse>
 

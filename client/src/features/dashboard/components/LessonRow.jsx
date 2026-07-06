@@ -2,7 +2,7 @@ import { Box, Button, Chip, Tooltip, Typography } from "@mui/material";
 
 import { DragIndicator, PlayCircleOutlineOutlined } from "@mui/icons-material";
 
-const LessonRow = ({ lesson, order }) => {
+const LessonRow = ({ lesson, order, onLessonEdit, onCurrentLesson }) => {
     return (
         <Box sx={{
             display: "flex", alignItems: "center", gap: 1.5,
@@ -24,7 +24,7 @@ const LessonRow = ({ lesson, order }) => {
             )}
             <Box className="lesson-actions" sx={{ display: "flex", gap: 0.5, opacity: 0, transition: "opacity 0.15s" }}>
                 <Tooltip title="Edit">
-                    <Button size="small" sx={{ minWidth: 0, px: 1.2, py: 0.3, fontSize: 10, fontWeight: 600, color: "#1a146b", bgcolor: "#e0e7ff", borderRadius: "6px", textTransform: "none", "&:hover": { bgcolor: "#c7d2fe" } }}>
+                    <Button onClick={() => { onLessonEdit(true); onCurrentLesson(lesson) }} size="small" sx={{ minWidth: 0, px: 1.2, py: 0.3, fontSize: 10, fontWeight: 600, color: "#1a146b", bgcolor: "#e0e7ff", borderRadius: "6px", textTransform: "none", "&:hover": { bgcolor: "#c7d2fe" } }}>
                         Edit
                     </Button>
                 </Tooltip>

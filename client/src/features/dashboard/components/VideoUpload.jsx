@@ -3,12 +3,17 @@ import { Box, Typography } from "@mui/material";
 
 import { UploadFile } from "@mui/icons-material";
 
-const VideoUpload = ({ file, onChange, isSaving }) => {
+const VideoUpload = ({ file, existingVideoUrl, onChange, isSaving }) => {
     const ref = useRef(null);
+
+    const getFileNameFromUrl = (url) => {
+        if (!url) return "";
+        return url.substring(url.lastIndexOf("/") + 1);
+    };
 
     return (
         <Box>
-            <input ref={ref} type="file" accept=".mp4,.mkv,.webm,.avi" style={{ display: "none" }} onChange={onChange} />
+            <input ref={ref} type="file" accept=".mp4,.mkv,.webm,.avi" style={{ display: "none" }} onClick={(e) => { e.target.value = null; }} onChange={onChange} />
             <Box
                 onClick={() => (!isSaving && ref.current.click())}
                 sx={{
@@ -28,6 +33,15 @@ const VideoUpload = ({ file, onChange, isSaving }) => {
                             <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#0d9488" }}>{file.name}</Typography>
                             <Typography sx={{ fontSize: 10, color: "#64748b", mt: 0.3 }}>
                                 {(file.size / (1024 * 1024)).toFixed(1)} MB · Click to change
+                            </Typography>
+                        </>
+                    ) : existingVideoUrl ? (
+                        <>
+                            <Typography noWrap sx={{ fontSize: { xs: 11, sm: 12 }, fontWeight: 700, color: "#0d9488" }}>
+                                {getFileNameFromUrl(existingVideoUrl)}
+                            </Typography>
+                            <Typography sx={{ fontSize: 10, color: "#0d9488", fontWeight: 500, mt: 0.3 }}>
+                                Saved Video · Click to replace
                             </Typography>
                         </>
                     ) : (

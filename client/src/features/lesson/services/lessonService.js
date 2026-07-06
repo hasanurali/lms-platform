@@ -25,3 +25,12 @@ export const fetchAllLessons = async (id) => {
 
     return response.data;
 };
+
+export const updateLesson = async (data) => {
+    const response = await api.put(
+        ENDPOINTS.LESSON.UPDATE(data.id),
+        data.data
+    );
+
+    return response.data;
+};
