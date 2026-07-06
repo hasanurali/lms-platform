@@ -187,6 +187,14 @@ export const getMyCoursesService = async (instructorId, page = 1, limit = 10) =>
                 publishedCount: [
                     { $match: { isPublished: true } },
                     { $count: "count" }
+                ],
+                overallAverageRating: [
+                    {
+                        $group: {
+                            _id: null,
+                            allCoursesAvgRating: { $avg: "$averageRating" }
+                        }
+                    }
                 ]
             }
         }
@@ -195,11 +203,13 @@ export const getMyCoursesService = async (instructorId, page = 1, limit = 10) =>
     const courses = result[0].data;
     const total = result[0].total[0]?.count || 0;
     const publishedCount = result[0].publishedCount[0]?.count || 0;
+     const allCourseAvgRating = result[0]?.overallAverageRating[0]?.allCoursesAvgRating || 0;
 
     // Return data
     return {
         data: courses,
         publishedCount,
+        allCourseAvgRating,
         pagination: {
             total,
             page: safePage,
