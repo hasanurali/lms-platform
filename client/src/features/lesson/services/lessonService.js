@@ -34,3 +34,11 @@ export const updateLesson = async (data) => {
 
     return response.data;
 };
+
+export const deleteLesson = async (id) => {
+    const response = await api.delete(
+        ENDPOINTS.LESSON.DELETE(id)
+    );
+
+    return response.data;
+};

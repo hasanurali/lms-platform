@@ -12,6 +12,7 @@ import useUpdateModule from "@/features/module/hooks/useUpdateModule"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 import useDeleteModule from "@/features/module/hooks/useDeleteModule"
 import useFetchAllLessons from "@/features/lesson/hooks/useFetchAllLessons";
+import useDeleteLesson from "@/features/lesson/hooks/useDeleteLesson"
 
 const ModuleBlock = ({ module, order }) => {
     const [addingLesson, setAddingLesson] = useState(false);
@@ -53,6 +54,12 @@ const ModuleBlock = ({ module, order }) => {
     const { data: lessonsData } = useFetchAllLessons(module._id);
     const lessons = lessonsData?.data;
 
+
+    // Delete lesson
+    const { mutate: deleteLessonMutate, isPending: isDeleteLessonPending } = useDeleteLesson(module._id);
+    const handleLessonDelete = (id) => {
+        deleteLessonMutate(id)
+    }
 
     return (
         <Paper elevation={0} sx={{ border: "1px solid #e2e8f0", borderRadius: "14px", overflow: "hidden" }}>
@@ -118,7 +125,7 @@ const ModuleBlock = ({ module, order }) => {
                     </Typography>
                 )}
 
-                {lessons?.map((lesson, i) => <LessonRow key={lesson._id} lesson={lesson} order={i + 1} onLessonEdit={setIsLessonEdit} onCurrentLesson={setCurrentLesson}/>)}
+                {lessons?.map((lesson, i) => <LessonRow key={lesson._id} lesson={lesson} order={i + 1} onLessonEdit={setIsLessonEdit} onCurrentLesson={setCurrentLesson} onLessonDelete={handleLessonDelete} isDeleting={isDeleteLessonPending}/>)}
 
                 {/* Add lesson form */}
                 <Collapse in={addingLesson || isLessonEdit}>

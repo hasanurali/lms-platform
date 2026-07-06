@@ -2,7 +2,7 @@ import { Box, Button, Chip, Tooltip, Typography } from "@mui/material";
 
 import { DragIndicator, PlayCircleOutlineOutlined } from "@mui/icons-material";
 
-const LessonRow = ({ lesson, order, onLessonEdit, onCurrentLesson }) => {
+const LessonRow = ({ lesson, order, onLessonEdit, onCurrentLesson, onLessonDelete, isDeleting }) => {
     return (
         <Box sx={{
             display: "flex", alignItems: "center", gap: 1.5,
@@ -29,8 +29,8 @@ const LessonRow = ({ lesson, order, onLessonEdit, onCurrentLesson }) => {
                     </Button>
                 </Tooltip>
                 <Tooltip title="Delete">
-                    <Button size="small" sx={{ minWidth: 0, px: 1.2, py: 0.3, fontSize: 10, fontWeight: 600, color: "#dc2626", bgcolor: "#fee2e2", borderRadius: "6px", textTransform: "none", "&:hover": { bgcolor: "#fecaca" } }}>
-                        Delete
+                    <Button onClick={() => onLessonDelete(lesson._id)} size="small" sx={{ minWidth: 0, px: 1.2, py: 0.3, fontSize: 10, fontWeight: 600, color: "#dc2626", bgcolor: "#fee2e2", borderRadius: "6px", textTransform: "none", "&:hover": { bgcolor: "#fecaca" } }}>
+                        {isDeleting ? "Deleting..." : "Delete"}
                     </Button>
                 </Tooltip>
             </Box>
