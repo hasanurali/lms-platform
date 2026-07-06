@@ -45,7 +45,6 @@ const Dashboard = () => {
   const { data: courses } = useFetchMyCourse(user?.role, instructorCoursePage);
   const myCourses = courses?.data;
 
-
   if (isPending || isMyEnroledCoursesPending) {
     return <div className="pt-20">Loding...</div>
   }
@@ -56,7 +55,7 @@ const Dashboard = () => {
 
       <Box component="main" className="md:ml-64 flex-1 pt-20 pb-12 px-6 md:px-10">
         <Box className="max-w-7xl mx-auto">
-          {activeTab === "profile" && <ProfileTab user={user} courses={user?.role !== "student" ? myCourses?.data : groupedData} />}
+          {activeTab === "profile" && <ProfileTab user={user} courses={groupedData} totalCourses={myCourses?.pagination?.total} totalPublished={myCourses?.publishedCount} avgRating={myCourses?.allCourseAvgRating} />}
 
           {/* Student tabs */}
           {user?.role === "student" && activeTab === "courses" && <CoursesTab courses={groupedData} />}

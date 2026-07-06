@@ -10,7 +10,7 @@ import updateProfileSchema from "@/features/user/Schema/updateProfileSchema"
 import useUpdateProfile from "@/features/user/hooks/useUpdateProfile"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 
-const ProfileTab = ({ user, courses }) => {
+const ProfileTab = ({ user, courses, totalCourses, totalPublished, avgRating }) => {
 
     const [editing, setEditing] = useState(false);
 
@@ -283,9 +283,9 @@ const ProfileTab = ({ user, courses }) => {
             <Box className="grid grid-cols-2 sm:grid-cols-4 gap-5">
                 {(user.role === "instructor"
                     ? [
-                        { label: "Total Courses", value: courses?.length ?? 0, accent: "border-indigo-800" },
-                        { label: "Published", value: courses?.filter(c => c.isPublished).length ?? 0, accent: "border-teal-500" },
-                        { label: "Avg Rating", value: (() => { const rated = courses?.filter(c => c.averageRating > 0) ?? []; return rated.length ? (rated.reduce((a, c) => a + c.averageRating, 0) / rated.length).toFixed(1) : "—"; })(), accent: "border-amber-400" },
+                        { label: "Total Courses", value: totalCourses ?? 0, accent: "border-indigo-800" },
+                        { label: "Published", value: totalPublished ?? 0, accent: "border-teal-500" },
+                        { label: "Avg Rating", value: avgRating, accent: "border-amber-400" },
                     ]
                     : [
                         { label: "Courses Enrolled", value: courses?.length ?? 0, accent: "border-indigo-800" },
