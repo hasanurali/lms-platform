@@ -128,7 +128,11 @@ const CourseDetailsPanel = ({ onSaved }) => {
                             <TextField
                                 {...field}
                                 fullWidth size="small" type="number" placeholder="49.99"
-                                InputProps={{ startAdornment: <Typography sx={{ mr: 0.5, color: "#94a3b8", fontSize: 14 }}>$</Typography> }}
+                                slotProps={{
+                                    input: {
+                                        startAdornment: <Typography sx={{ mr: 0.5, color: "#94a3b8", fontSize: 14 }}>$</Typography>
+                                    }
+                                }}
                                 sx={{ "& .MuiOutlinedInput-root": { borderRadius: "10px", fontSize: "0.875rem" } }}
                                 disabled={isSaved || isPending}
                                 error={!!errors.price}

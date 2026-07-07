@@ -10,7 +10,7 @@ import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 import updateLessonSchema from "@/features/lesson/schema/updateLessonSchema"
 import useUpdateLesson from "@/features/lesson/hooks/useUpdateLesson"
 
-const AddLessonForm = ({ module, lessonEdit, currentLesson, onCancel, onSuccess }) => {
+const AddLessonForm = ({ module, lessonEdit, currentLesson, onCurrentLesson, onCancel, onSuccess }) => {
 
     const [videoFile, setVideoFile] = useState(null)
     const [videoError, setVideoError] = useState("")
@@ -26,8 +26,8 @@ const AddLessonForm = ({ module, lessonEdit, currentLesson, onCancel, onSuccess 
 
     const isFormDirty = isDirty || !!videoFile;
 
-    const { mutate: createLessonMutate, isPending: isCreateLessonPending } = useCreateLesson(module._id);
-    const { mutate: updateLessonMutate, isPending: isUpdateLessonPending } = useUpdateLesson(module._id);
+    const { mutate: createLessonMutate, isPending: isCreateLessonPending, isSuccess: isCreateSuccess } = useCreateLesson(module._id);
+    const { mutate: updateLessonMutate, isPending: isUpdateLessonPending, isSuccess: isUpdateSuccess } = useUpdateLesson(module._id);
     const onSubmit = (data) => {
         if (!lessonEdit && !videoFile) {
             setVideoError("Video is required");
@@ -46,6 +46,7 @@ const AddLessonForm = ({ module, lessonEdit, currentLesson, onCancel, onSuccess 
                 onSuccess()
                 setVideoFile(null)
                 setVideoError("")
+                onCurrentLesson(null)
             },
             onError: (error) => {
                 handleFieldApiErrors(error, setError);
@@ -58,12 +59,13 @@ const AddLessonForm = ({ module, lessonEdit, currentLesson, onCancel, onSuccess 
         reset()
         setVideoFile(null)
         setVideoError("")
+        onCurrentLesson(null)
     }
 
     useEffect(() => {
         if (lessonEdit) {
-            setValue("title", currentLesson.title)
-            setValue("content", currentLesson.content)
+            setValue("title", currentLesson?.title)
+            setValue("content", currentLesson?.content)
         }
     }, [lessonEdit, currentLesson]);
 

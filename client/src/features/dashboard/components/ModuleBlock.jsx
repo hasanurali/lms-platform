@@ -125,7 +125,7 @@ const ModuleBlock = ({ module, order }) => {
                     </Typography>
                 )}
 
-                {lessons?.map((lesson, i) => <LessonRow key={lesson._id} lesson={lesson} order={i + 1} onLessonEdit={setIsLessonEdit} onCurrentLesson={setCurrentLesson} onLessonDelete={handleLessonDelete} isDeleting={isDeleteLessonPending}/>)}
+                {lessons?.map((lesson, i) => <LessonRow key={lesson._id} lesson={lesson} order={i + 1} onLessonEdit={() => { setAddingLesson(false), setIsLessonEdit(true) }} onCurrentLesson={setCurrentLesson} onLessonDelete={handleLessonDelete} isDeleting={isDeleteLessonPending} />)}
 
                 {/* Add lesson form */}
                 <Collapse in={addingLesson || isLessonEdit}>
@@ -133,13 +133,14 @@ const ModuleBlock = ({ module, order }) => {
                         module={module}
                         lessonEdit={isLessonEdit}
                         currentLesson={currentLesson}
+                        onCurrentLesson={setCurrentLesson}
                         onSuccess={addingLesson ? () => setAddingLesson(false) : () => setIsLessonEdit(false)}
                         onCancel={addingLesson ? () => setAddingLesson(false) : () => setIsLessonEdit(false)}
                     />
                 </Collapse>
 
                 {!addingLesson && (
-                    <Button variant="contained" startIcon={<Add sx={{ fontSize: 14 }} />}
+                    <Button disabled={isLessonEdit} variant="contained" startIcon={<Add sx={{ fontSize: 14 }} />}
                         onClick={() => setAddingLesson(true)}
                         sx={{ bgcolor: "#1a146b", borderRadius: "9px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", py: 1.1, mt: 0.5, "&:hover": { bgcolor: "#312e81" } }}>
                         Add Lesson
