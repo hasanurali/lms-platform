@@ -64,7 +64,6 @@ const Dashboard = () => {
           {/* Instructor tabs */}
           {user?.role === "instructor" && activeTab === "courses" && <InstructorCoursesTab page={instructorCoursePage} setPage={setInstructorCoursePage} courses={myCourses?.data} publishedCount={myCourses?.publishedCount} pagination={myCourses?.pagination} />}
           {user?.role === "instructor" && activeTab === "doubts" && <InstructorDoubtsTab />}
-          {user?.role === "instructor" && activeTab === "reviews" && <ReviewsTab />}
         </Box>
       </Box>
     </Box>
