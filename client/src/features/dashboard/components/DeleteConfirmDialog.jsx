@@ -2,7 +2,7 @@ import { Box, Button, Dialog, DialogContent, Typography } from "@mui/material";
 
 import { Delete } from "@mui/icons-material";
 
-const DeleteConfirmDialog = ({ open, onClose, course }) => {
+const DeleteConfirmDialog = ({ open, onClose, course, onDeleteCourse, isDeleteCoursePending }) => {
     return (
         <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth
             slotProps={{
@@ -27,13 +27,20 @@ const DeleteConfirmDialog = ({ open, onClose, course }) => {
                     </Typography>
 
                     <Box sx={{ display: "flex", gap: 1.5, width: "100%", pt: 0.5 }}>
-                        <Button fullWidth variant="outlined" onClick={onClose}
+                        <Button disabled={isDeleteCoursePending} fullWidth variant="outlined" onClick={onClose}
                             sx={{ borderColor: "#e2e8f0", color: "#64748b", borderRadius: "8px", fontWeight: 700, fontSize: 11, textTransform: "uppercase" }}>
                             Cancel
                         </Button>
-                        <Button fullWidth variant="contained" onClick={onClose}
-                            sx={{ bgcolor: "#dc2626", borderRadius: "8px", fontWeight: 700, fontSize: 11, textTransform: "uppercase", "&:hover": { bgcolor: "#b91c1c" } }}>
-                            Delete
+                        <Button disabled={isDeleteCoursePending} onClick={() => onDeleteCourse(course?._id)} fullWidth variant="contained"
+                            sx={{
+                                bgcolor: "#dc2626", borderRadius: "8px", fontWeight: 700, fontSize: 11, textTransform: "uppercase",
+                                "&:hover": { bgcolor: "#b91c1c" },
+                                '&.Mui-disabled': {
+                                    backgroundColor: '#cbd5e1',
+                                    color: '#64748b',
+                                }
+                            }}>
+                            {isDeleteCoursePending ? "Deleting..." : "Delete"}
                         </Button>
                     </Box>
 

@@ -9,6 +9,7 @@ import SummaryCard from "./SummaryCard";
 import InstructorCourseCard from "./InstructorCourseCard"
 import DeleteConfirmDialog from "./DeleteConfirmDialog"
 import { INSTRUCTOR_COURSES_PER_PAGE } from "../constants/dashboardConstants"
+import useDeleteCourse from "@/features/course/hooks/useDeleteCourse";
 
 
 const InstructorCoursesTab = ({ page, setPage, courses, publishedCount, pagination }) => {
@@ -16,6 +17,16 @@ const InstructorCoursesTab = ({ page, setPage, courses, publishedCount, paginati
     const [createOpen, setCreateOpen] = useState(false);
     const [editCourse, setEditCourse] = useState(null);
     const [deleteCourse, setDeleteCourse] = useState(null);
+
+
+    const { mutate: deleteCourseMutate, isPending: isDeleteCoursePending } = useDeleteCourse();
+    const handleDeleteCourse = (id) => {
+        deleteCourseMutate(id, {
+            onSuccess: () => {
+                setDeleteCourse(null)
+            }
+        })
+    }
 
     if (createOpen || editCourse) {
         return <CreateCourse onBack={() => { setCreateOpen(false); setEditCourse(null) }} course={editCourse} />;
@@ -71,6 +82,7 @@ const InstructorCoursesTab = ({ page, setPage, courses, publishedCount, paginati
                             course={course}
                             onEdit={setEditCourse}
                             onDelete={setDeleteCourse}
+                            isDeleteCoursePending={isDeleteCoursePending}
                         />
                     ))}
                 </Box>
@@ -101,6 +113,8 @@ const InstructorCoursesTab = ({ page, setPage, courses, publishedCount, paginati
                 open={!!deleteCourse}
                 onClose={() => setDeleteCourse(null)}
                 course={deleteCourse}
+                onDeleteCourse={handleDeleteCourse}
+                isDeleteCoursePending={isDeleteCoursePending}
             />
         </Box>
     );

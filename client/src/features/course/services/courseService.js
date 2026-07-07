@@ -42,3 +42,11 @@ export const updateCourse = async (data) => {
 
     return response.data;
 };
+
+export const deleteCourse = async (id) => {
+    const response = await api.delete(
+        ENDPOINTS.COURSE.DELETE(id)
+    );
+
+    return response.data;
+};
