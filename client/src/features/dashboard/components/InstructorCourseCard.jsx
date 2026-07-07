@@ -53,7 +53,12 @@ const InstructorCourseCard = ({ course, onEdit, onDelete }) => {
                         anchorEl={menuAnchor}
                         open={Boolean(menuAnchor)}
                         onClose={() => setMenuAnchor(null)}
-                        PaperProps={{ elevation: 2, sx: { borderRadius: "10px", minWidth: 170, mt: 0.5 } }}
+                        slotProps={{
+                            paper: {
+                                elevation: 2,
+                                sx: { borderRadius: "10px", minWidth: 170, mt: 0.5 }
+                            }
+                        }}
                     >
 
                         <MenuItem onClick={() => { onEdit(course); setMenuAnchor(null); }}

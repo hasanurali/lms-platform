@@ -5,7 +5,9 @@ import { Delete } from "@mui/icons-material";
 const DeleteConfirmDialog = ({ open, onClose, course }) => {
     return (
         <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth
-            PaperProps={{ sx: { borderRadius: "16px" } }}>
+            slotProps={{
+                paper: { sx: { borderRadius: "16px" } }
+            }}>
             <DialogContent sx={{ px: 3, py: 3 }}>
 
                 <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
