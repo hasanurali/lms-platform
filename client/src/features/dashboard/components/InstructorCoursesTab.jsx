@@ -17,8 +17,8 @@ const InstructorCoursesTab = ({ page, setPage, courses, publishedCount, paginati
     const [editCourse, setEditCourse] = useState(null);
     const [deleteCourse, setDeleteCourse] = useState(null);
 
-    if (createOpen) {
-        return <CreateCourse onBack={() => setCreateOpen(false)} />;
+    if (createOpen || editCourse) {
+        return <CreateCourse onBack={() => { setCreateOpen(false); setEditCourse(null) }} course={editCourse} />;
     }
 
     return (

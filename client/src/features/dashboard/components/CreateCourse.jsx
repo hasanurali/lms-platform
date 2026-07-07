@@ -6,7 +6,7 @@ import { Add, ArrowBack } from "@mui/icons-material";
 import CourseDetailsPanel from "./CourseDetailsPanel";
 import CurriculumPanel from "./CurriculumPanel";
 
-export default function CreateCourse({ onBack }) {
+export default function CreateCourse({ onBack, course }) {
     const [courseId, setCourseId] = useState(null);
 
     return (
@@ -20,10 +20,14 @@ export default function CreateCourse({ onBack }) {
                 </IconButton>
                 <Box>
                     <Typography sx={{ fontSize: { xs: 16, sm: 18 }, fontWeight: 700, color: "#1a146b", lineHeight: 1.2 }}>
-                        Create New Course
+                        {course ? "Edit course" : "Create New Course"}
                     </Typography>
                     <Typography sx={{ fontSize: 11, color: "#94a3b8", mt: 0.2 }}>
-                        {courseId ? "Step 2 — Add modules and lessons" : "Step 1 — Fill in course details"}
+                        {course ?
+                            courseId ? "Step 2 — Add modules and lessons" : "Step 1 — Edit course details"
+                            :
+                            courseId ? "Step 2 — Add modules and lessons" : "Step 1 — Fill in course details"
+                        }
                     </Typography>
                 </Box>
                 {courseId && (
@@ -37,7 +41,7 @@ export default function CreateCourse({ onBack }) {
 
                 {/* Left — Course Details */}
                 <Box sx={{ position: { lg: "sticky" }, top: { lg: 90 } }}>
-                    <CourseDetailsPanel onSaved={setCourseId} />
+                    <CourseDetailsPanel onSaved={setCourseId} course={course} />
                 </Box>
 
                 {/* Right — Curriculum */}

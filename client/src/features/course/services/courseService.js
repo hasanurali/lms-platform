@@ -33,3 +33,12 @@ export const createCourse = async (data) => {
 
     return response.data;
 };
+
+export const updateCourse = async (data) => {
+    const response = await api.put(
+        ENDPOINTS.COURSE.UPDATE(data.id),
+        data.data
+    );
+
+    return response.data;
+};
