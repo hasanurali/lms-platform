@@ -50,3 +50,12 @@ export const deleteCourse = async (id) => {
 
     return response.data;
 };
+
+export const publishCourse = async (id) => {
+    const response = await api.put(
+        ENDPOINTS.COURSE.UPDATE(id),
+        { isPublished: true }
+    );
+
+    return response.data;
+};

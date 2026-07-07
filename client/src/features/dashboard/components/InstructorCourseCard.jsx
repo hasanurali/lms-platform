@@ -5,8 +5,20 @@ import { Box, Chip, Divider, IconButton, Menu, MenuItem, Paper, Rating, Typograp
 
 import { Delete, Edit, MoreVert, VideoLibrary, Visibility, VisibilityOff } from "@mui/icons-material";
 
+import usePublishCourse from "@/features/course/hooks/usePublishCourse";
+
+
 const InstructorCourseCard = ({ course, onEdit, onDelete }) => {
     const [menuAnchor, setMenuAnchor] = useState(null);
+
+    const { mutate: publishCourseMutate, isPending: isPublishCoursePending } = usePublishCourse()
+    const handlePublishCourse = (id) => {
+        publishCourseMutate(id, {
+            onSuccess: () => {
+                setMenuAnchor(null)
+            }
+        })
+    }
 
     return (
         <Paper component={RouterLink} to={`/courses/${course?._id}`} elevation={0} sx={{
@@ -61,17 +73,18 @@ const InstructorCourseCard = ({ course, onEdit, onDelete }) => {
                         }}
                     >
 
-                        <MenuItem onClick={() => { onEdit(course); setMenuAnchor(null); }}
+                        <MenuItem disabled={isPublishCoursePending} onClick={() => { onEdit(course); setMenuAnchor(null); }}
                             sx={{ fontSize: 13, gap: 1.5 }}>
                             <Edit sx={{ fontSize: 16, color: "#1a146b" }} /> Edit Course
                         </MenuItem>
 
-                        {!course.isPublished && <MenuItem onClick={() => setMenuAnchor(null)} sx={{ fontSize: 13, gap: 1.5 }}>
-                            <Visibility sx={{ fontSize: 16, color: "#16a34a" }} /> Publish
+                        {!course.isPublished && <MenuItem disabled={isPublishCoursePending} onClick={() => handlePublishCourse(course._id)} sx={{ fontSize: 13, gap: 1.5 }}>
+                            <Visibility sx={{ fontSize: 16, color: "#16a34a" }} />
+                            {isPublishCoursePending ? "Publishing..." : "Publish"}
                         </MenuItem>}
                         <Divider sx={{ my: 0.5 }} />
 
-                        <MenuItem onClick={() => { onDelete(course); setMenuAnchor(null); }}
+                        <MenuItem disabled={isPublishCoursePending} onClick={() => { onDelete(course); setMenuAnchor(null); }}
                             sx={{ fontSize: 13, gap: 1.5, color: "#dc2626" }}>
                             <Delete sx={{ fontSize: 16 }} /> Delete Course
                         </MenuItem>
