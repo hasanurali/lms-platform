@@ -16,7 +16,7 @@ export const ENDPOINTS = {
     COURSE: {
         CREATE: "/courses",
         FETCH: (page, limit) => (page || limit) ? `/courses?page=${page}&limit=${limit}` : "/courses",
-        FETCHMY: (page, limit) => (page || limit) ? `/courses/my?page=${page}&limit=${limit}` : "/courses/my",
+        FETCHMY: (page, limit, published) => (page || limit || published) ? `/courses/my?page=${page}&limit=${limit}&published=${published}` : "/courses/my",
         DETAILS: (id) => `/courses/${id}`,
         FULL: (id) => `/courses/${id}/full`,
         UPDATE: (id) => `/courses/${id}`,
@@ -54,7 +54,7 @@ export const ENDPOINTS = {
         CREATE: "/doubts",
         FETCHLESSON: (id) => `/lessons/${id}/doubts`,
         FETCHMY: `/doubts/my`,
-        FETCHCOURSE: (id) => `/courses/${id}/doubts`,
+        FETCHCOURSE: (id, page, limit) => (page || limit) ? `/courses/${id}/doubts?page=${page}&limit=${limit}` : `/courses/${id}/doubts`,
         FETCHDETAILS: (id) => `/doubts/${id}`,
         REPLY: (id) => `/doubts/${id}/replies`,
         MARKANSWER: (id) => `/doubts/${id}/mark-answered`,

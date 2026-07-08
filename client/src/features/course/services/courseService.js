@@ -17,9 +17,9 @@ export const fetchFullCourse = async (id) => {
     return response.data;
 };
 
-export const fetchMyCourse = async (page = 1, limit = 3) => {
+export const fetchMyCourse = async (page = 1, limit = 3, published = null) => {
     const response = await api.get(
-        ENDPOINTS.COURSE.FETCHMY(page, limit)
+        ENDPOINTS.COURSE.FETCHMY(page, limit, published)
     );
 
     return response.data;
