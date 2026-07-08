@@ -12,7 +12,6 @@ import fetchEnrolledCourses from "@/features/enrollment/hooks/useFetchEnrolledCo
 import useAllCoursesProgress from "@/features/progress/hooks/useAllCoursesProgress"
 import InstructorCoursesTab from "../components/InstructorCoursesTab"
 import InstructorDoubtsTab from "../components/InstructorDoubtsTab";
-import ReviewsTab from "../components/ReviewsTab";
 import useFetchMyCourse from "@/features/course/hooks/useFetchMyCourse";
 
 const Dashboard = () => {
