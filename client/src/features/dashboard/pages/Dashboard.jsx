@@ -52,7 +52,7 @@ const Dashboard = () => {
     <Box className="flex min-h-screen bg-slate-50 w-full" style={{ fontFamily: "Inter, sans-serif" }}>
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} user={user} />
 
-      <Box component="main" className="md:ml-64 flex-1 pt-20 pb-12 px-6 md:px-10">
+      <Box component="main" className="md:ml-64 flex-1 pt-20 pb-4 px-6 md:px-10">
         <Box className="max-w-7xl mx-auto">
           {activeTab === "profile" && <ProfileTab user={user} courses={groupedData} totalCourses={myCourses?.pagination?.total} totalPublished={myCourses?.publishedCount} avgRating={myCourses?.allCourseAvgRating} />}
 

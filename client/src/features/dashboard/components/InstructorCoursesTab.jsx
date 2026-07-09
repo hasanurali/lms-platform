@@ -90,8 +90,8 @@ const InstructorCoursesTab = ({ page, setPage, courses, publishedCount, paginati
 
             {/* Pagination */}
             {pagination?.pages > 1 && (
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pt: 1 }}>
-                    <Typography sx={{ fontSize: 12, color: "#94a3b8" }}>
+                <Box className="max-[430px]:justify-center!" sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pt: 2.5 }}>
+                    <Typography className="max-[430px]:hidden" sx={{ fontSize: 12, color: "#94a3b8" }}>
                         Showing {(page - 1) * INSTRUCTOR_COURSES_PER_PAGE + 1}–{Math.min(page * INSTRUCTOR_COURSES_PER_PAGE, pagination?.total)} of {pagination?.total}
                     </Typography>
                     <Pagination
@@ -103,7 +103,6 @@ const InstructorCoursesTab = ({ page, setPage, courses, publishedCount, paginati
                         color="primary"
                         sx={{
                             justifyItems: "center",
-                            paddingTop: "30px"
                         }} />
                 </Box>
             )}
