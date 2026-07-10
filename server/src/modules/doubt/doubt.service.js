@@ -258,17 +258,37 @@ export const getCourseDoubtsService = async (courseId, user, page = 1, limit = 1
                         }
                     }
                 ],
-                total: [{ $count: "count" }]
+                total: [{ $count: "count" }],
+                openCount: [
+                    { $match: { status: "open" } },
+                    { $count: "count" }
+                ],
+                answeredCount: [
+                    { $match: { status: "answered" } },
+                    { $count: "count" }
+                ],
+                closedCount: [
+                    { $match: { status: "closed" } },
+                    { $count: "count" }
+                ]
             }
         }
     ]);
 
     const doubts = result[0].data;
     const total = result[0].total[0]?.count || 0;
+    const openCount = result[0].openCount[0]?.count || 0;
+    const answeredCount = result[0].answeredCount[0]?.count || 0;
+    const closedCount = result[0].closedCount[0]?.count || 0;
 
     // Return data
     return {
         data: doubts,
+        stats: {
+            open: openCount,
+            answered: answeredCount,
+            closed: closedCount
+        },
         pagination: {
             total,
             page: safePage,
