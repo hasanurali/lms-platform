@@ -271,6 +271,11 @@ limit: number (optional, default: 10, min: 1, max: 50)
         "lastReplyAt": "2026-05-03T10:30:00Z"
       }
     ],
+    "stats": {
+      "open": 10,
+      "answered": 2,
+      "closed": 3
+    },
     "pagination": {
       "total": 25,
       "page": 1,
@@ -384,7 +389,7 @@ id: string (required) - Doubt ID
 **Request Body:**
 ```json
 {
-  "message": "string (required, 5-5000 characters)"
+  "message": "string (required, 1-5000 characters)"
 }
 ```
 
@@ -416,7 +421,7 @@ id: string (required) - Doubt ID
 | Status | Message | Reason |
 |--------|---------|--------|
 | `400 Bad Request` | `Message is required` | `message` is missing or empty |
-| `400 Bad Request` | `Message must be between 5 and 5000 characters` | `message` length out of range |
+| `400 Bad Request` | `Message must be between 1 and 5000 characters` | `message` length out of range |
 | `400 Bad Request` | `Validation failed` | `id` is not a valid MongoDB ObjectId |
 | `400 Bad Request` | `This doubt is already closed` | Doubt status is `closed` |
 | `401 Unauthorized` | `You are not authorized` | No token provided, or user no longer exists |

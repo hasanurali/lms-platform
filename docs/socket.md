@@ -113,6 +113,8 @@ Payload:
     "title": "string",
     "status": "OPEN|ANSWERED|CLOSED",
     "student": { "_id": "string", "name": "string" },
+    "course": "string",
+    "lesson": "string",
     "lastReplyAt": "ISO8601"
 }
 ```

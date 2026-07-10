@@ -176,6 +176,7 @@ limit: number (optional, default: 10, min: 1, max: 50)
 ```
 page:  number (optional, default: 1, min: 1)
 limit: number (optional, default: 10, min: 1, max: 50)
+published: boolean (optional, default: select all courses including published and drafts)
 ```
 
 **Success Response:**
@@ -200,6 +201,8 @@ limit: number (optional, default: 10, min: 1, max: 50)
         "ratingDistribution": { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 }
       }
     ],
+    "publishedCount": 10,
+    "allCourseAvgRating": 4,
     "pagination": {
       "total": 5,
       "page": 1,
