@@ -119,6 +119,11 @@ courseRoute.get("/",
  *         schema:
  *           type: integer
  *           default: 10
+ *       - in: query
+ *         name: published
+ *         schema:
+ *           type: boolean
+ *           default: null
  *     responses:
  *       200:
  *         description: Courses fetched successfully with pagination
