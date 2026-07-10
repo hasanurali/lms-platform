@@ -1,11 +1,11 @@
+import { Link as RouterLink } from "react-router-dom"
 import { Box, Typography } from '@mui/material';
 
 import StatusChip from './StatusChip';
 import timeConverter from "@/utils/timeConverter";
 
-import { Link as RouterLink } from "react-router-dom"
 
-const DoubtCard = ({ doubt, selected, onClick, isLink = false }) => {
+const DoubtCard = ({ doubt, selected, onClick, isLink = false, isDashboardDoubt = false }) => {
 
     const handleClick = () => {
         if (onClick) onClick(doubt._id);
@@ -31,11 +31,22 @@ const DoubtCard = ({ doubt, selected, onClick, isLink = false }) => {
                 color: "#191c1e",
                 mb: 0.4,
                 lineHeight: 1.3,
-            }}
-            >
+            }}>
                 {doubt.title}
             </Typography>
-            <Typography sx={{ fontSize: 11, color: "#a0a0a8" }}>{timeConverter(doubt?.lastReplyAt)}</Typography>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 0.4, gap: 1, minWidth: 0 }}>
+                <Typography sx={{ fontSize: 11, color: "#a0a0a8", flexShrink: 0 }}>
+                    {timeConverter(doubt?.lastReplyAt)}
+                </Typography>
+                {isDashboardDoubt && (
+                    <Typography sx={{
+                        fontSize: 11, color: "#64748b", fontWeight: 500,
+                        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    }}>
+                        {doubt.student?.name}
+                    </Typography>
+                )}
+            </Box>
         </Box>
     )
 };

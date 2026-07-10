@@ -63,3 +63,11 @@ export const fetchMyDoubts = async () => {
 
     return response.data;
 };
+
+export const fetchCourseDoubts = async (id, page = 1, limit = 8) => {
+    const response = await api.get(
+        ENDPOINTS.DOUBT.FETCHCOURSE(id, page, limit)
+    );
+    
+    return response.data;
+};
