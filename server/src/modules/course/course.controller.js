@@ -40,13 +40,13 @@ export const getCourses = asyncHandler(async (req, res) => {
 export const getMyCourses = asyncHandler(async (req, res) => {
 
     // Get page and limit from request
-    const { page, limit } = req.cleanQuery;
+    const { page, limit, published: isPublished } = req.cleanQuery;
 
     // Get Instructor id from request
     const instructorId = req.user._id
 
     // Get my courses
-    const myCourses = await getMyCoursesService(instructorId, page, limit);
+    const myCourses = await getMyCoursesService(instructorId, page, limit, isPublished);
 
     // Send response
     return res

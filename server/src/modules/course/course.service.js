@@ -150,7 +150,7 @@ export const getCoursesService = async (page = 1, limit = 10) => {
 
 };
 
-export const getMyCoursesService = async (instructorId, page = 1, limit = 10) => {
+export const getMyCoursesService = async (instructorId, page = 1, limit = 10, isPublished = null) => {
 
     // Calculate page and limit
     const safePage = Math.max(parseInt(page) || 1, 1);
@@ -159,9 +159,14 @@ export const getMyCoursesService = async (instructorId, page = 1, limit = 10) =>
     // Calculate skip
     const skip = (safePage - 1) * safeLimit;
 
+    const matchQuery = { instructor: instructorId };
+    if (isPublished === "true" || isPublished === "false") {
+        matchQuery.isPublished = JSON.parse(isPublished);
+    }
+
     // Fetch courses
     const result = await courseModel.aggregate([
-        { $match: { instructor: instructorId } },
+        { $match: matchQuery },
         {
             $facet: {
                 data: [
@@ -203,7 +208,7 @@ export const getMyCoursesService = async (instructorId, page = 1, limit = 10) =>
     const courses = result[0].data;
     const total = result[0].total[0]?.count || 0;
     const publishedCount = result[0].publishedCount[0]?.count || 0;
-     const allCourseAvgRating = result[0]?.overallAverageRating[0]?.allCoursesAvgRating || 0;
+    const allCourseAvgRating = result[0]?.overallAverageRating[0]?.allCoursesAvgRating || 0;
 
     // Return data
     return {
@@ -423,7 +428,7 @@ export const updateCourseService = async (data, instructorId, courseId) => {
         .lean();
 
     if (!course.isPublished && updatedCourse.isPublished) {
-       void createGlobalNotificationService({
+        void createGlobalNotificationService({
             title: "A New Course Published Successfully",
             message: `Course "${course.title}" is now published and available to students.`,
             type: NOTIFICATION_TYPE.course,
