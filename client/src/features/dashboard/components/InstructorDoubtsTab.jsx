@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Box, Chip, Paper, Typography, Pagination } from "@mui/material";
-import { CheckCircleOutlineOutlined, MenuBook, RadioButtonUnchecked, RemoveCircleOutlineOutlined, } from "@mui/icons-material";
+import { Box, Chip, Paper, Typography, Pagination, IconButton } from "@mui/material";
+import { ArrowBack, CheckCircleOutlineOutlined, MenuBook, RadioButtonUnchecked, RemoveCircleOutlineOutlined, } from "@mui/icons-material";
 
 import InstructorDoubtsCourseItem from "./InstructorDoubtsCourseItem"
 import SelectCourseState from "./SelectCourseState"
@@ -9,7 +9,7 @@ import DoubtCard from "@/features/doubt/components/DoubtCard"
 import useInfiniteMyCourses from "@/features/course/hooks/useInfiniteMyCourses"
 import useFetchCourseDoubts from '@/features/doubt/hooks/useFetchCourseDoubts';
 import { COURSES_DOUBTS_PER_PAGE } from "../constants/dashboardConstants"
-
+import LessonDoubtsTab from "@/features/doubt/components/LessonDoubtsTab"
 
 export const STATUS = {
   open: { label: "Open", bg: "#fef3c7", color: "#92400e", icon: <RadioButtonUnchecked sx={{ fontSize: 12 }} /> },
@@ -45,7 +45,10 @@ const InstructorDoubtsTab = () => {
 
 
   if (selectedDoubtId) {
-    return <div>Doubt form</div>
+    return <LessonDoubtsTab
+      defaultSelectedId={selectedDoubtId}
+      onBack={() => setSelectedDoubtId(null)}
+    />
   }
 
 
