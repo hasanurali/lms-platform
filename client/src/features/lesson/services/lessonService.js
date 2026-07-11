@@ -8,3 +8,37 @@ export const fetchLesson = async (id) => {
 
     return response.data;
 };
+
+export const createLesson = async (data) => {
+    const response = await api.post(
+        ENDPOINTS.LESSON.CREATE(data.id),
+        data.data
+    );
+
+    return response.data;
+};
+
+export const fetchAllLessons = async (id) => {
+    const response = await api.get(
+        ENDPOINTS.LESSON.FETCHALL(id),
+    );
+
+    return response.data;
+};
+
+export const updateLesson = async (data) => {
+    const response = await api.put(
+        ENDPOINTS.LESSON.UPDATE(data.id),
+        data.data
+    );
+
+    return response.data;
+};
+
+export const deleteLesson = async (id) => {
+    const response = await api.delete(
+        ENDPOINTS.LESSON.DELETE(id)
+    );
+
+    return response.data;
+};

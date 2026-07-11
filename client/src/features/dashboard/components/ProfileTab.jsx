@@ -6,11 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { AccessTime, CalendarMonth, Cancel, Edit, Person, Save, PhotoCamera } from '@mui/icons-material';
 
 import formatDate from "@/utils/formatData";
-import updateProfileSchema from "../Schema/updateProfileSchema"
-import useUpdateProfile from "../hooks/useUpdateProfile"
+import updateProfileSchema from "@/features/user/Schema/updateProfileSchema"
+import useUpdateProfile from "@/features/user/hooks/useUpdateProfile"
 import handleFieldApiErrors from "@/utils/handleFieldApiErrors"
 
-const ProfileTab = ({ user, courses }) => {
+const ProfileTab = ({ user, courses, totalCourses, totalPublished, avgRating }) => {
 
     const [editing, setEditing] = useState(false);
 
@@ -26,7 +26,7 @@ const ProfileTab = ({ user, courses }) => {
         },
     });
 
-    
+
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -281,22 +281,27 @@ const ProfileTab = ({ user, courses }) => {
 
             {/* Stats */}
             <Box className="grid grid-cols-2 sm:grid-cols-4 gap-5">
-                {[
-                    { label: "Courses Enrolled", value: courses?.length, accent: "border-indigo-800" },
-                    { label: "Completed", value: courses?.filter(c => c.progressPercentage === 100).length, accent: "border-green-500" }
-                ].map(({ label, value, badge, accent }) => (
+                {(user.role === "instructor"
+                    ? [
+                        { label: "Total Courses", value: totalCourses ?? 0, accent: "border-indigo-800" },
+                        { label: "Published", value: totalPublished ?? 0, accent: "border-teal-500" },
+                        { label: "Avg Rating", value: avgRating, accent: "border-amber-400" },
+                    ]
+                    : [
+                        { label: "Courses Enrolled", value: courses?.length ?? 0, accent: "border-indigo-800" },
+                        { label: "Completed", value: courses?.filter(c => c.progressPercentage === 100).length ?? 0, accent: "border-green-500" },
+                    ]
+                ).map(({ label, value, accent }) => (
                     <Paper key={label} elevation={0} className={`bg-white! p-5! rounded-xl! border-l-4! ${accent} shadow-sm!`}>
                         <Typography className="text-[10px]! uppercase! tracking-widest! text-slate-400! block! mb-2!">
                             {label}
                         </Typography>
-                        <Box className="flex items-baseline gap-1.5">
-                            <Typography className="text-2xl! font-bold! text-indigo-950! tracking-tight!">{value}</Typography>
-                            {badge && <span className="text-xs font-semibold text-teal-600">{badge}</span>}
-                        </Box>
+                        <Typography className="text-2xl! font-bold! text-indigo-950! tracking-tight!">
+                            {value}
+                        </Typography>
                     </Paper>
                 ))}
             </Box>
-
         </Box>
     );
 }

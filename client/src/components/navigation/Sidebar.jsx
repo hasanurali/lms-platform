@@ -1,4 +1,4 @@
-import React from 'react'
+import { useEffect } from 'react'
 import { Box, Avatar, Typography } from '@mui/material';
 
 import { Logout, MenuBook, Person, HelpCenterOutlined } from '@mui/icons-material';

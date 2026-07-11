@@ -36,3 +36,14 @@ export const btnGhost = {
   textTransform: "none",
   "&:hover": { background: "#e0e3e5" },
 };
+
+export const tightButtonBase = {
+  fontSize: 12,
+  fontWeight: 600,
+  textTransform: "none",
+  px: 2,
+  py: 0.65,
+  borderRadius: "6px",
+  boxShadow: "none",
+  fontFamily: "Inter, sans-serif"
+};
