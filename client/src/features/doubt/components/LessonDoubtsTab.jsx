@@ -158,7 +158,7 @@ const LessonDoubtsTab = ({ lessonId: lessonIdProp, courseId, defaultSelectedId, 
                       </Typography>
                     </Box>
                   ) : (
-                    selected.replies?.map(r => <ReplyBubble key={r._id} reply={r} />)
+                    selected.replies?.map(r => <ReplyBubble key={r._id} reply={r} isMe={user._id === r.author?._id} />)
                   )}
                 </Box>
 
@@ -169,12 +169,12 @@ const LessonDoubtsTab = ({ lessonId: lessonIdProp, courseId, defaultSelectedId, 
                   bgcolor: "white", flexShrink: 0
                 }}>
 
-                  {(isValidToReply || isCurrentUser) && selected.doubt?.status !== "closed" && (
+                  {(isValidToReply || isCurrentUser || onBack) && selected.doubt?.status !== "closed" && (
                     <ReplyForm
                       selected={selected}
                       lessonId={lessonIdProp || lessonId}
                       isCurrentUser={isCurrentUser}
-                      isValidToMark={isValidToReply}
+                      isValidToMark={isValidToReply || onBack}
                     />
                   )}
 
@@ -297,7 +297,7 @@ const LessonDoubtsTab = ({ lessonId: lessonIdProp, courseId, defaultSelectedId, 
                 <Typography sx={{ fontSize: 13, color: "#a0a0a8" }}>No replies yet.</Typography>
               </Box>
             ) : (
-              selected.replies?.map(r => <ReplyBubble key={r._id} reply={r} />)
+              selected.replies?.map(r => <ReplyBubble key={r._id} reply={r} isMe={user._id === r.author?._id} />)
             )}
           </Box>
 

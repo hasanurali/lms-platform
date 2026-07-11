@@ -2,16 +2,26 @@ import React from 'react'
 import { Avatar, Box, Typography } from '@mui/material';
 import timeConverter from "@/utils/timeConverter"
 
-const ReplyBubble = ({ reply }) => {
+const ReplyBubble = ({ reply, isMe }) => {
 
     return (
-        <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-start" }}>
+        <Box sx={{
+            display: "flex", gap: 1.5,
+            alignItems: "flex-start",
+            flexDirection: isMe ? "row-reverse" : "row"
+        }}>
             <Avatar src={reply.author?.profilePicture} sx={{
                 width: 32, height: 32, fontSize: 12, fontWeight: 700, flexShrink: 0,
             }}>
             </Avatar>
 
-            <Box sx={{ flex: 1, background: "#f7f9fb", borderRadius: "10px", p: "10px 14px", border: "1px solid #eceef0" }}>
+            <Box sx={{
+                flex: 1,
+                background: isMe ? "#e0f2fe" : "#f7f9fb",
+                borderRadius: "10px", p: "10px 14px",
+                border: "1px solid #eceef0",
+                maxWidth: isMe ? { xs: "85%", md: "75%" } : "100%"
+            }}>
                 <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", mb: 0.5, gap: 1 }}>
 
                     <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, flexWrap: "wrap", minWidth: 0 }}>
@@ -35,7 +45,6 @@ const ReplyBubble = ({ reply }) => {
                 </Box>
                 <Typography sx={{ fontSize: 13, color: "#474651", lineHeight: 1.65 }}>{reply.message}</Typography>
             </Box>
-
         </Box>
     )
 };
