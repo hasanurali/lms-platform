@@ -52,20 +52,25 @@ const Dashboard = () => {
     <Box className="flex min-h-screen bg-slate-50 w-full" style={{ fontFamily: "Inter, sans-serif" }}>
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} user={user} />
 
-      <Box component="main" className="md:ml-64 flex-1 pt-20 pb-4 px-6 md:px-10">
-        <Box className="max-w-7xl mx-auto">
-          {activeTab === "profile" && <ProfileTab user={user} courses={groupedData} totalCourses={myCourses?.pagination?.total} totalPublished={myCourses?.publishedCount} avgRating={myCourses?.allCourseAvgRating} />}
+      <Box component="main" className="flex-1 flex flex-col min-h-screen transition-all duration-300 md:ml-64">
 
-          {/* Student tabs */}
-          {user?.role === "student" && activeTab === "courses" && <CoursesTab courses={groupedData} />}
-          {user?.role === "student" && activeTab === "doubts" && <DoubtsTab />}
+        <Box className="w-full flex-1 pt-24 pb-8 px-4 sm:px-6 lg:px-8 xl:px-12">
+          <Box className="max-w-7xl mx-auto w-full h-full">
+            {activeTab === "profile" && <ProfileTab user={user} courses={groupedData} totalCourses={myCourses?.pagination?.total} totalPublished={myCourses?.publishedCount} avgRating={myCourses?.allCourseAvgRating} />}
 
-          {/* Instructor tabs */}
-          {user?.role === "instructor" && activeTab === "courses" && <InstructorCoursesTab page={instructorCoursePage} setPage={setInstructorCoursePage} courses={myCourses?.data} publishedCount={myCourses?.publishedCount} pagination={myCourses?.pagination} />}
-          {user?.role === "instructor" && activeTab === "doubts" && <InstructorDoubtsTab />}
+            {/* Student tabs */}
+            {user?.role === "student" && activeTab === "courses" && <CoursesTab courses={groupedData} />}
+            {user?.role === "student" && activeTab === "doubts" && <DoubtsTab />}
+
+            {/* Instructor tabs */}
+            {user?.role === "instructor" && activeTab === "courses" && <InstructorCoursesTab page={instructorCoursePage} setPage={setInstructorCoursePage} courses={myCourses?.data} publishedCount={myCourses?.publishedCount} pagination={myCourses?.pagination} />}
+            {user?.role === "instructor" && activeTab === "doubts" && <InstructorDoubtsTab />}
+          </Box>
         </Box>
+
       </Box>
     </Box>
+
   );
 }
 
