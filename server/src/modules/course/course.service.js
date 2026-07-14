@@ -388,7 +388,7 @@ export const updateCourseService = async (data, instructorId, courseId) => {
     validateObjectId(courseId);
 
     // Fetch course by id
-    const course = await courseModel.findById(courseId).select("instructor thumbnail isPublished").lean();
+    const course = await courseModel.findById(courseId).select("title instructor thumbnail isPublished").lean();
     if (!course) {
         throw new ApiError(HTTP_STATUS.NOT_FOUND, MESSAGES.COURSE.NOT_FOUND);
     };
