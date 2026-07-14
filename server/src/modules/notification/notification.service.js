@@ -91,17 +91,20 @@ export const getNotificationsService = async (userId, page, limit) => {
                         }
                     }
                 ],
-                total: [{ $count: "count" }]
+                total: [{ $count: "count" }],
+                marked: [{ $match: { isRead: true } }, { $count: "count" }]
             }
         }
     ]);
 
     const notifications = result[0].data;
     const total = result[0].total[0]?.count || 0;
+    const markedNotifications = result[0].marked[0]?.count || 0;
 
     // Return data
     return {
         data: notifications,
+        markedNotifications,
         pagination: {
             total,
             page: safePage,

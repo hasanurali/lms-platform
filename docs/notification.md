@@ -112,6 +112,7 @@ limit: number (optional, default: 10, min: 1, max: 50)
         "createdAt": "2026-05-03T10:30:00Z"
       }
     ],
+    "markedNotifications": 10,
     "pagination": {
       "total": 42,
       "page": 1,
